@@ -1,311 +1,299 @@
 import * as THREE from 'three'
-import conceptRaw from '../data/exterior-concept.json'
+import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js'
+import raw from '../data/exterior-concept.json'
 
-/**
- * Stage 3.5 B: spatially registered *visual exterior concept*.
- * The original PDF has floor plans, but no confirmed elevations/sections/roof.
- * Do not interpret invented facade/window/roof dimensions as BIM source data.
- */
-type FloorId = 'garage' | 'level-1' | 'level-2' | 'level-3'
+export type FloorId = 'garage' | 'level-1' | 'level-2' | 'level-3'
 type Point = [number, number]
-type Opening = { id: string; at: number; widthM: number; sillM: number; heightM: number; status: string }
-type Segment = { id: string; fromPt: Point; toPt: Point; lengthM: number; windows: Opening[] }
-type FacadeFloor = {
-  status: string; sourceSheet: string; baseM: number; displayWallHeightM: number
-  outlinePt: Point[]; facadeSegments: Segment[]; windowsApproxCount: number
-}
-type Rect = Point[]
-type RoofWing = { id: string; rectPt: Rect; eaveYMetres: number; ridgeRiseM: number; overhangM: number; ridgeDirection: 'x' }
-type LowRoof = { id: string; outlinePt: Point[]; heightM: number }
+type Polygon = { outer: Point[]; holes: Point[][] }
+type Opening = { id: string; at: number; widthM: number; sillM: number; heightM: number; curvedPanel?: boolean; kind?: string; sourceLabel: string }
+type Segment = { id: string; fromPt: Point; toPt: Point; lengthM: number; earthContact: boolean; windows: Opening[] }
+type FacadeFloor = { sourceSheet: string; baseM: number; displayWallHeightM: number; registrationOffsetPt: Point; outlinePt: Point[]; facadeSegments: Segment[]; windowsApproxCount: number; floorPlatePt?: Polygon[]; slabBaseM?: number; slabThicknessM?: number }
 type ExteriorData = {
-  schema: string; pointsPerMeter: number; originPt: { xPt: number; yPt: number }
-  isApprovedArchitecturalModel: boolean
+  pointsPerMeter: number; originPt: { xPt: number; yPt: number }
   floors: Record<FloorId, FacadeFloor>
+  roof: { eaveM: number; faces: { id: string; outlinePt: Point[]; plane: [number, number, number] }[]; boundaryPt: Point[];
+    lowRoofs: { id: string; polygonPt: Polygon; heightM: number }[];
+    skylights: { id: string; centrePt: Point; widthM: number; heightM: number }[] }
+  terrace: { polygonPt: Point[]; elevationM: number; balustradeHeightM: number; scheduleAreaM2: number }
   garageAppendix: { outlinePt: Point[]; heightM: number }
-  garagePlacement: { xyMeters: null; onSitePositionApproved: false }
-  roof: { status: string; gableWings: RoofWing[]; lowRoofs: LowRoof[] }
-  terrace: { polygonPt: Point[]; elevationM: number; balustradeHeightM: number; scheduleAreaM2: number; confirmedPosition: boolean }
+  site: { trianglesPtM: [number, number, number][][]; boundaryPt: Point[]; pavingPt: Polygon[]; rearGradeM: number; frontGradeM: number }
 }
-export const exteriorConcept = conceptRaw as unknown as ExteriorData
-const perMeter = exteriorConcept.pointsPerMeter
+export const exteriorConcept = raw as unknown as ExteriorData
+const ppm = exteriorConcept.pointsPerMeter
 const origin = exteriorConcept.originPt
-const px = (value: number) => (value - origin.xPt) / perMeter
-const pz = (value: number) => (value - origin.yPt) / perMeter
-const point3 = (pt: Point, y = 0) => new THREE.Vector3(px(pt[0]), y, pz(pt[1]))
+const px = (n: number) => (n - origin.xPt) / ppm
+const pz = (n: number) => (n - origin.yPt) / ppm
+const point = (p: Point, y = 0) => new THREE.Vector3(px(p[0]), y, pz(p[1]))
+export const registrationMetres = (id: FloorId) => exteriorConcept.floors[id].registrationOffsetPt.map(n => n / ppm) as Point
 
-function mStone() { return new THREE.MeshStandardMaterial({ color: '#dacaba', roughness: .87, metalness: .015, side: THREE.DoubleSide }) }
-function mStoneAlt() { return new THREE.MeshStandardMaterial({ color: '#b9ae9e', roughness: .92, metalness: .018, side: THREE.DoubleSide }) }
-function mBronze() { return new THREE.MeshStandardMaterial({ color: '#4a4942', metalness: .75, roughness: .32 }) }
-function mGlass() { return new THREE.MeshPhysicalMaterial({ color: '#83b4bd', metalness: .12, roughness: .13, transparent: true, opacity: .62, side: THREE.DoubleSide, depthWrite: false, clearcoat: .92, clearcoatRoughness: .08 }) }
-function mRoof() { return new THREE.MeshStandardMaterial({ color: '#4b5554', roughness: .59, metalness: .38, side: THREE.DoubleSide }) }
-function mRooftop() { return new THREE.MeshStandardMaterial({ color: '#68706e', roughness: .68, metalness: .18, side: THREE.DoubleSide }) }
-
-function signedArea(points: Point[]) {
-  let a = 0
-  points.forEach((p, i) => { const q = points[(i + 1) % points.length]; a += p[0] * q[1] - q[0] * p[1] })
-  return a / 2
+function palette() {
+  return {
+    plaster: new THREE.MeshStandardMaterial({ color: '#e9e1d2', roughness: .88 }),
+    stone: new THREE.MeshStandardMaterial({ color: '#c8bdab', roughness: .94 }),
+    edge: new THREE.MeshStandardMaterial({ color: '#dfd7c9', roughness: .82 }),
+    frame: new THREE.MeshStandardMaterial({ color: '#383e39', roughness: .42, metalness: .55 }),
+    glass: new THREE.MeshPhysicalMaterial({ color: '#88a9a5', roughness: .16, metalness: .12, transparent: true, opacity: .62, side: THREE.DoubleSide, depthWrite: false }),
+    interior: new THREE.MeshStandardMaterial({ color: '#5b625b', roughness: .94 }),
+    roof: new THREE.MeshStandardMaterial({ color: '#4e5754', roughness: .72, metalness: .2, side: THREE.DoubleSide }),
+    flat: new THREE.MeshStandardMaterial({ color: '#b0b1a5', roughness: .96 }),
+  }
 }
-function between(a: THREE.Vector3, b: THREE.Vector3, thickness: number, height: number, material: THREE.Material, y: number) {
-  const length = a.distanceTo(b)
-  if (length < .035 || height <= 0) return null
-  const mesh = new THREE.Mesh(new THREE.BoxGeometry(length, height, thickness), material)
-  mesh.position.copy(a.clone().add(b).multiplyScalar(.5))
-  mesh.position.y = y + height / 2
-  mesh.rotation.y = -Math.atan2(b.z - a.z, b.x - a.x)
+type Palette = ReturnType<typeof palette>
+function shape(poly: Polygon) {
+  const trace = (path: THREE.Path, pts: Point[]) => {
+    pts.forEach((p, i) => i ? path.lineTo(px(p[0]), -pz(p[1])) : path.moveTo(px(p[0]), -pz(p[1])))
+    path.closePath()
+  }
+  const s = new THREE.Shape(); trace(s, poly.outer)
+  for (const pts of poly.holes) { const h = new THREE.Path(); trace(h, pts); s.holes.push(h) }
+  return s
+}
+function slab(poly: Polygon | Point[], base: number, thickness: number, material: THREE.Material) {
+  const geometry = new THREE.ExtrudeGeometry(shape(Array.isArray(poly) ? { outer: poly, holes: [] } : poly), { depth: thickness, bevelEnabled: false, steps: 1 })
+  geometry.rotateX(-Math.PI / 2)
+  const mesh = new THREE.Mesh(geometry, material)
+  mesh.position.y = base; mesh.castShadow = true; mesh.receiveShadow = true
+  return mesh
+}
+function beam(a: THREE.Vector3, b: THREE.Vector3, depth: number, height: number, base: number, material: THREE.Material) {
+  const d = b.clone().sub(a)
+  const mesh = new THREE.Mesh(new THREE.BoxGeometry(d.length(), height, depth), material)
+  mesh.position.copy(a).lerp(b, .5); mesh.position.y = base + height / 2
+  mesh.rotation.y = -Math.atan2(d.z, d.x)
   mesh.castShadow = true; mesh.receiveShadow = true
   return mesh
 }
-function lineBeam(group: THREE.Group, a: THREE.Vector3, b: THREE.Vector3, radius: number, material: THREE.Material) {
-  const delta = b.clone().sub(a)
-  if (delta.length() < .03) return
-  const mesh = new THREE.Mesh(new THREE.CylinderGeometry(radius, radius, delta.length(), 8), material)
-  mesh.position.copy(a.clone().add(b).multiplyScalar(.5))
-  mesh.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), delta.normalize())
-  group.add(mesh)
-}
-function shapeFromOutline(points: Point[]): THREE.Shape {
-  const shape = new THREE.Shape()
-  points.forEach((p, i) => { if (!i) shape.moveTo(px(p[0]), -pz(p[1])); else shape.lineTo(px(p[0]), -pz(p[1])) })
-  shape.closePath()
-  return shape
-}
-function slabMesh(points: Point[], y: number, thickness: number, material: THREE.Material) {
-  const geo = new THREE.ExtrudeGeometry(shapeFromOutline(points), { depth: thickness, bevelEnabled: false, steps: 1, curveSegments: 8 })
-  geo.rotateX(-Math.PI / 2)
-  const mesh = new THREE.Mesh(geo, material)
-  mesh.position.y = y
-  mesh.receiveShadow = true
-  return mesh
-}
-function windowUnit(group: THREE.Group, a: THREE.Vector3, b: THREE.Vector3, y: number,
-  width: number, height: number, stone: THREE.Material, bronze: THREE.Material, glass: THREE.Material,
-  outside: THREE.Vector3, id: string, showGlazing: boolean) {
-  // Light stone reveals, charcoal metal mullions and transparent blue/green glass.
-  const push = outside.clone().multiplyScalar(.07)
-  const a0 = a.clone().add(push), b0 = b.clone().add(push)
-  const panel = between(a0, b0, .034, height, glass, y)
-  if (panel && showGlazing) { panel.castShadow = false; panel.renderOrder = 7; panel.userData = { facadeOpening: id, conceptOnly: true }; group.add(panel) } else panel?.geometry.dispose()
-  const frameThickness = .055
-  const frameHeight = .07
-  for (const t of [0, 1, width > 1.5 ? .5 : -1]) {
-    if (t < 0) continue
-    const p = a0.clone().lerp(b0, t)
-    const v = new THREE.Vector3(p.x, y, p.z), v2 = new THREE.Vector3(p.x, y + height, p.z)
-    lineBeam(group, v, v2, frameThickness / 2, bronze)
-  }
-  for (const fraction of [0, 1]) {
-    const start = a0.clone(); start.y = y + fraction * height
-    const end = b0.clone(); end.y = y + fraction * height
-    lineBeam(group, start, end, frameHeight / 2, bronze)
-  }
-  // Narrow stone surround above/below is actually solid masonry; the reveal is illustrative.
-  const sill = between(a0, b0, .11, .075, stone, y - .04)
-  if (sill) group.add(sill)
-}
+function area(pts: Point[]) { return pts.reduce((sum, p, i) => { const q = pts[(i + 1) % pts.length]; return sum + p[0] * q[1] - q[0] * p[1] }, 0) / 2 }
 
-function facadeRing(floorId: FloorId, palette: { stone: THREE.Material; accent: THREE.Material; bronze: THREE.Material; glass: THREE.Material },
-  levelMode: boolean, glazing: boolean) {
-  const data = exteriorConcept.floors[floorId]
-  const root = new THREE.Group()
-  root.userData = { facadeFloor: floorId, status: data.status, originalSheet: data.sourceSheet }
-  const positive = signedArea(data.outlinePt) > 0
-  data.facadeSegments.forEach((edge, edgeIndex) => {
-    const start = point3(edge.fromPt), end = point3(edge.toPt)
-    const tangent = end.clone().sub(start); tangent.y = 0
-    const span = tangent.length()
-    if (span < .04) return
-    const dir = tangent.clone().normalize()
-    const outside = positive
-      ? new THREE.Vector3(dir.z, 0, -dir.x)
-      : new THREE.Vector3(-dir.z, 0, dir.x)
-    const windows = edge.windows.map(window => ({
-      ...window,
-      left: Math.max(.12, window.at * span - window.widthM / 2),
-      right: Math.min(span - .12, window.at * span + window.widthM / 2),
-    })).filter(w => w.right - w.left >= .24).sort((a, b) => a.left - b.left)
-    let previous = 0
-    const base = levelMode ? 0 : data.baseM
-    const stone = floorId === 'level-1' ? palette.stone : palette.accent
-    for (const gap of windows) {
-      if (gap.left - previous > .075) {
-        const wall = between(start.clone().addScaledVector(dir, previous),start.clone().addScaledVector(dir, gap.left),.22,data.displayWallHeightM,stone,base)
-        if (wall) groupAdd(root,wall,edge.id)
-      }
-      const s = start.clone().addScaledVector(dir, gap.left)
-      const e = start.clone().addScaledVector(dir, gap.right)
-      if (gap.sillM > .04) {
-        const sill = between(s,e,.22,gap.sillM,stone,base)
-        if (sill) groupAdd(root,sill,edge.id)
-      }
-      const upper = Math.max(0, data.displayWallHeightM - gap.sillM - gap.heightM)
-      if (upper > .05) {
-        const head = between(s,e,.22,upper,stone,base+gap.sillM+gap.heightM)
-        if (head) groupAdd(root,head,edge.id)
-      }
-      windowUnit(root,s,e,base + gap.sillM,gap.right-gap.left,gap.heightM,stone,palette.bronze,palette.glass,outside,gap.id,glazing)
-      previous = gap.right
-    }
-    if (span - previous > .075) {
-      const remainder = between(start.clone().addScaledVector(dir,previous),end,.22,data.displayWallHeightM,stone,base)
-      if (remainder) groupAdd(root,remainder,edge.id)
-    }
-    // Premium, understated shadow line between floor bands.
-    const corniceA = start.clone().addScaledVector(outside,.012);corniceA.y = base + data.displayWallHeightM - .12
-    const corniceB = end.clone().addScaledVector(outside,.012);corniceB.y = base + data.displayWallHeightM - .12
-    if (edgeIndex % 3 !== 1) lineBeam(root,corniceA,corniceB,.012,palette.bronze)
-  })
-  return root
-}
-function groupAdd(group: THREE.Group, mesh: THREE.Mesh, id: string) {
-  mesh.userData = { facadeEdgeId: id, confidence: 'inferred-exterior-plan-outline-only' }
-  group.add(mesh)
-}
-function quad(group: THREE.Group, vertices: THREE.Vector3[], material: THREE.Material, name: string) {
-  const coords = [0,1,2,0,2,3]
-  const positions: number[] = [], uvs: number[] = []
-  const uv = [[0,0],[1,0],[1,1],[0,1]]
-  coords.forEach(i => { positions.push(vertices[i].x,vertices[i].y,vertices[i].z);uvs.push(uv[i][0],uv[i][1]) })
-  const geometry = new THREE.BufferGeometry()
-  geometry.setAttribute('position',new THREE.Float32BufferAttribute(positions,3))
-  geometry.setAttribute('uv',new THREE.Float32BufferAttribute(uvs,2))
-  geometry.computeVertexNormals()
-  const mesh = new THREE.Mesh(geometry,material)
-  mesh.castShadow = true; mesh.receiveShadow = true
-  mesh.userData = { conceptRoofPart: name, constructionApproved: false }
-  group.add(mesh)
-}
-function gableEnd(group: THREE.Group, a: THREE.Vector3, b: THREE.Vector3, apex: THREE.Vector3, material: THREE.Material, name: string) {
-  const geo = new THREE.BufferGeometry()
-  geo.setAttribute('position',new THREE.Float32BufferAttribute([
-    a.x,a.y,a.z,b.x,b.y,b.z,apex.x,apex.y,apex.z,
-  ],3))
-  geo.computeVertexNormals()
-  const mesh = new THREE.Mesh(geo,material)
-  mesh.castShadow = true;mesh.userData = {conceptGable:name}
-  group.add(mesh)
-}
-function roofWing(roof: RoofWing, palette: { roof: THREE.Material; bronze: THREE.Material; stone: THREE.Material }) {
-  const ring = roof.rectPt.map(point => point3(point))
-  const xs = ring.map(p=>p.x), zs=ring.map(p=>p.z)
-  const x0=Math.min(...xs)-roof.overhangM,x1=Math.max(...xs)+roof.overhangM
-  const z0=Math.min(...zs)-roof.overhangM,z1=Math.max(...zs)+roof.overhangM
-  const middle=(z0+z1)/2,eave=roof.eaveYMetres,crest=eave+roof.ridgeRiseM
-  const root=new THREE.Group()
-  const v=(x:number,y:number,z:number)=>new THREE.Vector3(x,y,z)
-  quad(root,[v(x0,eave,z0),v(x1,eave,z0),v(x1,crest,middle),v(x0,crest,middle)],palette.roof,roof.id+'-north-slope')
-  quad(root,[v(x0,crest,middle),v(x1,crest,middle),v(x1,eave,z1),v(x0,eave,z1)],palette.roof,roof.id+'-south-slope')
-  for(const x of [x0,x1]) gableEnd(root,v(x,eave,z0),v(x,eave,z1),v(x,crest,middle),palette.stone,roof.id)
-  lineBeam(root,v(x0,crest+.024,middle),v(x1,crest+.024,middle),.033,palette.bronze)
-  for(const z of [z0,z1]) lineBeam(root,v(x0,eave,z),v(x1,eave,z),.04,palette.bronze)
-  // Standing-seam rhythm, no photo texture dependency.
-  const strips=Math.max(3,Math.floor((x1-x0)/.66))
-  for(let i=1;i<strips;i++) {
-    const x=x0+(x1-x0)*i/strips
-    lineBeam(root,v(x,eave+.018,z0),v(x,crest+.02,middle),.009,palette.bronze)
-    lineBeam(root,v(x,crest+.02,middle),v(x,eave+.018,z1),.009,palette.bronze)
+function glazing(a: THREE.Vector3, b: THREE.Vector3, sill: number, opening: Opening, outside: THREE.Vector3, p: Palette, visible: boolean) {
+  const g = new THREE.Group(); g.name = opening.id
+  g.userData = { openingId: opening.id, sourceLabel: opening.sourceLabel, lightingBinding: null }
+  const width = a.distanceTo(b), height = opening.heightM
+  const inset = outside.clone().multiplyScalar(-.035)
+  const start = a.clone().add(inset), end = b.clone().add(inset)
+  if (opening.kind === 'shutter') {
+    g.add(beam(start, end, .09, height, sill, p.frame))
+    for (let h = .08; h < height; h += .16) g.add(beam(start, end, .095, .012, sill + h, p.roof))
+    return g
   }
-  root.userData={roofPartId:roof.id,notInOriginalRoofDrawings:true}
-  return root
-}
-function balustrade(group: THREE.Group, a: THREE.Vector3, b: THREE.Vector3, elevation: number, height: number, glass: THREE.Material, bronze: THREE.Material) {
-  const pane=between(a,b,.032,height,glass,elevation)
-  if(pane) { pane.castShadow=false; pane.userData.conceptBalustrade=true;group.add(pane) }
-  lineBeam(group,new THREE.Vector3(a.x,elevation+height,a.z),new THREE.Vector3(b.x,elevation+height,b.z),.026,bronze)
-  for(const t of [0,.5,1]) {
-    const point=a.clone().lerp(b,t)
-    lineBeam(group,new THREE.Vector3(point.x,elevation,point.z),new THREE.Vector3(point.x,elevation+height,point.z),.027,bronze)
+  if (visible) {
+    const glass = beam(start, end, .018, height, sill, p.glass)
+    glass.castShadow = false; glass.userData = { openingId: opening.id, smartHomeTarget: true }
+    g.add(glass)
+    // Recessed neutral interior, so an empty envelope does not look transparent through two facades.
+    const back = outside.clone().multiplyScalar(-.30)
+    g.add(beam(a.clone().add(back), b.clone().add(back), .02, height, sill, p.interior))
   }
-}
-function terraceGroup(materials: { stone: THREE.Material; bronze: THREE.Material; glass: THREE.Material }) {
-  const terrace=exteriorConcept.terrace
-  const g=new THREE.Group()
-  const t=slabMesh(terrace.polygonPt,terrace.elevationM-.16,.13,materials.stone)
-  t.userData={sourceRoom:13,level:'level-2',confirmedPosition:false}
-  g.add(t)
-  // Balcony fronts on the 3 outward edges of the source plan recess.
-  const lines=[0,1,2]
-  lines.forEach(i=>{
-    const a=point3(terrace.polygonPt[i]),b=point3(terrace.polygonPt[i+1])
-    balustrade(g,a,b,terrace.elevationM,terrace.balustradeHeightM,materials.glass,materials.bronze)
-  })
+  // Slim rectangular joinery. Bay glazing uses continuous curved rails, no thick
+  // vertical frame on every tiny tessellation edge.
+  for (const h of [0, height - .045]) g.add(beam(start, end, .07, .045, sill + h, p.frame))
+  if (!opening.curvedPanel) {
+    for (const t of width > 1.3 ? [0, .5, 1] : [0, 1]) {
+      const pos = start.clone().lerp(end, t)
+      const m = new THREE.Mesh(new THREE.BoxGeometry(.045, height, .07), p.frame)
+      m.position.set(pos.x, sill + height / 2, pos.z); m.rotation.y = -Math.atan2(end.z - start.z, end.x - start.x)
+      g.add(m)
+    }
+  }
+  if (opening.sillM > .2 && !opening.curvedPanel) g.add(beam(a, b, .34, .055, sill - .04, p.edge))
   return g
 }
-function garageRoof(roofMaterial: THREE.Material, stoneMaterial: THREE.Material) {
-  const group=new THREE.Group()
-  group.add(slabMesh(exteriorConcept.floors.garage.outlinePt,2.68,.18,roofMaterial))
-  group.add(slabMesh(exteriorConcept.garageAppendix.outlinePt,2.68,.16,roofMaterial))
-  group.add(slabMesh(exteriorConcept.floors.garage.outlinePt,-.24,.18,stoneMaterial))
-  return group
-}
-function garageOutbuilding(palette: {stone:THREE.Material;roof:THREE.Material}) {
-  const group=new THREE.Group(),outline=exteriorConcept.garageAppendix.outlinePt
-  for(let i=0;i<outline.length;i++){
-    const m=between(point3(outline[i]),point3(outline[(i+1)%outline.length]),.22,exteriorConcept.garageAppendix.heightM,palette.stone,0)
-    if(m)group.add(m)
+function facade(id: FloorId, individual: boolean, glass: boolean, p: Palette) {
+  const f = exteriorConcept.floors[id], g = new THREE.Group()
+  const base = individual ? 0 : f.baseM
+  const sign = area(f.outlinePt) > 0 ? 1 : -1
+  for (const edge of f.facadeSegments) {
+    const a = point(edge.fromPt), b = point(edge.toPt)
+    const length = a.distanceTo(b), dir = b.clone().sub(a).normalize()
+    const outside = new THREE.Vector3(dir.z * sign, 0, -dir.x * sign)
+    const at = (n: number) => a.clone().addScaledVector(dir, n)
+    const wall = (left: number, right: number, y: number, h: number) => {
+      if (right - left < .0001 || h < .0001) return
+      const join = edge.lengthM < .6 ? .018 : .001
+      const m = beam(at(left - join), at(right + join), .28, h, y, p.plaster)
+      m.userData = { facadeEdgeId: edge.id, floorId: id, earthContact: edge.earthContact }
+      g.add(m)
+    }
+    let cursor = 0
+    for (const w of edge.windows) {
+      const left = Math.max(0, w.at * length - w.widthM / 2), right = Math.min(length, left + w.widthM)
+      wall(cursor, left, base, f.displayWallHeightM)
+      wall(left, right, base, w.sillM)
+      wall(left, right, base + w.sillM + w.heightM, f.displayWallHeightM - w.sillM - w.heightM)
+      g.add(glazing(at(left), at(right), base + w.sillM, w, outside, p, glass))
+      cursor = right
+    }
+    wall(cursor, length, base, f.displayWallHeightM)
+    // Restrained stone plinth meets the floor; never an open band under a wall.
+    g.add(beam(a, b, .31, .12, base - .12, p.stone))
   }
-  group.userData={source:'A-14 detached annex',roof:'conceptual'}
-  return group
+  if (!individual && f.floorPlatePt) {
+    for (const polygon of f.floorPlatePt) g.add(slab(polygon, f.slabBaseM!, f.slabThicknessM!, p.edge))
+  } else g.add(slab(f.outlinePt, base - .22, .22, p.edge))
+  const [x, z] = registrationMetres(id); g.position.set(x, 0, z)
+  g.userData = { facadeFloor: id, sourceSheet: f.sourceSheet }; return g
 }
-function garageShutter(mat: THREE.Material,frame: THREE.Material){
-  // The wide southern opening on A-14 is clear in plan, but garage-door height is missing.
-  const group=new THREE.Group()
-  const a=point3([320*1190.52001953125/1448,643*841.9200439453125/1024])
-  const b=point3([808*1190.52001953125/1448,643*841.9200439453125/1024])
-  const door=between(a,b,.065,2.34,mat,0.12)
-  if(door){ door.userData={garageShutter:'not-in-door-schedule',uncertain:true};group.add(door) }
-  for(let i=0;i<9;i++){
-    const y=.23+i*.24
-    lineBeam(group,new THREE.Vector3(a.x,y,a.z-.045),new THREE.Vector3(b.x,y,b.z-.045),.012,frame)
+function containsPoint(pts: Point[], p: Point) {
+  let inside = false
+  for (let i = 0, j = pts.length - 1; i < pts.length; j = i++) {
+    if ((pts[i][1] > p[1]) !== (pts[j][1] > p[1]) && p[0] < (pts[j][0] - pts[i][0]) * (p[1] - pts[i][1]) / (pts[j][1] - pts[i][1]) + pts[i][0]) inside = !inside
   }
-  return group
+  return inside
+}
+function roofHeight(p: Point) {
+  const face = exteriorConcept.roof.faces.find(f => containsPoint(f.outlinePt, p))
+  if (!face) return exteriorConcept.roof.eaveM
+  const [a,b,c] = face.plane
+  return a*p[0] + b*p[1] + c
+}
+function roofGroup(p: Palette, glass: boolean) {
+  const g = new THREE.Group(); g.name = 'continuous-roof'
+  for (const face of exteriorConcept.roof.faces) {
+    const poly = face.outlinePt.map(pt => new THREE.Vector2(px(pt[0]), pz(pt[1])))
+    const triangles = THREE.ShapeUtils.triangulateShape(poly, [])
+    const positions: number[] = []
+    const [a, b, c] = face.plane
+    for (const t of triangles) for (const i of [...t].reverse()) {
+      const pt = face.outlinePt[i]; positions.push(px(pt[0]), a * pt[0] + b * pt[1] + c, pz(pt[1]))
+    }
+    const geometry = new THREE.BufferGeometry()
+    geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3)); geometry.computeVertexNormals()
+    const m = new THREE.Mesh(geometry, p.roof); m.castShadow = true; m.receiveShadow = true
+    m.userData = { roofFace: face.id, provisional: true }; g.add(m)
+    // Fine seams on actual clipped roof faces, no disconnected gable triangles.
+    const edge = new THREE.LineSegments(new THREE.EdgesGeometry(geometry, 24), new THREE.LineBasicMaterial({ color: '#3b4541', transparent: true, opacity: .5 }))
+    g.add(edge)
+  }
+  const outline = exteriorConcept.roof.boundaryPt
+  outline.forEach((pt, i) => g.add(beam(point(pt), point(outline[(i + 1) % outline.length]), .12, .16, 8.04, p.frame)))
+  for (const r of exteriorConcept.roof.skylights) {
+    const [x, z] = r.centrePt
+    const spanX = r.widthM * ppm / 2, spanZ = r.heightM * ppm / 2
+    const vertices: Point[] = [[x - spanX, z - spanZ], [x + spanX, z - spanZ], [x + spanX, z + spanZ], [x - spanX, z + spanZ]]
+    const centreFace = exteriorConcept.roof.faces.find(face => containsPoint(face.outlinePt, [x,z]))
+    const [slopeX, slopeZ] = centreFace?.plane ?? [0, 0, 0]
+    const plane = (v: Point) => roofHeight([x,z]) + slopeX * (v[0]-x) + slopeZ * (v[1]-z)
+    // A real planar pane on a flashing curb, even at an inferred roof hip.
+    // Sampling four roof heights directly creates a twisted quadrilateral.
+    const lift = Math.max(...vertices.map(v => roofHeight(v) + .085 - plane(v)))
+    const paneHeight = (v: Point) => plane(v) + lift
+    const coords = [0, 2, 1, 0, 3, 2].flatMap(i => { const v = vertices[i]; return [px(v[0]), paneHeight(v), pz(v[1])] })
+    const geometry = new THREE.BufferGeometry(); geometry.setAttribute('position', new THREE.Float32BufferAttribute(coords, 3)); geometry.computeVertexNormals()
+    const m = new THREE.Mesh(geometry, glass ? p.glass : p.frame); m.userData = { skylight: r.id, source: 'A-06' }; g.add(m)
+    vertices.forEach((v,i) => {
+      const w = vertices[(i+1)%4]
+      const points = [point(v,roofHeight(v)),point(w,roofHeight(w)),point(w,paneHeight(w)),point(v,roofHeight(v)),point(w,paneHeight(w)),point(v,paneHeight(v))]
+      const geo = new THREE.BufferGeometry();geo.setAttribute('position',new THREE.Float32BufferAttribute(points.flatMap(p=>p.toArray()),3));geo.computeVertexNormals()
+      g.add(new THREE.Mesh(geo,p.roof))
+    })
+    const line = new THREE.LineLoop(new THREE.BufferGeometry().setFromPoints(vertices.map(v => point(v, paneHeight(v) + .01))), new THREE.LineBasicMaterial({ color: '#303a36', linewidth: 2 }))
+    g.add(line)
+  }
+  for (const low of exteriorConcept.roof.lowRoofs) {
+    const m = slab(low.polygonPt, low.heightM, .04, p.flat); m.userData.lowRoof = low.id; g.add(m)
+  }
+  return g
+}
+function terraceGroup(p: Palette) {
+  const t = exteriorConcept.terrace, g = new THREE.Group(); g.name = 'terrace-13'
+  g.add(slab(t.polygonPt, t.elevationM + .004, .025, p.stone))
+  // Only the open front has a balustrade. The other three edges adjoin rooms.
+  const a = point(t.polygonPt[2]), b = point(t.polygonPt[3]), width = a.distanceTo(b)
+  const n = Math.ceil(width / 1.3)
+  for (let i = 0; i < n; i++) {
+    const aa = a.clone().lerp(b, i / n), bb = a.clone().lerp(b, (i + 1) / n)
+    const pane = beam(aa, bb, .025, t.balustradeHeightM - .08, t.elevationM + .06, p.glass); pane.castShadow = false; g.add(pane)
+    const post = new THREE.Mesh(new THREE.BoxGeometry(.035, t.balustradeHeightM, .035), p.frame)
+    post.position.set(aa.x, t.elevationM + t.balustradeHeightM / 2, aa.z); g.add(post)
+  }
+  g.add(beam(a, b, .055, .04, t.elevationM + t.balustradeHeightM, p.frame))
+  // Large-format stone joints, quietly legible instead of a global modelling grid.
+  const x0 = t.polygonPt[0][0], x1 = t.polygonPt[1][0], z0 = t.polygonPt[0][1], z1 = t.polygonPt[2][1]
+  const joint = new THREE.MeshStandardMaterial({ color: '#a89e8c', roughness: 1 })
+  for (let x = x0 + 36; x < x1; x += 36) g.add(beam(point([x, z0]), point([x, z1]), .009, .006, t.elevationM + .030, joint))
+  return g
 }
 
-export function createExteriorConcept(opts:{
-   floors:FloorId[]; roof:boolean; windows:boolean; terrace:boolean; garage:boolean; assembled:boolean
-}) {
-  const root=new THREE.Group()
-  const palette={stone:mStone(),accent:mStoneAlt(),bronze:mBronze(),glass:mGlass(),roof:mRoof(),rooftop:mRooftop()}
-  const individual=opts.floors.length===1
-  for(const id of opts.floors){
-    root.add(facadeRing(id,palette,individual,opts.windows))
-    if(id==='garage')root.add(garageOutbuilding(palette))
+/** Keep glazing individually addressable for stage 5; batch static masonry and
+ * joinery by shared material to avoid hundreds of draw calls on a phone. */
+function batchOpaque(root: THREE.Group) {
+  root.updateMatrixWorld(true)
+  const buckets = new Map<THREE.Material, { geometries: THREE.BufferGeometry[]; parts: object[] }>()
+  const meshes: THREE.Mesh[] = []
+  root.traverse(obj => { if (obj instanceof THREE.Mesh && !Array.isArray(obj.material) && !obj.material.transparent) meshes.push(obj) })
+  for (const m of meshes) {
+    const material = m.material as THREE.Material
+    let bucket = buckets.get(material)
+    if (!bucket) { bucket = { geometries: [], parts: [] }; buckets.set(material, bucket) }
+    const geo = m.geometry.index ? m.geometry.toNonIndexed() : m.geometry.clone()
+    geo.applyMatrix4(m.matrixWorld); geo.deleteAttribute('uv')
+    bucket.geometries.push(geo); bucket.parts.push({ name: m.name, ...m.userData })
+    m.removeFromParent(); m.geometry.dispose()
   }
-  if(opts.roof){
-    if(opts.floors.includes('garage')) root.add(garageRoof(palette.roof,palette.stone))
-    else if(opts.floors.includes('level-3') && opts.assembled){
-      for(const roof of exteriorConcept.roof.gableWings)root.add(roofWing(roof,palette))
-      if(opts.floors.length>1){
-        for(const low of exteriorConcept.roof.lowRoofs){
-          const cap=slabMesh(low.outlinePt,low.heightM,.14,palette.rooftop)
-          cap.userData={lowRoof:low.id,notVerified:true};root.add(cap)
-        }
+  for (const [material, bucket] of buckets) {
+    const geometry = mergeGeometries(bucket.geometries, false)
+    for (const geo of bucket.geometries) geo.dispose()
+    if (!geometry) throw new Error('Cannot batch exterior geometry')
+    const mesh = new THREE.Mesh(geometry, material)
+    mesh.castShadow = true; mesh.receiveShadow = true
+    mesh.userData = { staticBatch: true, parts: bucket.parts }
+    root.add(mesh)
+  }
+}
+
+export function createExteriorConcept(opts: { floors: FloorId[]; roof: boolean; windows: boolean; terrace: boolean; garage: boolean; assembled: boolean; batch?: boolean }) {
+  const g = new THREE.Group(), p = palette(), individual = opts.floors.length === 1
+  for (const id of opts.floors) g.add(facade(id, individual, opts.windows, p))
+  if (opts.floors.includes('garage')) {
+    const pts = exteriorConcept.garageAppendix.outlinePt
+    pts.forEach((pt, i) => g.add(beam(point(pt), point(pts[(i + 1) % pts.length]), .28, 2.65, 0, p.plaster)))
+    if (opts.roof) {
+      g.add(slab(exteriorConcept.floors.garage.outlinePt, 2.65, .20, p.flat))
+      g.add(slab(pts, 2.65, .20, p.flat))
+    }
+  } else {
+    if (opts.roof && opts.assembled && opts.floors.includes('level-3')) g.add(roofGroup(p, opts.windows))
+    if (opts.terrace && opts.assembled && opts.floors.includes('level-2')) g.add(terraceGroup(p))
+  }
+  if (opts.batch !== false) batchOpaque(g)
+  g.userData = { visualization: 'source-informed-client-presentation', constructionApproved: false }
+  return g
+}
+
+export function createExteriorContext(garage = false): THREE.Group {
+  const g = new THREE.Group(); g.name = 'sloped-site'
+  const grass = new THREE.MeshStandardMaterial({ color: '#8e9d80', roughness: 1, side: THREE.DoubleSide })
+  const coords = garage
+    ? [-30,-.23,-24, 30,-.23,-24, 30,-.23,24, -30,-.23,-24, 30,-.23,24, -30,-.23,24]
+    : exteriorConcept.site.trianglesPtM.flatMap(t => t.flatMap(([x, y, z]) => [px(x), y, pz(z)]))
+  const geom = new THREE.BufferGeometry(); geom.setAttribute('position', new THREE.Float32BufferAttribute(coords, 3)); geom.computeVertexNormals()
+  const normals = geom.getAttribute('normal'), positions = geom.getAttribute('position')
+  for (let i = 0; i < positions.count; i += 3) if (normals.getY(i) < 0) {
+    const a = new THREE.Vector3().fromBufferAttribute(positions, i + 1), b = new THREE.Vector3().fromBufferAttribute(positions, i + 2)
+    positions.setXYZ(i + 1, b.x, b.y, b.z); positions.setXYZ(i + 2, a.x, a.y, a.z)
+  }
+  geom.computeVertexNormals()
+  const terrain = new THREE.Mesh(geom, grass); terrain.receiveShadow = true; terrain.name = 'terrain-outside-footprint'; g.add(terrain)
+  if (!garage) {
+    const earth = new THREE.MeshStandardMaterial({ color: '#84776a', roughness: 1, side: THREE.DoubleSide })
+    const boundary = exteriorConcept.site.boundaryPt
+    const grade = (p: Point) => { const t = THREE.MathUtils.clamp((p[1] - 142.6) / (423.24 - 142.6), 0, 1); return 2.90 - 3.12 * t * t * (3 - 2 * t) }
+    // A continuous site cut on the outside perimeter. The house is subtracted
+    // from the top triangulation, so earth never appears through the rooms.
+    for (let i = 0; i < boundary.length; i++) {
+      const a = boundary[i], b = boundary[(i + 1) % boundary.length]
+      const steps = 24
+      for (let j = 0; j < steps; j++) {
+        const c: Point = [THREE.MathUtils.lerp(a[0], b[0], j / steps), THREE.MathUtils.lerp(a[1], b[1], j / steps)]
+        const d: Point = [THREE.MathUtils.lerp(a[0], b[0], (j + 1) / steps), THREE.MathUtils.lerp(a[1], b[1], (j + 1) / steps)]
+        const positions = [point(c, -1.1), point(d, -1.1), point(d, grade(d)), point(c, -1.1), point(d, grade(d)), point(c, grade(c))].flatMap(v => v.toArray())
+        const geo = new THREE.BufferGeometry(); geo.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3)); geo.computeVertexNormals()
+        g.add(new THREE.Mesh(geo, earth))
       }
     }
+    const paving = new THREE.MeshStandardMaterial({ color: '#cfc6b2', roughness: .96 })
+    for (const poly of exteriorConcept.site.pavingPt) g.add(slab(poly, -.21, .08, paving))
   }
-  if(opts.terrace && !opts.floors.includes('garage') && opts.floors.includes('level-2') && opts.assembled)
-    root.add(terraceGroup(palette))
-  if(opts.floors.includes('garage') && opts.garage)root.add(garageShutter(palette.roof,palette.bronze))
-  root.userData={visualization:'owner-review-exterior-concept',approvedForConstruction:false,
-    windowsCount:opts.windows?opts.floors.reduce((n,f)=>n+exteriorConcept.floors[f].windowsApproxCount,0):0}
-  // No fake verified facade: windows stay part of facade geometry. 'windows' controls glazing layer (future).
-  return root
-}
-
-export function createExteriorContext(): THREE.Group {
-  const group=new THREE.Group()
-  const grass=new THREE.MeshStandardMaterial({color:'#61776a',roughness:.98})
-  const base=new THREE.Mesh(new THREE.PlaneGeometry(80,80),grass)
-  base.rotation.x=-Math.PI/2;base.position.y=-.48;base.receiveShadow=true;group.add(base)
-  // Context is deliberately sparse; actual Como terrain / roads / lake are unavailable.
-  const shadowGrass=new THREE.MeshStandardMaterial({color:'#829786',roughness:1,side:THREE.DoubleSide})
-  for(let i=0;i<6;i++){
-    const x= i%2===0?-19:19
-    const z=-13+i*5
-    const trunk=new THREE.Mesh(new THREE.CylinderGeometry(.12,.2,1.6,7),new THREE.MeshStandardMaterial({color:'#574c40',roughness:1}))
-    trunk.position.set(x,.35,z);group.add(trunk)
-    const crown=new THREE.Mesh(new THREE.ConeGeometry(1.0,5.3,9),shadowGrass)
-    crown.position.set(x,3.35,z);crown.castShadow=true;group.add(crown)
-  }
-  group.userData={vegetation:'demonstration-only-not-toposurvey'}
-  return group
+  batchOpaque(g)
+  g.userData = { siteProfile: 'owner-confirmed-rear-at-level-2', surveyed: false }; return g
 }

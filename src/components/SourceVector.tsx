@@ -40,3 +40,26 @@ export default function SourceVector({ encoded, alt, className = '' }: {
   if (!url) return <div className="source-vector-state">Загрузка векторного чертежа…</div>
   return <img className={className} src={url} alt={alt} draggable={false}/>
 }
+
+
+/** Large source-art archives load only when the corresponding drawing opens. */
+export function LazySourceVector({ source, sheet, alt, className }: {
+  source: 'furniture' | 'plumbing'; sheet: string; alt: string; className?: string
+}) {
+  const [data, setData] = useState<{ source: string; sheet: string; encoded: string } | null>(null)
+  const [error, setError] = useState<string | null>(null)
+  useEffect(() => {
+    let live = true
+    setError(null)
+    const load = source === 'furniture' ? import('../data/furniture-vectors.json') : import('../data/plumbing-vectors.json')
+    load.then(result => {
+      const encoded = (result.default as Record<string, string>)[sheet]
+      if (!encoded) throw new Error('Нет исходного слоя')
+      if (live) setData({ source, sheet, encoded })
+    }).catch(error => { if (live) setError(String(error)) })
+    return () => { live = false }
+  }, [source, sheet])
+  if (error) return <div className="source-vector-state" role="alert">Не удалось загрузить чертёж: {error}</div>
+  if (!data || data.source !== source || data.sheet !== sheet) return <div className="source-vector-state" role="status">Загрузка исходного чертежа…</div>
+  return <SourceVector encoded={data.encoded} alt={alt} className={className}/>
+}

@@ -2,3 +2,6 @@ pymupdf>=1.26,<2
 lxml>=5,<7
 numpy>=1.26,<3
 opencv-python-headless>=4.9,<5
+
+# Exterior envelope boolean operations / stage 3.6
+shapely==2.1.2

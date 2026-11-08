@@ -2,10 +2,8 @@ import { useEffect, useMemo, useRef, useState, type PointerEvent } from 'react'
 import { project, totalScheduledArea } from './domain/project'
 import rawPlans from './data/architectural-plans.json'
 import compressedTraces from './data/source-traces.json'
-import furnitureVectors from './data/furniture-vectors.json'
-import plumbingVectors from './data/plumbing-vectors.json'
 import plumbingRegister from './data/plumbing-register.json'
-import SourceVector from './components/SourceVector'
+import { LazySourceVector as SourceVector } from './components/SourceVector'
 import Villa3D from './components/Villa3D'
 import type { ArchitecturalPlan, ArchitecturalPlanSet, PlanRoom } from './data/plan-types'
 import type { FloorRecord } from './domain/types'
@@ -138,7 +136,7 @@ function PlanViewer({ floor, data, selectedRoom, onSelectRoom, onOpenPlumbing }:
           <div className={'vector-document ' + (!layers.finish ? 'finish-hidden' : '')} style={{ aspectRatio: data.viewport.width + '/' + data.viewport.height }}>
             {loading && <div className="plan-loading">Загрузка исходных векторов…</div>}
             {error && <div className="plan-error">Не удалось загрузить векторный чертёж: {error}</div>}
-            {layers.furniture ? <SourceVector key={floor.id} encoded={furnitureVectors[floor.id]} alt={`Векторный мебельный план ${data.furnitureSheet}`} className="furniture-source-art" /> : !!svg && <div className="vector-ink" dangerouslySetInnerHTML={{ __html: svg }} />}
+            {layers.furniture ? <SourceVector key={floor.id} source="furniture" sheet={floor.id} alt={`Векторный мебельный план ${data.furnitureSheet}`} className="furniture-source-art" /> : !!svg && <div className="vector-ink" dangerouslySetInnerHTML={{ __html: svg }} />}
             <svg className="plan-overlay" viewBox={`0 0 ${data.viewport.width} ${data.viewport.height}`} role="img" aria-label="Проектные перегородки и номера помещений">
               {layers.plumbing && plumbingByFloor(floor.id).flatMap(group => group.rooms.map(roomNum => {
                 const rm = data.rooms.find(item => item.number === roomNum)
@@ -248,7 +246,7 @@ function PlumbingDetail({ sheet, onClose }: { sheet: string; onClose: () => void
   if (!group) return null
   return <div className="plumbing-backdrop" role="presentation" onClick={onClose}><section className="plumbing-modal" role="dialog" aria-modal="true" aria-labelledby="plumbing-modal-title" onClick={event => event.stopPropagation()}>
     <div className="plumbing-modal-head"><div><span className="section-index">ИСХОДНЫЙ САНТЕХНИЧЕСКИЙ ЧЕРТЁЖ · {sheet}</span><h2 id="plumbing-modal-title">{group.title}</h2></div><button aria-label="Закрыть" onClick={onClose}>×</button></div>
-    <div className="plumbing-modal-body"><div className="plumbing-detail-art"><SourceVector encoded={plumbingVectors[sheet as keyof typeof plumbingVectors]} alt={`Исходный план выводов ${sheet}`} /></div>
+    <div className="plumbing-modal-body"><div className="plumbing-detail-art"><SourceVector source="plumbing" sheet={sheet} alt={`Исходный план выводов ${sheet}`} /></div>
       <div className="plumbing-detail-list"><h3>Спецификация по {sheet}</h3><p>Графика взята из рабочего листа. Размеры на нём проектные, от чистового пола, требуют контрольных замеров.</p>
         {group.fixtures.map(item => <div className="fixture-row" key={item.mark}><span className="fixture-mark">{item.mark}</span><span>{item.name ?? 'Неясная строка ведомости'}</span><b>{item.quantity ?? '?'}</b></div>)}
         <p className="source-note">Точки на общем плане только открывают эту схему. A-22–A-29 выполнены в масштабе 1:35; их координаты пока не сопоставлены с полной моделью здания.</p>
@@ -270,14 +268,14 @@ export default function App() {
     <nav className="side-rail" aria-label="Навигация"><a href="/" aria-label="Villa Como v2" className="brand-mark">V<span>.</span>C</a><div className="rail-rule"><i /><i /><i /></div><span className="rail-caption">MÈTRE<br/>2026</span></nav>
     <main className="main-content">
       <header className="topbar">
-        <div className="breadcrumbs"><span>VILLA COMO</span><i>/</i><b>INTERACTIVE 3D</b><i>/</i><span>ЭТАП 3.5 · ПАКЕТ Б</span></div>
+        <div className="breadcrumbs"><span>VILLA COMO</span><i>/</i><b>INTERACTIVE 3D</b><i>/</i><span>ЭТАП 3 / 5 · АРХИТЕКТУРА</span></div>
         <div className="header-actions"><span className="status-light" /> <span>ВНЕШНИЙ ОБЛИК · ДЕМОНСТРАЦИОННАЯ ВЕРСИЯ</span> <a href="https://github.com/RadamirSS/Villa_como_v2" target="_blank" rel="noreferrer">GitHub ↗</a></div>
       </header>
       <div className="page-content">
         <div className="intro">
-          <div className="eyebrow"><span className="eyebrow-line" /> SOURCE-DRIVEN EXTERIOR CONCEPT <span className="muted">/ 3.5 B</span></div>
+          <div className="eyebrow"><span className="eyebrow-line" /> ARCHITECTURE FOR SMART LIVING <span className="muted">/ VILLA COMO</span></div>
           <h1>Villa <em>Como.</em></h1>
-          <div className="intro-bottom"><p>3D-сцена строится из стеновых контуров PDF. Внешний облик восстановлен как демонстрационная концепция поверх архитектуры A-14–A-17. Есть объёмные фасады, остекление, терраса и крыша; для отсутствующих фасадных чертежей реконструкция помечена как условная. Исходные 2D и 3D-планы сохранены.</p><span className="intro-step"><span>ЭТАП ПРОЕКТА</span><b>03<small>/03</small></b><small>Внешний облик · пакет Б</small></span></div>
+          <div className="intro-bottom"><p>Интерактивная модель виллы для презентации умного дома. Три этажа, терраса и гараж; панорамные окна по размерам обмерных планов и посадка нижнего этажа в склон. Вращайте дом, откройте этаж изнутри или сравните его с исходным чертежом. Следующие этапы — интерьер, материалы и световые сценарии.</p><span className="intro-step"><span>ЭТАП ПРОЕКТА</span><b>03<small>/05</small></b><small>Дом на склоне · архитектура</small></span></div>
         </div>
         <section className="metrics" aria-label="Показатели проекта">
           <div><span>УРОВНИ</span><strong>04</strong><small>3 этажа и гараж</small></div>
@@ -306,7 +304,7 @@ export default function App() {
             <div><span>МЕБЕЛЬНЫЙ ПЛАН</span><b>{data.furnitureSheet}</b><p>Мебель и планировочные позиции</p></div>
           </div>
         </section>
-        <div className="audit-note"><div><span>!</span><strong>Внешний облик · пакет Б, граница точности</strong></div><p>Для 368 стеновых полигонов созданы устойчивые ID, восемь опорных размеров из A‑03/A‑05/A‑06/A‑15/A‑16 проверены по геометрии векторных размерных линий. Все <b>33 дверные марки</b> связаны с источниковыми символами открытых полотен и ведомостями их ширины/высоты. Для <b>18 проёмов</b> программа однозначно сопоставляет дверное полотно с просветом на исходном плане; оставшиеся 15 пока не разрешены. Точное положение створки в 3D воспроизводит <b>условную открытую ориентацию на чертеже</b>. Конструктивные перекрытия, лестничные марши, оконные высоты, мансардная кровля и привязка гаража к участку остаются неподтверждёнными. Эти части не подменяются придуманной BIM-геометрией. <b>Пакет А требует дальнейшей инженерной доработки</b> до заявления «в точности по проекту».</p></div>
+        <div className="audit-note"><div><span>!</span><strong>Дом на склоне · архитектура, граница точности</strong></div><p>Для 368 стеновых полигонов созданы устойчивые ID, восемь опорных размеров из A‑03/A‑05/A‑06/A‑15/A‑16 проверены по геометрии векторных размерных линий. Все <b>33 дверные марки</b> связаны с источниковыми символами открытых полотен и ведомостями их ширины/высоты. Для <b>18 проёмов</b> программа однозначно сопоставляет дверное полотно с просветом на исходном плане; оставшиеся 15 пока не разрешены. Точное положение створки в 3D воспроизводит <b>условную открытую ориентацию на чертеже</b>. Габариты ряда окон восстановлены по подписям A‑04–A‑06; отметки подоконников, конструктив перекрытий, лестничные марши, мансардная кровля и привязка гаража к участку требуют дальнейшей сверки. Профиль склона — демонстрационная интерпретация уточнения владельца. Эти части не подменяются придуманной BIM-геометрией. <b>Пакет А требует дальнейшей инженерной доработки</b> до заявления «в точности по проекту».</p></div>
         <div className="bottom-actions"><a href="https://github.com/RadamirSS/Villa_como_v2/tree/main/docs" target="_blank" rel="noreferrer">Методика и незакрытые вопросы ↗</a><button onClick={() => setInfoExpanded(!infoExpanded)}>{infoExpanded ? 'Скрыть инженерные требования' : 'Что необходимо для BIM-точности?'} <span>{infoExpanded ? '−' : '+'}</span></button></div>
         {infoExpanded && <div className="expanded-note">Следующий инженерный шаг: закрыть все размерные цепочки каждого этажа, определить геометрию оставшихся 15 дверных проёмов, зарегистрировать окна, лестничные марши и отверстия в перекрытиях; получить фасады, разрезы, конструкцию крыши и топосъёмку. Тогда можно согласовать одну метрическую пространственную модель для 2D и 3D.</div>}
         <footer><span>VILLA COMO / DIGITAL DESIGN</span><span>MÈTRE · Рабочая документация</span><span>© 2026</span></footer>
