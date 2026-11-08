@@ -38,7 +38,7 @@ export default function App() {
             <div className="eyebrow"><span className="accent-bar"/> ARCHITECTURAL DIGITAL TWIN <span className="serial">/ 00 — FOUNDATION</span></div>
             <div className="intro-row">
               <div><h1>Villa <em>Como.</em></h1><p className="lede">Точность начинается с плана. Единая система данных для 2D, 3D и инженерной модели виллы.</p></div>
-              <div className="phase-stamp"><span>ТЕКУЩИЙ ЭТАП</span><strong>00<span>/05</span></strong><small>Архитектурная подготовка</small></div>
+              <div className="phase-stamp"><span>ТЕКУЩИЙ ЭТАП</span><strong>00<span>/03</span></strong><small>Архитектурная подготовка</small></div>
             </div>
           </div>
           <div className="metrics">
@@ -96,7 +96,7 @@ export default function App() {
             </div>
           </section>
           <section className="roadmap">
-            <div className="roadmap-heading"><div><div className="micro">03 / DELIVERY ROADMAP</div><h2>Порядок построения</h2></div><span>01 / 04 В РАБОТЕ</span></div>
+            <div className="roadmap-heading"><div><div className="micro">03 / DELIVERY ROADMAP</div><h2>Порядок построения</h2></div><span>01 / 04 · ЭТАП 0 ГОТОВ</span></div>
             <div className="steps">
               {phases.map((step) => <div key={step.id} className={'step ' + (step.active ? 'step-active' : '')}>
                 <div className="step-index">{step.id}{step.active && <span className="active-spark"/>}</div>
