@@ -1,5 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
 import * as THREE from 'three'
+import LightingControls from './LightingControls'
+import {createLightingLayer,updateLightingVisuals}from './Lighting3D'
+import type{LightingController}from '../domain/useLighting'
+import {roomIsOn}from '../domain/lighting'
 import { createInterior3D } from './Interior3D'
 import { SVGRenderer, SVGObject } from 'three/examples/jsm/renderers/SVGRenderer.js'
 import { TessellateModifier } from 'three/examples/jsm/modifiers/TessellateModifier.js'
@@ -243,8 +247,9 @@ function disposeSceneGroup(obj: THREE.Object3D) {
   })
 }
 
-export default function Villa3D({ floorId, selectedRoom, onSelectRoom, floorSelectionRevision = 0 }: {
+export default function Villa3D({ floorId, selectedRoom, onSelectRoom, lighting, floorSelectionRevision = 0 }: {
   floorId: FloorId
+  lighting: LightingController
   floorSelectionRevision?: number
   selectedRoom: number | null
   onSelectRoom: (value: number) => void
@@ -261,6 +266,8 @@ export default function Villa3D({ floorId, selectedRoom, onSelectRoom, floorSele
   const invalidateRef = useRef(() => {})
   const fitCameraRef = useRef(() => {})
   const onSelectRef = useRef(onSelectRoom)
+  const lightStateRef=useRef(lighting.state)
+  lightStateRef.current=lighting.state
   const [view, setView] = useState<StageView>('all')
   const [arrangement, setArrangement] = useState<StageArrangement>('assembled')
   const [presentation, setPresentation] = useState<PresentationMode>('exterior')
@@ -474,6 +481,19 @@ export default function Villa3D({ floorId, selectedRoom, onSelectRoom, floorSele
       }
       setLoadingTexture(false)
     }
+    const litFloors:FloorId[]=isExterior&&viewAll&&showGarage?[...all,'garage']:all
+    for(const id of [...new Set(litFloors)]){
+      const layer=createLightingLayer(id,presentation==='section',lighting.wiring,isExterior)
+      const [offsetX,offsetZ]=registrationMetres(id)
+      layer.position.set(offsetX,viewAll?vertical(id,arrangement):0,offsetZ)
+      if(isExterior&&viewAll&&id==='garage'){
+        layer.position.set(exteriorConcept.garagePlacement.xyMeters[0],exteriorConcept.garagePlacement.baseM,exteriorConcept.garagePlacement.xyMeters[1])
+        layer.rotation.y=exteriorConcept.garagePlacement.rotationToHouseDegrees*Math.PI/180
+      }
+      if(detailRoom!==null)layer.visible=false
+      root.add(layer)
+    }
+    updateLightingVisuals(root,lightStateRef.current)
     if (isExterior) setLoadingTexture(false)
     if (fallback) root.traverse(item => {
       if(item instanceof THREE.Mesh){
@@ -507,7 +527,31 @@ export default function Villa3D({ floorId, selectedRoom, onSelectRoom, floorSele
     if (fitKeyRef.current !== fitKey) { fitKeyRef.current = fitKey; fitCameraRef.current() }
     invalidateRef.current()
 
-  }, [floorId, viewAll, arrangement, furniture, walls, doors, labels, presentation, roof, glazing, terrace, site, fallback, showGarage, detailRoom])
+  }, [floorId, viewAll, arrangement, furniture, walls, doors, labels, presentation, roof, glazing, terrace, site, fallback, showGarage, detailRoom, lighting.wiring])
+
+  useEffect(()=>{
+    if(drawingsRef.current){
+      updateLightingVisuals(drawingsRef.current,lighting.state)
+      drawingsRef.current.traverse(obj=>{
+        if(obj instanceof SVGObject&&Number.isInteger(obj.userData.roomNumber)){
+          const on=roomIsOn(lighting.state,floorId,obj.userData.roomNumber)
+          obj.node.querySelector('circle')?.setAttribute('fill',on?'#ffcb61':'#dbc399')
+        }
+      })
+    }
+    invalidateRef.current()
+  },[lighting.state,floorId,viewAll,presentation,lighting.wiring])
+
+  useEffect(()=>{
+    const scene=sceneRef.current;if(!scene)return
+    scene.background=new THREE.Color(lighting.time==='day'?'#e4e7df':lighting.time==='dusk'?'#737d7c':'#18272d')
+    scene.traverse(obj=>{if(obj instanceof THREE.Light){
+      if(obj instanceof THREE.AmbientLight){obj.color.set(fallback?(lighting.time==='day'?'#959b9a':lighting.time==='dusk'?'#677574':'#36474c'):'#ffffff');obj.intensity=lighting.time==='day'?.7:lighting.time==='dusk'?.4:.2}
+      else if(obj instanceof THREE.DirectionalLight)obj.intensity=(obj.castShadow?(fallback?.6:2.6):(fallback?.25:.8))*(lighting.time==='day'?1:lighting.time==='dusk'?.5:.2)
+      else if(obj instanceof THREE.HemisphereLight)obj.intensity=fallback?0:lighting.time==='day'?1.5:lighting.time==='dusk'?.65:.25
+    }})
+    invalidateRef.current()
+  },[lighting.time,fallback])
 
   useEffect(() => {
     drawingsRef.current?.traverse(item => {
@@ -586,6 +630,7 @@ export default function Villa3D({ floorId, selectedRoom, onSelectRoom, floorSele
       <button onClick={() => setCameraPose('side')}>Сбоку</button>
       <button onClick={() => { setDetailRoom(null);setCameraPose('floor'); setPresentation('section'); setView('one'); setArrangement('assembled'); setLabels(true) }}>Внутри этажа ↗</button>
     </div>
+    <LightingControls floor={floorId} room={selectedRoom} onRoom={onSelectRoom} lighting={lighting}/>
     <div className="model-viewport" ref={mount} aria-label="Интерактивная 3D модель этажей Villa Como: перетаскивайте для вращения, колесо мыши для масштаба">
       {error && <div className="model-error" role="alert">{error}<button onClick={() => setError(null)}>Закрыть</button></div>}
       <div className="model-overlay">
@@ -598,7 +643,7 @@ export default function Villa3D({ floorId, selectedRoom, onSelectRoom, floorSele
       {loadingTexture && <div className="model-loading">Проекция мебели загружается…</div>}
     </div>
     {fallback && <div className="model-renderer-note" role="status">Векторный 3D-просмотр · WebGL недоступен в этом браузере. Материалы и тени упрощены.</div>}
-    <div className="model-footnote"><span>{presentation === 'exterior' ? `Внешний контур: ${exteriorConcept.floors[floorId].sourceSheet} · размеры окон A-04–A-06 · рельеф по уточнению владельца` : `Стеновые контуры: ${spatial.floors[floorId].sourceSheet} · мебель: ${plans[floorId].furnitureSheet}`}</span><strong>{presentation === 'exterior' ? 'ЭТАП 3 / 5 · АРХИТЕКТУРА' : 'ПРЕДВАРИТЕЛЬНАЯ 3D · НЕ BIM'}</strong></div>
+    <div className="model-footnote"><span>{presentation === 'exterior' ? `Внешний контур: ${exteriorConcept.floors[floorId].sourceSheet} · размеры окон A-04–A-06 · рельеф по уточнению владельца` : `Стеновые контуры: ${spatial.floors[floorId].sourceSheet} · мебель: ${plans[floorId].furnitureSheet}`}</span><strong>{presentation === 'exterior' ? 'ЭТАП 5 / 5 · СВЕТ И СЦЕНАРИИ' : 'ПРЕДВАРИТЕЛЬНАЯ 3D · НЕ BIM'}</strong></div>
     <details className="architecture-calibration">
       <summary>Геометрический контроль · {architecture.floors[floorId].calibrationChecks.length} независимые размерные привязки</summary>
       <div className="calibration-row-head"><span>Исходный лист</span><span>Размер</span><span>Расхождение с моделью</span></div>
@@ -610,7 +655,7 @@ export default function Villa3D({ floorId, selectedRoom, onSelectRoom, floorSele
       <small>Расхождение измерений в PDF с масштабом предпросмотра; не погрешность готового строительного CAD. Размерные цепочки полностью не замкнуты.</small>
     </details>
     <div className="model-warning">{presentation === 'exterior' ? <>
-      <b>Модель для презентации умного дома.</b> Планы и подписанные габариты окон перенесены из PDF; подоконные отметки, кровля, отделка и профиль склона требуют сверки с фасадами и топосъёмкой. Задняя часть нижнего этажа заглублена по уточнению владельца. Гараж справа, повёрнут к двору; въезд расположен со стороны балкона. Двор, парковка и гараж — на уровне первого этажа. Расстояния на участке — демонстрационные. Мебель и сантехника — упрощённые 3D-модели по планам A-18–A-29. Далее: отделка и световые сценарии.
+      <b>Модель для презентации умного дома.</b> Планы и подписанные габариты окон перенесены из PDF; подоконные отметки, кровля, отделка и профиль склона требуют сверки с фасадами и топосъёмкой. Задняя часть нижнего этажа заглублена по уточнению владельца. Гараж справа, повёрнут к двору; въезд расположен со стороны балкона. Двор, парковка и гараж — на уровне первого этажа. Расстояния на участке — демонстрационные. Мебель и сантехника — упрощённые 3D-модели по планам A-18–A-29. Световые группы и сценарии работают в демонстрационном режиме; команды оборудованию не отправляются.
     </> : <>
       Контуры стен и положения {architecture.floors[floorId].doors.length} дверных полотен перенесены из PDF, размеры дверей — из ведомости {spatial.floors[floorId].sourceSheet}. <b>{architecture.floors[floorId].openingCountResolved} проёмов сопоставлены с просветами на плане, остальные оставлены неразрешёнными.</b> Конструктивная крыша и фасады пока не подтверждены.
     </>}</div>

@@ -5,6 +5,7 @@ import compressedTraces from './data/source-traces.json'
 import plumbingRegister from './data/plumbing-register.json'
 import { LazySourceVector as SourceVector } from './components/SourceVector'
 import Villa3D from './components/Villa3D'
+import { useLighting } from './domain/useLighting'
 import type { ArchitecturalPlan, ArchitecturalPlanSet, PlanRoom } from './data/plan-types'
 import type { FloorRecord } from './domain/types'
 
@@ -255,6 +256,7 @@ function PlumbingDetail({ sheet, onClose }: { sheet: string; onClose: () => void
 }
 
 export default function App() {
+  const lighting=useLighting()
   const [floorId, setFloorId] = useState<typeof floorIds[number]>('level-1')
   const [displayMode, setDisplayMode] = useState<'3d' | '2d'>('3d')
   const [selectedRoom, setSelectedRoom] = useState<number | null>(null)
@@ -269,14 +271,14 @@ export default function App() {
     <nav className="side-rail" aria-label="Навигация"><a href="/" aria-label="Villa Como v2" className="brand-mark">V<span>.</span>C</a><div className="rail-rule"><i /><i /><i /></div><span className="rail-caption">MÈTRE<br/>2026</span></nav>
     <main className="main-content">
       <header className="topbar">
-        <div className="breadcrumbs"><span>VILLA COMO</span><i>/</i><b>INTERACTIVE 3D</b><i>/</i><span>ЭТАП 3 / 5 · АРХИТЕКТУРА</span></div>
-        <div className="header-actions"><span className="status-light" /> <span>ВНЕШНИЙ ОБЛИК · ДЕМОНСТРАЦИОННАЯ ВЕРСИЯ</span> <a href="https://github.com/RadamirSS/Villa_como_v2" target="_blank" rel="noreferrer">GitHub ↗</a></div>
+        <div className="breadcrumbs"><span>VILLA COMO</span><i>/</i><b>INTERACTIVE 3D</b><i>/</i><span>ЭТАП 5 / 5 · СВЕТ И СЦЕНАРИИ</span></div>
+        <div className="header-actions"><span className="status-light" /> <span>УМНЫЙ ДОМ · ДЕМОНСТРАЦИОННАЯ ВЕРСИЯ</span> <a href="https://github.com/RadamirSS/Villa_como_v2" target="_blank" rel="noreferrer">GitHub ↗</a></div>
       </header>
       <div className="page-content">
         <div className="intro">
           <div className="eyebrow"><span className="eyebrow-line" /> ARCHITECTURE FOR SMART LIVING <span className="muted">/ VILLA COMO</span></div>
           <h1>Villa <em>Como.</em></h1>
-          <div className="intro-bottom"><p>Интерактивная модель виллы для презентации умного дома. Три этажа, терраса и гараж; панорамные окна по размерам обмерных планов и посадка нижнего этажа в склон. Вращайте дом, откройте этаж изнутри или сравните его с исходным чертежом. Внутри этажей показаны объёмная мебель, кухни и сантехника по планам. Далее — отделка и световые сценарии.</p><span className="intro-step"><span>ЭТАП ПРОЕКТА</span><b>03<small>/05</small></b><small>Дом на склоне · архитектура</small></span></div>
+          <div className="intro-bottom"><p>Интерактивная модель виллы для презентации умного дома. Три этажа, терраса и гараж; панорамные окна по размерам обмерных планов и посадка нижнего этажа в склон. Вращайте дом, откройте этаж изнутри или сравните его с исходным чертежом. Внутри этажей показаны объёмная мебель, кухни и сантехника по планам. Управляйте группами света, выбирайте сценарии и наблюдайте свечение комнат и окон.</p><span className="intro-step"><span>ЭТАП ПРОЕКТА</span><b>05<small>/05</small></b><small>Свет · комнаты · сценарии</small></span></div>
         </div>
         <section className="metrics" aria-label="Показатели проекта">
           <div><span>УРОВНИ</span><strong>04</strong><small>3 этажа и гараж</small></div>
@@ -292,7 +294,7 @@ export default function App() {
             </button>)}
           </div>
           <div className="workspace-grid">
-            {displayMode === '3d' ? <Villa3D floorSelectionRevision={floorSelectionRevision} floorId={floorId} selectedRoom={selectedRoom} onSelectRoom={selectRoom} /> : <PlanViewer floor={floor} data={data} selectedRoom={selectedRoom} onSelectRoom={selectRoom} onOpenPlumbing={setOpenPlumbingSheet} />}
+            {displayMode === '3d' ? <Villa3D lighting={lighting} floorSelectionRevision={floorSelectionRevision} floorId={floorId} selectedRoom={selectedRoom} onSelectRoom={selectRoom} /> : <PlanViewer floor={floor} data={data} selectedRoom={selectedRoom} onSelectRoom={selectRoom} onOpenPlumbing={setOpenPlumbingSheet} />}
             <InfoPanel floor={floor} data={data} selectedRoom={selectedRoom} onSelectRoom={selectRoom} onOpenPlumbing={setOpenPlumbingSheet} />
           </div>
         </section>

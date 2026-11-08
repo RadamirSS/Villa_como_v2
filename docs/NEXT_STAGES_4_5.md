@@ -24,7 +24,17 @@ Acceptance: the viewer can open furnished, finished rooms and compare them with
 the original plans; approximate items are identifiable in the data. Roof, site
 and other missing architectural information retain their evidence status.
 
-## Stage 5 — lighting and smart-home scenarios
+## Stage 5 — first demo implemented
+
+The first working demonstration is implemented; see STAGE_5_REPORT.md.
+Room/group switching, shared multi-control state, five scenarios, day/dusk/night,
+room fills and facade panes work from a single persisted state. Remaining work:
+close source gaps in the left first-floor wing and unnumbered garage circuits,
+independently verify fixture positions/counts and room/window bindings, accept
+phone GPU performance, then design/review actual electrical/controller integration.
+The original implementation checklist is retained below as acceptance context.
+
+### Lighting and smart-home scenarios
 
 1. Extract fixtures and control groups from A-34–A-39; correlate circuits with
    actual rooms and source switching diagrams. Multiple switches can control

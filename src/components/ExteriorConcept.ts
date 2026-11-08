@@ -1,6 +1,7 @@
 import * as THREE from 'three'
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js'
 import raw from '../data/exterior-concept.json'
+import { roomForWindow } from '../domain/lighting'
 
 export type FloorId = 'garage' | 'level-1' | 'level-2' | 'level-3'
 type Point = [number, number]
@@ -66,7 +67,7 @@ function beam(a: THREE.Vector3, b: THREE.Vector3, depth: number, height: number,
 }
 function area(pts: Point[]) { return pts.reduce((sum, p, i) => { const q = pts[(i + 1) % pts.length]; return sum + p[0] * q[1] - q[0] * p[1] }, 0) / 2 }
 
-function glazing(a: THREE.Vector3, b: THREE.Vector3, sill: number, opening: Opening, outside: THREE.Vector3, p: Palette, visible: boolean) {
+function glazing(a: THREE.Vector3, b: THREE.Vector3, sill: number, opening: Opening, outside: THREE.Vector3, p: Palette, visible: boolean, floorId: FloorId) {
   const g = new THREE.Group(); g.name = opening.id
   g.userData = { openingId: opening.id, sourceLabel: opening.sourceLabel, lightingBinding: null }
   const width = a.distanceTo(b), height = opening.heightM
@@ -75,11 +76,17 @@ function glazing(a: THREE.Vector3, b: THREE.Vector3, sill: number, opening: Open
   if (opening.kind === 'shutter') {
     g.add(beam(start, end, .09, height, sill, p.frame))
     for (let h = .08; h < height; h += .16) g.add(beam(start, end, .095, .012, sill + h, p.roof))
+    if(floorId==='garage'){
+      // Visual light spilling at a closed garage threshold, not a fictitious glazed door.
+      const glow=new THREE.MeshBasicMaterial({color:'#ffc364',transparent:true,opacity:.45,depthWrite:false})
+      const spill=beam(a.clone().addScaledVector(outside,.7),b.clone().addScaledVector(outside,.7),1.3,.012,.012,glow)
+      spill.castShadow=false;spill.userData={lightRole:'exterior-spill',lightingFloor:'garage',roomNumber:1,visualizationOnly:true};g.add(spill)
+    }
     return g
   }
   if (visible) {
-    const glass = beam(start, end, .018, height, sill, p.glass)
-    glass.castShadow = false; glass.userData = { openingId: opening.id, smartHomeTarget: true }
+    const glass = beam(start, end, .018, height, sill, p.glass.clone())
+    glass.castShadow = false; glass.userData = { openingId: opening.id, smartHomeTarget: true, lightingRoomKey:roomForWindow(floorId,[(a.x+b.x)/2*ppm+origin.xPt,(a.z+b.z)/2*ppm+origin.yPt],[-outside.x,-outside.z]), bindingEvidence:'nearest-inward-source-room' }
     g.add(glass)
     // Recessed neutral interior, so an empty envelope does not look transparent through two facades.
     const back = outside.clone().multiplyScalar(-.30)
@@ -121,7 +128,7 @@ function facade(id: FloorId, individual: boolean, glass: boolean, p: Palette) {
       wall(cursor, left, base, f.displayWallHeightM)
       wall(left, right, base, w.sillM)
       wall(left, right, base + w.sillM + w.heightM, f.displayWallHeightM - w.sillM - w.heightM)
-      g.add(glazing(at(left), at(right), base + w.sillM, w, outside, p, glass))
+      g.add(glazing(at(left), at(right), base + w.sillM, w, outside, p, glass, id))
       cursor = right
     }
     wall(cursor, length, base, f.displayWallHeightM)
@@ -180,7 +187,7 @@ function roofGroup(p: Palette, glass: boolean) {
     const paneHeight = (v: Point) => plane(v) + lift
     const coords = [0, 2, 1, 0, 3, 2].flatMap(i => { const v = vertices[i]; return [px(v[0]), paneHeight(v), pz(v[1])] })
     const geometry = new THREE.BufferGeometry(); geometry.setAttribute('position', new THREE.Float32BufferAttribute(coords, 3)); geometry.computeVertexNormals()
-    const m = new THREE.Mesh(geometry, glass ? p.glass : p.frame); m.userData = { skylight: r.id, source: 'A-06' }; g.add(m)
+    const m = new THREE.Mesh(geometry, glass ? p.glass.clone() : p.frame); m.userData = { skylight: r.id, source: 'A-06', lightingRoomKey:glass?roomForWindow('level-3',r.centrePt):null }; g.add(m)
     vertices.forEach((v,i) => {
       const w = vertices[(i+1)%4]
       const points = [point(v,roofHeight(v)),point(w,roofHeight(w)),point(w,paneHeight(w)),point(v,roofHeight(v)),point(w,paneHeight(w)),point(v,paneHeight(v))]
