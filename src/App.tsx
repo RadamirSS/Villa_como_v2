@@ -263,7 +263,6 @@ export default function App() {
   const [openPlumbingSheet, setOpenPlumbingSheet] = useState<string | null>(null)
   const floor = useMemo(() => project.floors.find(item => item.id === floorId)!, [floorId])
   const data = plans.floors[floorId]
-  const doorsTotal = Object.values(plans.floors).reduce((sum, item) => sum + item.doorSpecification.reduce((v, door) => v + door.count, 0), 0)
   const chooseFloor = (id: typeof floorIds[number]) => { setFloorId(id); setSelectedRoom(null); setOpenPlumbingSheet(null) }
   const selectRoom = (number: number) => setSelectedRoom(previous => previous === number ? null : number)
   return <div className="app-shell">
