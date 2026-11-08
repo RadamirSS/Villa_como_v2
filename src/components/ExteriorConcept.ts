@@ -26,7 +26,7 @@ type ExteriorData = {
   roof: { status: string; gableWings: RoofWing[]; lowRoofs: LowRoof[] }
   terrace: { polygonPt: Point[]; elevationM: number; balustradeHeightM: number; scheduleAreaM2: number; confirmedPosition: boolean }
 }
-export const exteriorConcept = conceptRaw as ExteriorData
+export const exteriorConcept = conceptRaw as unknown as ExteriorData
 const perMeter = exteriorConcept.pointsPerMeter
 const origin = exteriorConcept.originPt
 const px = (value: number) => (value - origin.xPt) / perMeter
