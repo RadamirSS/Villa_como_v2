@@ -9,8 +9,9 @@ it does not silently mark stages 4 or 5 complete.
 
 1. Parse A-44–A-57 for room-specific floors, wall finishes and ceilings, with
    references to source sheets rather than one generic material for every room.
-2. Stage 3.8 implements 180 individually identified procedural 3D placements
-   from A-18–A-29, including every scheduled sanitary mark. Independently accept
+2. Stages 3.8–3.9 implement 180 individually identified procedural 3D placements
+   from A-18–A-29, including every scheduled sanitary mark. Kitchen finishes
+   and fitted-unit details now reference A-92–A-94/A-118–A-119. Independently accept
    traced positions and dimensions against plans/elevations; retain the 2D
    comparison and do not label unverified objects exact BIM.
 3. Resolve source ambiguities and placements before adding presentation detail.

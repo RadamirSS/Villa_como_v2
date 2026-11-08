@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import * as THREE from 'three'
 import { createInterior3D } from './Interior3D'
 import { SVGRenderer, SVGObject } from 'three/examples/jsm/renderers/SVGRenderer.js'
+import { TessellateModifier } from 'three/examples/jsm/modifiers/TessellateModifier.js'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import rawSpatial from '../data/spatial-model.json'
 import rawArchitectural from '../data/architectural-geometry.json'
@@ -148,7 +149,8 @@ export function wallAndSlabGroup(floorId: FloorId, height: number, current: bool
     const shape = toShape(polygon)
     if (!shape) continue
     const mesh = new THREE.Mesh(extrusion(shape, spatial.displayAssumptions.slabThicknessM), slabMaterial)
-    mesh.position.y = -.17
+    mesh.position.y = -spatial.displayAssumptions.slabThicknessM
+    mesh.userData.floorSlab=true
     mesh.receiveShadow = true
     group.add(mesh)
   }
@@ -254,7 +256,7 @@ export default function Villa3D({ floorId, selectedRoom, onSelectRoom, floorSele
   const drawingsRef = useRef<THREE.Group | null>(null)
   const contextRef = useRef<THREE.Group | null>(null)
   const boundsRef = useRef(new THREE.Box3())
-  const poseRef = useRef<'perspective' | 'front' | 'rear' | 'side' | 'top' | 'floor'>('perspective')
+  const poseRef = useRef<'perspective' | 'front' | 'rear' | 'side' | 'top' | 'floor' | 'kitchen'>('perspective')
   const fitKeyRef = useRef('')
   const invalidateRef = useRef(() => {})
   const fitCameraRef = useRef(() => {})
@@ -266,6 +268,7 @@ export default function Villa3D({ floorId, selectedRoom, onSelectRoom, floorSele
   const [glazing, setGlazing] = useState(true)
   const [terrace, setTerrace] = useState(true)
   const [furniture, setFurniture] = useState(true)
+  const [detailRoom, setDetailRoom] = useState<number | null>(null)
   const [labels, setLabels] = useState(true)
   const [showGarage, setShowGarage] = useState(true)
   const [walls, setWalls] = useState(true)
@@ -281,7 +284,7 @@ export default function Villa3D({ floorId, selectedRoom, onSelectRoom, floorSele
 
   useEffect(() => {
     if (!floorSelectionRevision) return
-    poseRef.current = 'floor'; setTop(false)
+    poseRef.current = 'floor'; setTop(false); setDetailRoom(null)
     setView('one'); setArrangement('assembled'); setPresentation('section'); setLabels(true)
   }, [floorSelectionRevision])
 
@@ -326,9 +329,10 @@ export default function Villa3D({ floorId, selectedRoom, onSelectRoom, floorSele
     controls.target.set(0, 3.4, 0)
     controls.update()
     controlsRef.current = controls
-    scene.add(new THREE.AmbientLight('#ffffff', webgl ? .7 : .65))
+    // SVGRenderer sums ambient colour and ignores intensity; encode its ambient level in colour.
+    scene.add(new THREE.AmbientLight(webgl ? '#ffffff' : '#959b9a', webgl ? .7 : 1))
     scene.add(new THREE.HemisphereLight('#fff7e7', '#747d69', webgl ? 1.5 : 0))
-    const key = new THREE.DirectionalLight('#fff4e2', webgl ? 2.6 : .6)
+    const key = new THREE.DirectionalLight(webgl ? '#fff4e2' : '#ffffff', webgl ? 2.6 : .6)
     key.position.set(-16, 28, 18)
     key.castShadow = true
     key.shadow.mapSize.set(2048, 2048)
@@ -347,7 +351,7 @@ export default function Villa3D({ floorId, selectedRoom, onSelectRoom, floorSele
       const box = boundsRef.current
       if (box.isEmpty()) return
       const centre = box.getCenter(new THREE.Vector3())
-      const poses = { perspective: [1,.68,1.35], front: [0,.35,1.6], rear: [0,.4,-1.6], side: [1.6,.4,.1], top: [.001,1,.001], floor: [.65,1.65,1.25] }
+      const poses = { perspective: [1,.68,1.35], front: [0,.35,1.6], rear: [0,.4,-1.6], side: [1.6,.4,.1], top: [.001,1,.001], floor: [.65,1.65,1.25], kitchen: [.25,1.15,1.65] }
       const direction = new THREE.Vector3(...poses[poseRef.current] as [number,number,number]).normalize()
       const cameraUp = poseRef.current === 'top' ? new THREE.Vector3(0,0,-1) : new THREE.Vector3(0,1,0)
       const right = new THREE.Vector3().crossVectors(cameraUp, direction).normalize()
@@ -462,7 +466,7 @@ export default function Villa3D({ floorId, selectedRoom, onSelectRoom, floorSele
       }
       if (furniture) {
         for(const id of all){
-          const interior=createInterior3D(id,presentation === 'section')
+          const interior=createInterior3D(id,presentation === 'section',detailRoom)
           const [x,z]=registrationMetres(id)
           interior.position.set(x,viewAll?vertical(id,arrangement):0,z)
           root.add(interior)
@@ -472,18 +476,38 @@ export default function Villa3D({ floorId, selectedRoom, onSelectRoom, floorSele
     }
     if (isExterior) setLoadingTexture(false)
     if (fallback) root.traverse(item => {
+      if(item instanceof THREE.Mesh){
+        // A selected floor is wholly below the furnishings. SVG has no depth buffer.
+        if(!viewAll&&item.userData.floorSlab)item.renderOrder=-20
+        if(item.parent?.userData.designSheets){const previous=item.geometry;item.geometry=new TessellateModifier(.5,7).modify(previous);previous.dispose()}
+      }
       if (item instanceof THREE.Mesh && !Array.isArray(item.material) && item.material instanceof THREE.MeshPhysicalMaterial) {
         const material = item.material.clone(); material.transparent = false; material.opacity = 1; material.side = THREE.FrontSide
         item.material = material
       }
     })
     boundsRef.current.setFromObject(root)
+    if(detailRoom!==null&&!viewAll&&!isExterior){
+      const detailBounds=new THREE.Box3()
+      root.updateMatrixWorld(true)
+      root.traverse(obj=>{if(obj.userData.placementId&&obj.userData.roomNumber===detailRoom)detailBounds.expandByObject(obj)})
+      if(!detailBounds.isEmpty()){
+        // A detail is a furniture inspection view; the complete source floor is one click away.
+        for(const child of root.children)if(!child.name.startsWith('furnished-'))child.visible=false
+        root.traverse(obj=>{if(obj.userData.placementId&&obj.userData.roomNumber!==detailRoom)obj.visible=false})
+        detailBounds.min.y=0
+        const size=detailBounds.getSize(new THREE.Vector3()),centre=detailBounds.getCenter(new THREE.Vector3())
+        const base=new THREE.Mesh(new THREE.BoxGeometry(size.x+.18,.06,size.z+.18),new THREE.MeshStandardMaterial({color:'#e6e2df',roughness:.95}))
+        base.position.set(centre.x,-.03,centre.z);base.receiveShadow=true;base.renderOrder=-20;base.userData.presentationBase=true;root.add(base)
+        boundsRef.current.copy(detailBounds)
+      }
+    }
     if (isExterior && viewAll && site) boundsRef.current.expandByPoint(new THREE.Vector3(32,0,31))
-    const fitKey = `${floorId}-${viewAll}-${arrangement}-${presentation}`
+    const fitKey = `${floorId}-${viewAll}-${arrangement}-${presentation}-${detailRoom}`
     if (fitKeyRef.current !== fitKey) { fitKeyRef.current = fitKey; fitCameraRef.current() }
     invalidateRef.current()
 
-  }, [floorId, viewAll, arrangement, furniture, walls, doors, labels, presentation, roof, glazing, terrace, site, fallback, showGarage])
+  }, [floorId, viewAll, arrangement, furniture, walls, doors, labels, presentation, roof, glazing, terrace, site, fallback, showGarage, detailRoom])
 
   useEffect(() => {
     drawingsRef.current?.traverse(item => {
@@ -518,7 +542,7 @@ export default function Villa3D({ floorId, selectedRoom, onSelectRoom, floorSele
 
   return <div className={`villa3d${expanded ? ' villa3d-expanded' : ''}`}>
     <div className="model-top-strip">
-      <div className="model-title"><span className="live-indicator"/><b>VILLA COMO · АРХИТЕКТУРА</b><small>{presentation === 'exterior' ? 'ДОМ НА СКЛОНЕ' : `${spatial.floors[floorId].sourceSheet} · исходная архитектура`}</small></div>
+      <div className="model-title"><span className="live-indicator"/><b>VILLA COMO · АРХИТЕКТУРА</b><small>{detailRoom===12&&!viewAll&&presentation!=='exterior'?'Меблировка · A-118 / A-119':presentation === 'exterior' ? 'ДОМ НА СКЛОНЕ' : `${spatial.floors[floorId].sourceSheet} · исходная архитектура`}</small></div>
       <div className="model-tools">
         <button onClick={() => zoomCamera(1.22)} aria-label="Отдалить 3D">−</button>
         <button onClick={() => zoomCamera(.82)} aria-label="Приблизить 3D">+</button>
@@ -529,13 +553,13 @@ export default function Villa3D({ floorId, selectedRoom, onSelectRoom, floorSele
     </div>
     <div className="model-layers">
       <div className="model-switches" role="group" aria-label="Показ 3D уровней">
-        <button className={!viewAll ? 'selected' : ''} onClick={() => { setView('one');setPresentation('section');setCameraPose('floor') }}>Обзор этажа</button>
-        <button className={viewAll ? 'selected' : ''} onClick={() => { setView('all');setPresentation('exterior');setArrangement('assembled');setCameraPose('perspective') }}>Весь участок</button>
+        <button className={!viewAll ? 'selected' : ''} onClick={() => { setDetailRoom(null);setView('one');setPresentation('section');setCameraPose('floor') }}>Обзор этажа</button>
+        <button className={viewAll ? 'selected' : ''} onClick={() => { setDetailRoom(null);setView('all');setPresentation('exterior');setArrangement('assembled');setCameraPose('perspective') }}>Весь участок</button>
         {viewAll && <button className="mode-light" onClick={() => { setPresentation('section'); setArrangement(v => v === 'assembled' ? 'exploded' : 'assembled') }}>{arrangement === 'exploded' ? 'Собрать уровни' : 'Раздвинуть уровни'}</button>}
       </div>
       <div className="model-presentation" role="group" aria-label="Режим архитектурной визуализации">
-        <button className={presentation === 'exterior' ? 'selected' : ''} aria-pressed={presentation === 'exterior'} onClick={() => { setPresentation('exterior'); setView('all'); setArrangement('assembled'); resetCamera(false) }}>Дом и участок</button>
-        <button className={presentation === 'section' ? 'selected' : ''} aria-pressed={presentation === 'section'} onClick={() => {setPresentation('section');setView('one');setCameraPose('floor')}}>Низкие стены</button>
+        <button className={presentation === 'exterior' ? 'selected' : ''} aria-pressed={presentation === 'exterior'} onClick={() => { setDetailRoom(null);setPresentation('exterior'); setView('all'); setArrangement('assembled'); resetCamera(false) }}>Дом и участок</button>
+        <button className={presentation === 'section' ? 'selected' : ''} aria-pressed={presentation === 'section'} onClick={() => {setDetailRoom(null);setPresentation('section');setView('one');setCameraPose('floor')}}>Низкие стены</button>
         <button className={presentation === 'source' ? 'selected' : ''} aria-pressed={presentation === 'source'} onClick={() => setPresentation('source')}>Исходные стены</button>
       </div>
       <div className="model-checks">
@@ -555,18 +579,19 @@ export default function Villa3D({ floorId, selectedRoom, onSelectRoom, floorSele
     </div>
     <div className="model-camera-presets" role="group" aria-label="Ракурсы дома">
       <span>РАКУРС</span>
+      {!viewAll&&presentation!=='exterior'&&floorId==='level-2'&&<button aria-pressed={detailRoom===12} onClick={()=>{poseRef.current='kitchen';setDetailRoom(12);setFurniture(true);setLabels(false);onSelectRoom(12)}}>Кухня крупно ↗</button>}
       <button onClick={() => setCameraPose('perspective')}>Общий</button>
       <button onClick={() => setCameraPose('front')}>Фасад</button>
       <button onClick={() => setCameraPose('rear')}>Со склона</button>
       <button onClick={() => setCameraPose('side')}>Сбоку</button>
-      <button onClick={() => { setCameraPose('floor'); setPresentation('section'); setView('one'); setArrangement('assembled'); setLabels(true) }}>Внутри этажа ↗</button>
+      <button onClick={() => { setDetailRoom(null);setCameraPose('floor'); setPresentation('section'); setView('one'); setArrangement('assembled'); setLabels(true) }}>Внутри этажа ↗</button>
     </div>
     <div className="model-viewport" ref={mount} aria-label="Интерактивная 3D модель этажей Villa Como: перетаскивайте для вращения, колесо мыши для масштаба">
       {error && <div className="model-error" role="alert">{error}<button onClick={() => setError(null)}>Закрыть</button></div>}
       <div className="model-overlay">
         <span className="model-eyebrow">{presentation === 'exterior' ? 'VILLA COMO / SMART HOME' : 'MÈTRE / SOURCE-BASED 3D'}</span>
-        <b>{viewAll ? 'ВИЛЛА · ГАРАЖ · ДВОР' : floorId === 'garage' ? 'ГАРАЖ' : floorId === 'level-1' ? 'ПЕРВЫЙ ЭТАЖ' : floorId === 'level-2' ? 'ВТОРОЙ ЭТАЖ' : 'ТРЕТИЙ ЭТАЖ'}</b>
-        <small>{presentation === 'exterior' ? viewAll ? 'Общая кровля · жилой и неиспользуемый чердак' : 'План выбранного этажа' : presentation === 'section' ? `${plans[floorId].rooms.length} помещений · стены 55 см` : `${spatial.floors[floorId].wallPolygonCount} стен · ${architecture.floors[floorId].doors.length} дверей`}</small>
+        <b>{detailRoom===12&&!viewAll&&presentation!=='exterior'?'КУХНЯ · ВТОРОЙ ЭТАЖ':viewAll ? 'ВИЛЛА · ГАРАЖ · ДВОР' : floorId === 'garage' ? 'ГАРАЖ' : floorId === 'level-1' ? 'ПЕРВЫЙ ЭТАЖ' : floorId === 'level-2' ? 'ВТОРОЙ ЭТАЖ' : 'ТРЕТИЙ ЭТАЖ'}</b>
+        <small>{detailRoom===12&&!viewAll&&presentation!=='exterior'?'Меблировка · A-118 / A-119':presentation === 'exterior' ? viewAll ? 'Общая кровля · жилой и неиспользуемый чердак' : 'План выбранного этажа' : presentation === 'section' ? `${plans[floorId].rooms.length} помещений · стены 55 см` : `${spatial.floors[floorId].wallPolygonCount} стен · ${architecture.floors[floorId].doors.length} дверей`}</small>
         {selectedRoom !== null && presentation !== 'exterior' && <span className="model-selection">{selectedRoom} · {plans[floorId].rooms.find(room => room.number === selectedRoom)?.name}</span>}
       </div>
       <div className="model-gesture-hint">{presentation === 'exterior' ? 'Вращайте · Приближайте · Откройте этаж изнутри' : 'Вращайте · Выбирайте номера помещений'}</div>
