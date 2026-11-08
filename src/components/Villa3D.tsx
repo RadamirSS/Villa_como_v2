@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import rawSpatial from '../data/spatial-model.json'
+import rawArchitectural from '../data/architectural-geometry.json'
 import rawPlans from '../data/architectural-plans.json'
 import furnitureVectors from '../data/furniture-vectors.json'
 
@@ -23,6 +24,37 @@ type SpatialModel = {
   displayAssumptions: { wallHeightM: number; slabThicknessM: number; level3BaseM: number }
   floors: Record<FloorId, FloorSource>
 }
+type DoorAxis = {
+  status: string
+  startPt?: number[]
+  endPt?: number[]
+}
+type SourceDoor = {
+  id: string
+  mark: string
+  sourceLeafSegmentPt: number[][]
+  openingWidthMm: number
+  openingHeightMm: number
+  leafWidthMm: number
+  leafHeightMm: number
+  symbolMatchDistancePt: number
+  aperture: DoorAxis
+}
+type ArchitecturalData = {
+  floors: Record<FloorId, {
+    doors: SourceDoor[]
+    openingCountResolved: number
+    calibrationChecks: {
+      label: string
+      sheet: string
+      dimensionMm: number
+      observedLengthPt: number
+      residualAtDisplayScalePct: number
+      scalePointsPerM: number
+    }[]
+  }>
+}
+const architecture = rawArchitectural as ArchitecturalData
 const spatial = rawSpatial as SpatialModel
 const plans = rawPlans.floors
 const ptPerM = spatial.calibration.pointsPerMeter
@@ -98,13 +130,15 @@ function wallAndSlabGroup(floorId: FloorId, height: number, current: boolean, de
     mesh.receiveShadow = true
     group.add(mesh)
   }
-  if (detail) for (const polygon of data.wallPolygonsPt) {
+  if (detail) for (const [wallIndex, polygon] of data.wallPolygonsPt.entries()) {
     const shape = toShape(polygon)
     if (!shape) continue
     const geom = extrusion(shape, height)
     const mesh = new THREE.Mesh(geom, wallMaterial)
     mesh.castShadow = current
     mesh.receiveShadow = true
+    mesh.userData.wallId = rawArchitectural.floors[floorId].sourceWalls[wallIndex].id
+    mesh.userData.confidence = 'source-wall-fill-footprint'
     group.add(mesh)
     // High contrast only for major elements; do not add thousands of duplicate edges.
     if (polygon.outer.length < 100 && polygon.holes.length === 0) {
@@ -122,6 +156,62 @@ async function inflateSvg(encoded: string) {
   const svg = await new Response(stream).text()
   if (!svg.startsWith('<svg ') || /<script|<image\b|<foreignObject/i.test(svg)) throw new Error('Недопустимый SVG')
   return svg
+}
+
+/**
+ * Only the original door leaf line in plan has source-certified XY position.
+ * Door heights/sizes are drawn from the A-14..17 door schedule. The leaf is
+ * intentionally shown ajar at the angle printed in the source drawing;
+ * exact jamb/hinge build-up and overhead lintel depth remain provisional.
+ */
+function sourceDoorGroup(floorId: FloorId, current: boolean, drawLintels: boolean) {
+  const group = new THREE.Group()
+  const leaves = architecture.floors[floorId].doors
+  const leafMaterial = new THREE.MeshStandardMaterial({
+    color: current ? '#ba9b74' : '#a7a99c', roughness: .78, metalness: .03,
+    transparent: true, opacity: current ? .89 : .36, side: THREE.DoubleSide,
+  })
+  const lintelMaterial = new THREE.MeshStandardMaterial({
+    color: current ? '#d0c6b3' : '#859b8f', roughness: .93,
+    transparent: true, opacity: current ? .88 : .36,
+  })
+  for (const door of leaves) {
+    const [start, end] = door.sourceLeafSegmentPt
+    const a = new THREE.Vector3(pX(start[0]), 0, pZ(start[1]))
+    const b = new THREE.Vector3(pX(end[0]), 0, pZ(end[1]))
+    const vector = b.clone().sub(a)
+    const span = vector.length()
+    const leafHeight = door.leafHeightMm / 1000
+    if (span > .15 && span < 3) {
+      const panel = new THREE.Mesh(new THREE.BoxGeometry(span, leafHeight, .045), leafMaterial)
+      panel.position.copy(a.clone().add(b).multiplyScalar(.5))
+      panel.position.y = leafHeight / 2 + .015
+      panel.rotation.y = -Math.atan2(vector.z, vector.x)
+      panel.userData = { doorMark: door.mark, floorId, sourceVerified: 'plan-symbol-and-schedule' }
+      panel.castShadow = current
+      group.add(panel)
+    }
+    // Do not invent masonry over a doorway whose opening direction is ambiguous.
+    if (!drawLintels || door.aperture.status !== 'source-gap-correlated-not-construction-approved'
+      || !door.aperture.startPt || !door.aperture.endPt) continue
+    const startPortal = door.aperture.startPt
+    const endPortal = door.aperture.endPt
+    const openingHeight = door.openingHeightMm / 1000
+    const wallHeight = floorId === 'level-3' ? 2.3 : spatial.displayAssumptions.wallHeightM
+    const above = wallHeight - openingHeight
+    if (above < .045) continue
+    const v0 = new THREE.Vector3(pX(startPortal[0]), 0, pZ(startPortal[1]))
+    const v1 = new THREE.Vector3(pX(endPortal[0]), 0, pZ(endPortal[1]))
+    const along = v1.clone().sub(v0)
+    const mesh = new THREE.Mesh(new THREE.BoxGeometry(along.length(), above, .115), lintelMaterial)
+    mesh.position.copy(v0.add(v1).multiplyScalar(.5))
+    mesh.position.y = openingHeight + above / 2
+    mesh.rotation.y = -Math.atan2(along.z, along.x)
+    mesh.userData = { doorMark: door.mark, floorId, provisional: 'wall-thickness-and-lintel-inference' }
+    mesh.castShadow = current
+    group.add(mesh)
+  }
+  return group
 }
 
 async function furnitureOverlay(floor: FloorId): Promise<THREE.Mesh> {
@@ -194,6 +284,7 @@ export default function Villa3D({ floorId, selectedRoom, onSelectRoom }: {
   const [furniture, setFurniture] = useState(true)
   const [labels, setLabels] = useState(true)
   const [walls, setWalls] = useState(true)
+  const [doors, setDoors] = useState(true)
   const [top, setTop] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [loadingTexture, setLoadingTexture] = useState(false)
@@ -302,6 +393,11 @@ export default function Villa3D({ floorId, selectedRoom, onSelectRoom }: {
       const group = wallAndSlabGroup(id, id === 'level-3' ? 2.3 : spatial.displayAssumptions.wallHeightM, current, walls)
       group.position.y = base
       root.add(group)
+      if (walls && doors) {
+        const doorGroup = sourceDoorGroup(id, current, true)
+        doorGroup.position.y = base
+        root.add(doorGroup)
+      }
       if (current && labels) {
         for (const room of plans[id].rooms) {
           if (!room.marker) continue
@@ -322,7 +418,7 @@ export default function Villa3D({ floorId, selectedRoom, onSelectRoom }: {
       }).catch(e => { if (live) { setLoadingTexture(false); setError('Не удалось загрузить мебельную проекцию: ' + String(e)) } })
     } else setLoadingTexture(false)
     return () => { live = false }
-  }, [floorId, viewAll, arrangement, furniture, walls, labels])
+  }, [floorId, viewAll, arrangement, furniture, walls, doors, labels])
 
   useEffect(() => {
     drawingsRef.current?.traverse(item => {
@@ -369,6 +465,7 @@ export default function Villa3D({ floorId, selectedRoom, onSelectRoom }: {
       </div>
       <div className="model-checks">
         <button aria-pressed={walls} onClick={() => setWalls(x => !x)} className={walls ? 'active' : ''}>Стены</button>
+        <button aria-pressed={doors} onClick={() => setDoors(x => !x)} className={doors ? 'active' : ''}>Двери · 3D</button>
         <button aria-pressed={furniture} onClick={() => setFurniture(x => !x)} className={furniture ? 'active' : ''}>Мебель · 2D</button>
         <button aria-pressed={labels} onClick={() => setLabels(x => !x)} className={labels ? 'active' : ''}>Помещения</button>
       </div>
@@ -378,12 +475,22 @@ export default function Villa3D({ floorId, selectedRoom, onSelectRoom }: {
       <div className="model-overlay">
         <span className="model-eyebrow">MÈTRE / SOURCE-BASED 3D</span>
         <b>{floorId === 'garage' ? 'ГАРАЖ · ОТДЕЛЬНО' : viewAll ? 'ЭТАЖИ 1–3' : floorId === 'level-1' ? 'ПЕРВЫЙ ЭТАЖ' : floorId === 'level-2' ? 'ВТОРОЙ ЭТАЖ' : 'ТРЕТИЙ ЭТАЖ'}</b>
-        <small>{spatial.floors[floorId].wallPolygonCount} конструктивных контуров</small>
+        <small>{spatial.floors[floorId].wallPolygonCount} стен · {architecture.floors[floorId].doors.length} дверных марок</small>
       </div>
       <div className="model-gesture-hint">↻ Вращайте · ≋ Увеличивайте · Выбирайте помещения</div>
       {loadingTexture && <div className="model-loading">Проекция мебели загружается…</div>}
     </div>
     <div className="model-footnote"><span>Стеновые контуры: {spatial.floors[floorId].sourceSheet} · из PDF; мебель: плоская проекция {plans[floorId].furnitureSheet}</span><strong>ПРЕДВАРИТЕЛЬНАЯ 3D · НЕ BIM</strong></div>
-    <div className="model-warning">Объёмные стены построены из реальных 2D-контуров. <b>Высоты стен, толщина плит и отметка мансарды пока условны.</b> Вырезы проёмов и объёмная мебель не воссозданы и не должны считаться точными. Кровля и расположение гаража на участке требуют отсутствующих исходных материалов.</div>
+    <details className="architecture-calibration" open>
+      <summary>Геометрический контроль · {architecture.floors[floorId].calibrationChecks.length} независимые размерные привязки</summary>
+      <div className="calibration-row-head"><span>Исходный лист</span><span>Размер</span><span>Расхождение с моделью</span></div>
+      {architecture.floors[floorId].calibrationChecks.map((check, index) => <div key={index} className="calibration-row">
+        <span>{check.sheet} · {check.label}</span>
+        <b>{check.dimensionMm.toLocaleString('ru-RU')} мм</b>
+        <strong>{check.residualAtDisplayScalePct > 0 ? '+' : ''}{check.residualAtDisplayScalePct.toFixed(2)}%</strong>
+      </div>)}
+      <small>Расхождение измерений в PDF с масштабом предпросмотра; не погрешность готового строительного CAD. Размерные цепочки полностью не замкнуты.</small>
+    </details>
+    <div className="model-warning">Контуры стен и положения {architecture.floors[floorId].doors.length} дверных полотен перенесены из PDF, размеры дверей — из ведомости {spatial.floors[floorId].sourceSheet}. <b>{architecture.floors[floorId].openingCountResolved} проёмов подтверждены сопоставлением с просветами на плане, остальные оставлены неразрешёнными.</b> 3D полотна показаны в условно открытом положении с листа. Высоты стен, плит, мансарды и перемычки над проёмами остаются предварительными. Конструктивные лестницы, оконные высоты, кровля и посадка гаража не подтверждены.</div>
   </div>
 }
