@@ -312,23 +312,14 @@ function siteAccessories() {
   const rect=(x0:number,z0:number,x1:number,z1:number,y:number,t:number,mat:THREE.Material)=>{
     const mesh=new THREE.Mesh(new THREE.BoxGeometry(x1-x0,t,z1-z0),mat);mesh.position.set((x0+x1)/2,y-t/2,(z0+z1)/2);mesh.receiveShadow=true;g.add(mesh);return mesh
   }
-  const rail=(a:THREE.Vector3,b:THREE.Vector3,y:number)=>{
-    g.add(beam(a,b,.055,.045,y+1.02,p.frame))
-    const n=Math.ceil(a.distanceTo(b)/1.7)
-    for(let i=0;i<=n;i++){const pos=a.clone().lerp(b,i/n);const post=new THREE.Mesh(new THREE.BoxGeometry(.045,1.04,.045),p.frame);post.position.set(pos.x,y+.52,pos.z);g.add(post)}
+  // Owner correction: entrance, parking and garage share the FIRST-floor level.
+  // No elevated court, bridge, pedestrian deck or access ramp exists here.
+  const paving=rect(0,6.2,32.2,30,-.12,.09,p.stone)
+  paving.userData={siteObject:'ground-level-courtyard',elevationM:0}
+  for(const x of [17.5,20.2,22.9]){
+    const line=rect(x,19,x+.055,24,-.064,.012,p.edge)
+    line.userData={siteObject:'parking-marking',elevationM:0}
   }
-  // Lower access road and garage apron; higher court follows the v1 scheme.
-  rect(15.3,2,32.2,30,-.12,.09,p.stone)
-  rect(6.0,7.2,13.2,17,2.93,.22,p.stone)
-  rect(0,6.1,13.2,7.3,2.93,.18,p.stone)
-  rect(0,4.48,1.2,6.2,2.93,.18,p.stone)
-  for(const x of [6.3,12.9])for(const z of [7.6,16.6])rect(x-.12,z-.12,x+.12,z+.12,2.72,2.85,p.edge)
-  rail(new THREE.Vector3(6,0,7.2),new THREE.Vector3(6,0,17),2.93)
-  rail(new THREE.Vector3(13.2,0,7.2),new THREE.Vector3(13.2,0,17),2.93)
-  const coords=[9,2.93,17,12.5,2.93,17,12.5,-.12,28,9,2.93,17,12.5,-.12,28,9,-.12,28]
-  const geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.Float32BufferAttribute(coords,3));geo.computeVertexNormals()
-  const ramp=new THREE.Mesh(geo,new THREE.MeshStandardMaterial({color:'#b9b29f',roughness:1,side:THREE.DoubleSide}));ramp.receiveShadow=true;ramp.userData={siteObject:'access-ramp'};g.add(ramp)
-  rect(9,27.8,21,30,-.12,.09,p.stone)
   // Courtyard entrance faces +Z, the same side as the balcony, not the garage door.
   for(const x of [8.8,14.1])rect(x-.16,29.75,x+.16,30.1,1.65,1.87,p.edge)
   for(const x of [10.1,12.8]){

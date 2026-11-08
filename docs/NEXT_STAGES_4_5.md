@@ -9,9 +9,10 @@ it does not silently mark stages 4 or 5 complete.
 
 1. Parse A-44–A-57 for room-specific floors, wall finishes and ceilings, with
    references to source sheets rather than one generic material for every room.
-2. Convert furniture and sanitary plan symbols into individually identified 3D
-   placements using A-18–A-29 and available elevations. Preserve the raw source
-   overlays as the comparison mode; do not label unverified objects exact BIM.
+2. Stage 3.8 implements 180 individually identified procedural 3D placements
+   from A-18–A-29, including every scheduled sanitary mark. Independently accept
+   traced positions and dimensions against plans/elevations; retain the 2D
+   comparison and do not label unverified objects exact BIM.
 3. Resolve source ambiguities and placements before adding presentation detail.
    Keep source-derived positions, assumed dimensions and chosen models separate.
 4. Add finished room views and useful cutaway heights, without altering the

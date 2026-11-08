@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import * as THREE from 'three'
+import { createInterior3D } from './Interior3D'
 import { SVGRenderer, SVGObject } from 'three/examples/jsm/renderers/SVGRenderer.js'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import rawSpatial from '../data/spatial-model.json'
@@ -171,14 +172,6 @@ export function wallAndSlabGroup(floorId: FloorId, height: number, current: bool
   return group
 }
 
-async function inflateSvg(encoded: string) {
-  const bytes = Uint8Array.from(atob(encoded), x => x.charCodeAt(0))
-  const stream = new Blob([bytes]).stream().pipeThrough(new DecompressionStream('gzip'))
-  const svg = await new Response(stream).text()
-  if (!svg.startsWith('<svg ') || /<script|<image\b|<foreignObject/i.test(svg)) throw new Error('Недопустимый SVG')
-  return svg
-}
-
 /**
  * Only the original door leaf line in plan has source-certified XY position.
  * Door heights/sizes are drawn from the A-14..17 door schedule. The leaf is
@@ -235,47 +228,6 @@ function sourceDoorGroup(floorId: FloorId, current: boolean, drawLintels: boolea
   return group
 }
 
-async function furnitureOverlay(floor: FloorId): Promise<THREE.Mesh> {
-  const source = spatial.floors[floor].sourceViewport
-  const { default: furnitureVectors } = await import('../data/furniture-vectors.json')
-  const svg = await inflateSvg(furnitureVectors[floor])
-  const url = URL.createObjectURL(new Blob([svg], { type: 'image/svg+xml' }))
-  try {
-    const img = new Image()
-    await new Promise<void>((resolve, reject) => {
-      img.onload = () => resolve()
-      img.onerror = () => reject(new Error('Не удалось распаковать мебельный план'))
-      img.src = url
-    })
-    const ratio = Math.min(2.0, 2100 / source.widthPt)
-    const canvas = document.createElement('canvas')
-    canvas.width = Math.ceil(source.widthPt * ratio)
-    canvas.height = Math.ceil(source.heightPt * ratio)
-    const ctx = canvas.getContext('2d', { willReadFrequently: true })!
-    ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
-    const pixels = ctx.getImageData(0, 0, canvas.width, canvas.height)
-    const a = pixels.data
-    // Remove the white PDF-paper background: objects remain as source 2D ink laid on a 3D plane.
-    for (let i = 0; i < a.length; i += 4) {
-      const min = Math.min(a[i], a[i + 1], a[i + 2])
-      if (min >= 244) a[i + 3] = 0
-      else if (min >= 228) a[i + 3] = Math.min(a[i + 3], Math.round((244 - min) / 16 * 255))
-    }
-    ctx.putImageData(pixels, 0, 0)
-    const texture = new THREE.CanvasTexture(canvas)
-    texture.colorSpace = THREE.SRGBColorSpace
-    texture.anisotropy = 4
-    const geometry = new THREE.PlaneGeometry(source.widthPt / ptPerM, source.heightPt / ptPerM)
-    const material = new THREE.MeshBasicMaterial({ map: texture, transparent: true, side: THREE.DoubleSide, depthWrite: false, opacity: .77 })
-    const plane = new THREE.Mesh(geometry, material)
-    plane.rotation.x = -Math.PI / 2
-    plane.position.set(pX(source.xPt + source.widthPt / 2), .035, pZ(source.yPt + source.heightPt / 2))
-    plane.renderOrder = 3
-    plane.userData.source = `MÈTRE ${plans[floor].furnitureSheet} · source 2D projection`
-    return plane
-  } finally { URL.revokeObjectURL(url) }
-}
-
 function disposeSceneGroup(obj: THREE.Object3D) {
   obj.traverse(child => {
     if (child instanceof THREE.Mesh || child instanceof THREE.Sprite || child instanceof THREE.Line) {
@@ -313,7 +265,7 @@ export default function Villa3D({ floorId, selectedRoom, onSelectRoom, floorSele
   const [roof, setRoof] = useState(true)
   const [glazing, setGlazing] = useState(true)
   const [terrace, setTerrace] = useState(true)
-  const [furniture, setFurniture] = useState(false)
+  const [furniture, setFurniture] = useState(true)
   const [labels, setLabels] = useState(true)
   const [showGarage, setShowGarage] = useState(true)
   const [walls, setWalls] = useState(true)
@@ -452,7 +404,6 @@ export default function Villa3D({ floorId, selectedRoom, onSelectRoom, floorSele
   useEffect(() => {
     const scene = sceneRef.current
     if (!scene) return
-    let live = true
     const previous = drawingsRef.current
     if (previous) { scene.remove(previous); disposeSceneGroup(previous) }
     if (contextRef.current) { scene.remove(contextRef.current); disposeSceneGroup(contextRef.current); contextRef.current = null }
@@ -509,18 +460,15 @@ export default function Villa3D({ floorId, selectedRoom, onSelectRoom, floorSele
           }
         }
       }
-      if (furniture && !fallback) {
-        setLoadingTexture(true)
-        furnitureOverlay(floorId).then(mesh => {
-          if (!live) { disposeSceneGroup(mesh); return }
-          mesh.position.y += viewAll ? vertical(floorId, arrangement) : 0
-          const [offsetX, offsetZ] = registrationMetres(floorId)
-          mesh.position.x += offsetX; mesh.position.z += offsetZ
-          root.add(mesh)
-          invalidateRef.current()
-          setLoadingTexture(false)
-        }).catch(e => { if (live) { setLoadingTexture(false); setError('Не удалось загрузить мебельную проекцию: ' + String(e)) } })
-      } else setLoadingTexture(false)
+      if (furniture) {
+        for(const id of all){
+          const interior=createInterior3D(id,presentation === 'section')
+          const [x,z]=registrationMetres(id)
+          interior.position.set(x,viewAll?vertical(id,arrangement):0,z)
+          root.add(interior)
+        }
+      }
+      setLoadingTexture(false)
     }
     if (isExterior) setLoadingTexture(false)
     if (fallback) root.traverse(item => {
@@ -534,7 +482,7 @@ export default function Villa3D({ floorId, selectedRoom, onSelectRoom, floorSele
     const fitKey = `${floorId}-${viewAll}-${arrangement}-${presentation}`
     if (fitKeyRef.current !== fitKey) { fitKeyRef.current = fitKey; fitCameraRef.current() }
     invalidateRef.current()
-    return () => { live = false }
+
   }, [floorId, viewAll, arrangement, furniture, walls, doors, labels, presentation, roof, glazing, terrace, site, fallback, showGarage])
 
   useEffect(() => {
@@ -600,7 +548,7 @@ export default function Villa3D({ floorId, selectedRoom, onSelectRoom, floorSele
         </> : <>
           <button aria-pressed={walls} onClick={() => setWalls(x => !x)} className={walls ? 'active' : ''}>Стены</button>
           <button aria-pressed={doors} onClick={() => setDoors(x => !x)} className={doors ? 'active' : ''}>Двери · 3D</button>
-          <button disabled={fallback} title={fallback ? 'Проекция текстуры доступна в WebGL' : undefined} aria-pressed={furniture} onClick={() => setFurniture(x => !x)} className={furniture ? 'active' : ''}>Мебель · 2D</button>
+          <button aria-pressed={furniture} onClick={() => setFurniture(x => !x)} className={furniture ? 'active' : ''}>Мебель и сантехника · 3D</button>
           <button aria-pressed={labels} onClick={() => setLabels(x => !x)} className={labels ? 'active' : ''}>Помещения</button>
         </>}
       </div>
@@ -637,7 +585,7 @@ export default function Villa3D({ floorId, selectedRoom, onSelectRoom, floorSele
       <small>Расхождение измерений в PDF с масштабом предпросмотра; не погрешность готового строительного CAD. Размерные цепочки полностью не замкнуты.</small>
     </details>
     <div className="model-warning">{presentation === 'exterior' ? <>
-      <b>Модель для презентации умного дома.</b> Планы и подписанные габариты окон перенесены из PDF; подоконные отметки, кровля, отделка и профиль склона требуют сверки с фасадами и топосъёмкой. Задняя часть нижнего этажа заглублена по уточнению владельца. Гараж справа, повёрнут к двору; въезд расположен со стороны балкона. Расстояния на участке — демонстрационные. Далее: этап 4 — интерьер и материалы; этап 5 — свет и сценарии.
+      <b>Модель для презентации умного дома.</b> Планы и подписанные габариты окон перенесены из PDF; подоконные отметки, кровля, отделка и профиль склона требуют сверки с фасадами и топосъёмкой. Задняя часть нижнего этажа заглублена по уточнению владельца. Гараж справа, повёрнут к двору; въезд расположен со стороны балкона. Двор, парковка и гараж — на уровне первого этажа. Расстояния на участке — демонстрационные. Мебель и сантехника — упрощённые 3D-модели по планам A-18–A-29. Далее: отделка и световые сценарии.
     </> : <>
       Контуры стен и положения {architecture.floors[floorId].doors.length} дверных полотен перенесены из PDF, размеры дверей — из ведомости {spatial.floors[floorId].sourceSheet}. <b>{architecture.floors[floorId].openingCountResolved} проёмов сопоставлены с просветами на плане, остальные оставлены неразрешёнными.</b> Конструктивная крыша и фасады пока не подтверждены.
     </>}</div>

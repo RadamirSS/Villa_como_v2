@@ -1,0 +1,5224 @@
+{
+  "schema": "villa-interior-placements/1",
+  "sourceImageWidthPx": 1800,
+  "sourcePages": [
+    18,
+    19,
+    20,
+    21
+  ],
+  "accuracy": "visual symbol trace; requires independent metric acceptance",
+  "items": [
+    {
+      "id": "garage-counter-001",
+      "floor": "garage",
+      "room": 2,
+      "kind": "counter",
+      "sourceSheet": "A-18",
+      "sourceBBoxPx": [
+        359,
+        253,
+        390,
+        388
+      ],
+      "centrePt": [
+        247.69430406358507,
+        211.97870347764757
+      ],
+      "sizeM": [
+        0.5632802290211958,
+        2.452994545737466
+      ],
+      "head": "north",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "garage-counter-002",
+      "floor": "garage",
+      "room": 2,
+      "kind": "counter",
+      "sourceSheet": "A-18",
+      "sourceBBoxPx": [
+        390,
+        253,
+        484,
+        285
+      ],
+      "centrePt": [
+        289.0318047417535,
+        177.91660291883682
+      ],
+      "sizeM": [
+        1.7080110170320133,
+        0.5814505589896215
+      ],
+      "head": "north",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "garage-cabinet-003",
+      "floor": "garage",
+      "room": 2,
+      "kind": "cabinet",
+      "sourceSheet": "A-18",
+      "sourceBBoxPx": [
+        484,
+        253,
+        524,
+        388
+      ],
+      "centrePt": [
+        333.34560546875,
+        211.97870347764757
+      ],
+      "sizeM": [
+        0.7268131987370269,
+        2.452994545737466
+      ],
+      "head": "north",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "garage-hob-004",
+      "floor": "garage",
+      "room": 2,
+      "kind": "hob",
+      "sourceSheet": "A-18",
+      "sourceBBoxPx": [
+        395,
+        256,
+        423,
+        283
+      ],
+      "centrePt": [
+        270.51260443793404,
+        178.24730292426216
+      ],
+      "sizeM": [
+        0.5087692391159189,
+        0.49059890914749316
+      ],
+      "head": "north",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "garage-shelf-005",
+      "floor": "garage",
+      "room": 3,
+      "kind": "shelf",
+      "sourceSheet": "A-18",
+      "sourceBBoxPx": [
+        534,
+        253,
+        568,
+        389
+      ],
+      "centrePt": [
+        364.43140597873264,
+        212.3094034830729
+      ],
+      "sizeM": [
+        0.6177912189264729,
+        2.4711648757058917
+      ],
+      "head": "north",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "garage-shelf-006",
+      "floor": "garage",
+      "room": 3,
+      "kind": "shelf",
+      "sourceSheet": "A-18",
+      "sourceBBoxPx": [
+        662,
+        253,
+        697,
+        389
+      ],
+      "centrePt": [
+        449.4213073730469,
+        212.3094034830729
+      ],
+      "sizeM": [
+        0.6359615488948985,
+        2.4711648757058917
+      ],
+      "head": "north",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "garage-shelf-007",
+      "floor": "garage",
+      "room": 4,
+      "kind": "shelf",
+      "sourceSheet": "A-18",
+      "sourceBBoxPx": [
+        709,
+        253,
+        871,
+        291
+      ],
+      "centrePt": [
+        522.5060085720486,
+        179.9008029513889
+      ],
+      "sizeM": [
+        2.943593454884959,
+        0.6904725388001756
+      ],
+      "head": "north",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "garage-shelf-008",
+      "floor": "garage",
+      "room": 4,
+      "kind": "shelf",
+      "sourceSheet": "A-18",
+      "sourceBBoxPx": [
+        838,
+        291,
+        871,
+        389
+      ],
+      "centrePt": [
+        565.1663092719184,
+        224.87600368923611
+      ],
+      "sizeM": [
+        0.5996208889580472,
+        1.780692336905716
+      ],
+      "head": "north",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "garage-shelf-009",
+      "floor": "garage",
+      "room": 1,
+      "kind": "shelf",
+      "sourceSheet": "A-18",
+      "sourceBBoxPx": [
+        879,
+        376,
+        1035,
+        398
+      ],
+      "centrePt": [
+        632.9598103841146,
+        255.96180419921876
+      ],
+      "sizeM": [
+        2.834571475074405,
+        0.39974725930536475
+      ],
+      "head": "north",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "garage-cabinet-010",
+      "floor": "garage",
+      "room": 1,
+      "kind": "cabinet",
+      "sourceSheet": "A-18",
+      "sourceBBoxPx": [
+        246,
+        427,
+        279,
+        490
+      ],
+      "centrePt": [
+        173.61750284830728,
+        303.2519049750434
+      ],
+      "sizeM": [
+        0.5996208889580472,
+        1.1447307880108175
+      ],
+      "head": "north",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "garage-cabinet-011",
+      "floor": "garage",
+      "room": 6,
+      "kind": "cabinet",
+      "sourceSheet": "A-18",
+      "sourceBBoxPx": [
+        241,
+        527,
+        350,
+        546
+      ],
+      "centrePt": [
+        195.4437032063802,
+        354.84110582139755
+      ],
+      "sizeM": [
+        1.9805659665583981,
+        0.3452362694000878
+      ],
+      "head": "north",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "garage-cabinet-012",
+      "floor": "garage",
+      "room": 6,
+      "kind": "cabinet",
+      "sourceSheet": "A-18",
+      "sourceBBoxPx": [
+        241,
+        621,
+        350,
+        639
+      ],
+      "centrePt": [
+        195.4437032063802,
+        416.6820068359375
+      ],
+      "sizeM": [
+        1.9805659665583981,
+        0.32706593943166207
+      ],
+      "head": "north",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "garage-wineRack-013",
+      "floor": "garage",
+      "room": 7,
+      "kind": "wineRack",
+      "sourceSheet": "A-18",
+      "sourceBBoxPx": [
+        1154,
+        603,
+        1367,
+        640
+      ],
+      "centrePt": [
+        833.6947136773003,
+        411.06010674370657
+      ],
+      "sizeM": [
+        3.8702802832746683,
+        0.6723022088317498
+      ],
+      "head": "north",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "garage-wineRack-014",
+      "floor": "garage",
+      "room": 7,
+      "kind": "wineRack",
+      "sourceSheet": "A-18",
+      "sourceBBoxPx": [
+        1204,
+        734,
+        1367,
+        772
+      ],
+      "centrePt": [
+        850.2297139485677,
+        498.0342081705729
+      ],
+      "sizeM": [
+        2.9617637848533844,
+        0.6904725388001756
+      ],
+      "head": "north",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-1-rug-015",
+      "floor": "level-1",
+      "room": 4,
+      "kind": "rug",
+      "sourceSheet": "A-19",
+      "sourceBBoxPx": [
+        234,
+        438,
+        395,
+        599
+      ],
+      "centrePt": [
+        208.0103034125434,
+        321.69590562608505
+      ],
+      "sizeM": [
+        2.925423124916533,
+        2.925423124916533
+      ],
+      "head": "north",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-1-bed-016",
+      "floor": "level-1",
+      "room": 4,
+      "kind": "bed",
+      "sourceSheet": "A-19",
+      "sourceBBoxPx": [
+        266,
+        485,
+        364,
+        590
+      ],
+      "centrePt": [
+        208.34100341796875,
+        334.2625058322483
+      ],
+      "sizeM": [
+        1.780692336905716,
+        1.9078846466846957
+      ],
+      "head": "south",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-1-nightstand-017",
+      "floor": "level-1",
+      "room": 4,
+      "kind": "nightstand",
+      "sourceSheet": "A-19",
+      "sourceBBoxPx": [
+        238,
+        564,
+        270,
+        596
+      ],
+      "centrePt": [
+        167.99560275607638,
+        362.37200629340276
+      ],
+      "sizeM": [
+        0.5814505589896215,
+        0.5814505589896215
+      ],
+      "head": "north",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-1-nightstand-018",
+      "floor": "level-1",
+      "room": 4,
+      "kind": "nightstand",
+      "sourceSheet": "A-19",
+      "sourceBBoxPx": [
+        363,
+        564,
+        393,
+        596
+      ],
+      "centrePt": [
+        250.0092041015625,
+        362.37200629340276
+      ],
+      "sizeM": [
+        0.5451098990527702,
+        0.5814505589896215
+      ],
+      "head": "north",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-1-cabinet-019",
+      "floor": "level-1",
+      "room": 5,
+      "kind": "cabinet",
+      "sourceSheet": "A-19",
+      "sourceBBoxPx": [
+        480,
+        409,
+        642,
+        438
+      ],
+      "centrePt": [
+        371.0454060872396,
+        258.8629045952691
+      ],
+      "sizeM": [
+        2.943593454884959,
+        0.5269395690843445
+      ],
+      "head": "north",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-1-cabinet-020",
+      "floor": "level-1",
+      "room": 5,
+      "kind": "cabinet",
+      "sourceSheet": "A-19",
+      "sourceBBoxPx": [
+        480,
+        508,
+        642,
+        539
+      ],
+      "centrePt": [
+        371.0454060872396,
+        325.00290568033853
+      ],
+      "sizeM": [
+        2.943593454884959,
+        0.5632802290211958
+      ],
+      "head": "north",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-1-cabinet-021",
+      "floor": "level-1",
+      "room": 6,
+      "kind": "cabinet",
+      "sourceSheet": "A-19",
+      "sourceBBoxPx": [
+        390,
+        215,
+        480,
+        245
+      ],
+      "centrePt": [
+        287.70900472005206,
+        130.88200249565972
+      ],
+      "sizeM": [
+        1.6353296971583104,
+        0.5451098990527702
+      ],
+      "head": "north",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-1-cabinet-022",
+      "floor": "level-1",
+      "room": 6,
+      "kind": "cabinet",
+      "sourceSheet": "A-19",
+      "sourceBBoxPx": [
+        490,
+        215,
+        521,
+        310
+      ],
+      "centrePt": [
+        334.33770548502605,
+        152.37750284830727
+      ],
+      "sizeM": [
+        0.5632802290211958,
+        1.7261813470004388
+      ],
+      "head": "north",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-1-cabinet-023",
+      "floor": "level-1",
+      "room": 6,
+      "kind": "cabinet",
+      "sourceSheet": "A-19",
+      "sourceBBoxPx": [
+        493,
+        310,
+        521,
+        387
+      ],
+      "centrePt": [
+        335.3298055013021,
+        209.257903781467
+      ],
+      "sizeM": [
+        0.5087692391159189,
+        1.3991154075687766
+      ],
+      "head": "north",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-1-counter-024",
+      "floor": "level-1",
+      "room": 7,
+      "kind": "counter",
+      "sourceSheet": "A-19",
+      "sourceBBoxPx": [
+        223,
+        214,
+        381,
+        238
+      ],
+      "centrePt": [
+        199.7428032769097,
+        128.23640245225693
+      ],
+      "sizeM": [
+        2.870912135011256,
+        0.4360879192422161
+      ],
+      "head": "north",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-1-counter-025",
+      "floor": "level-1",
+      "room": 8,
+      "kind": "counter",
+      "sourceSheet": "A-19",
+      "sourceBBoxPx": [
+        529,
+        216,
+        643,
+        247
+      ],
+      "centrePt": [
+        387.58040635850693,
+        131.87410251193575
+      ],
+      "sizeM": [
+        2.0714176164005265,
+        0.5632802290211958
+      ],
+      "head": "north",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-1-cabinet-026",
+      "floor": "level-1",
+      "room": 8,
+      "kind": "cabinet",
+      "sourceSheet": "A-19",
+      "sourceBBoxPx": [
+        617,
+        252,
+        644,
+        339
+      ],
+      "centrePt": [
+        417.01270684136284,
+        174.2037032063802
+      ],
+      "sizeM": [
+        0.49059890914749316,
+        1.5808187072530335
+      ],
+      "head": "north",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-1-cabinet-027",
+      "floor": "level-1",
+      "room": 8,
+      "kind": "cabinet",
+      "sourceSheet": "A-19",
+      "sourceBBoxPx": [
+        576,
+        365,
+        612,
+        396
+      ],
+      "centrePt": [
+        392.8716064453125,
+        230.42270412868922
+      ],
+      "sizeM": [
+        0.6541318788633241,
+        0.5632802290211958
+      ],
+      "head": "north",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-1-cabinet-028",
+      "floor": "level-1",
+      "room": 8,
+      "kind": "cabinet",
+      "sourceSheet": "A-19",
+      "sourceBBoxPx": [
+        534,
+        366,
+        574,
+        393
+      ],
+      "centrePt": [
+        366.4156060112847,
+        229.76130411783853
+      ],
+      "sizeM": [
+        0.7268131987370269,
+        0.49059890914749316
+      ],
+      "head": "north",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-1-counter-029",
+      "floor": "level-1",
+      "room": 9,
+      "kind": "counter",
+      "sourceSheet": "A-19",
+      "sourceBBoxPx": [
+        655,
+        367,
+        746,
+        398
+      ],
+      "centrePt": [
+        463.3107076009115,
+        231.74550415039062
+      ],
+      "sizeM": [
+        1.6535000271267362,
+        0.5632802290211958
+      ],
+      "head": "north",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-1-cabinet-030",
+      "floor": "level-1",
+      "room": 9,
+      "kind": "cabinet",
+      "sourceSheet": "A-19",
+      "sourceBBoxPx": [
+        746,
+        367,
+        795,
+        398
+      ],
+      "centrePt": [
+        509.60870836046007,
+        231.74550415039062
+      ],
+      "sizeM": [
+        0.890346168452858,
+        0.5632802290211958
+      ],
+      "head": "north",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-1-cabinet-031",
+      "floor": "level-1",
+      "room": 9,
+      "kind": "cabinet",
+      "sourceSheet": "A-19",
+      "sourceBBoxPx": [
+        655,
+        224,
+        691,
+        319
+      ],
+      "centrePt": [
+        445.1222073025174,
+        158.33010294596355
+      ],
+      "sizeM": [
+        0.6541318788633241,
+        1.7261813470004388
+      ],
+      "head": "north",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-1-sofa-032",
+      "floor": "level-1",
+      "room": 2,
+      "kind": "sofa",
+      "sourceSheet": "A-19",
+      "sourceBBoxPx": [
+        484,
+        566,
+        607,
+        686
+      ],
+      "centrePt": [
+        360.7937059190538,
+        392.7964067925347
+      ],
+      "sizeM": [
+        2.2349505861163577,
+        2.1804395962110807
+      ],
+      "head": "north",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-1-coffeeTable-033",
+      "floor": "level-1",
+      "room": 2,
+      "kind": "coffeeTable",
+      "sourceSheet": "A-19",
+      "sourceBBoxPx": [
+        484,
+        639,
+        545,
+        696
+      ],
+      "centrePt": [
+        340.29030558268227,
+        420.24450724283855
+      ],
+      "sizeM": [
+        1.108390128073966,
+        1.0357088082002632
+      ],
+      "head": "north",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-1-diningTable-034",
+      "floor": "level-1",
+      "room": 2,
+      "kind": "diningTable",
+      "sourceSheet": "A-19",
+      "sourceBBoxPx": [
+        480,
+        758,
+        592,
+        805
+      ],
+      "centrePt": [
+        354.5104058159722,
+        495.64410847981765
+      ],
+      "sizeM": [
+        2.0350769564636755,
+        0.8540055085160067
+      ],
+      "head": "north",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-1-cabinet-035",
+      "floor": "level-1",
+      "room": 2,
+      "kind": "cabinet",
+      "sourceSheet": "A-19",
+      "sourceBBoxPx": [
+        640,
+        638,
+        675,
+        835
+      ],
+      "centrePt": [
+        434.8705071343316,
+        465.88110799153645
+      ],
+      "sizeM": [
+        0.6359615488948985,
+        3.5795550037798574
+      ],
+      "head": "north",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-1-armchair-036",
+      "floor": "level-1",
+      "room": 2,
+      "kind": "armchair",
+      "sourceSheet": "A-19",
+      "sourceBBoxPx": [
+        490,
+        586,
+        546,
+        629
+      ],
+      "centrePt": [
+        342.6052056206597,
+        380.56050659179687
+      ],
+      "sizeM": [
+        1.0175384782318377,
+        0.7813241886423039
+      ],
+      "head": "north",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-1-sofa-037",
+      "floor": "level-1",
+      "room": 11,
+      "kind": "sofa",
+      "sourceSheet": "A-19",
+      "sourceBBoxPx": [
+        891,
+        321,
+        1147,
+        343
+      ],
+      "centrePt": [
+        673.9666110568577,
+        198.34480360243055
+      ],
+      "sizeM": [
+        4.651604471916972,
+        0.39974725930536475
+      ],
+      "head": "north",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-1-desk-038",
+      "floor": "level-1",
+      "room": 11,
+      "kind": "desk",
+      "sourceSheet": "A-19",
+      "sourceBBoxPx": [
+        967,
+        398,
+        1071,
+        451
+      ],
+      "centrePt": [
+        673.9666110568577,
+        259.52430460611976
+      ],
+      "sizeM": [
+        1.88971431671627,
+        0.9630274883265606
+      ],
+      "head": "north",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-1-officeChair-039",
+      "floor": "level-1",
+      "room": 11,
+      "kind": "officeChair",
+      "sourceSheet": "A-19",
+      "sourceBBoxPx": [
+        938,
+        404,
+        962,
+        440
+      ],
+      "centrePt": [
+        628.3300103081597,
+        257.87080457899305
+      ],
+      "sizeM": [
+        0.4360879192422161,
+        0.6541318788633241
+      ],
+      "head": "north",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-1-coffeeTable-040",
+      "floor": "level-1",
+      "room": 11,
+      "kind": "coffeeTable",
+      "sourceSheet": "A-19",
+      "sourceBBoxPx": [
+        1017,
+        472,
+        1058,
+        508
+      ],
+      "centrePt": [
+        686.2025112575955,
+        302.84600531684026
+      ],
+      "sizeM": [
+        0.7449835287054526,
+        0.6541318788633241
+      ],
+      "head": "north",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-1-armchair-041",
+      "floor": "level-1",
+      "room": 11,
+      "kind": "armchair",
+      "sourceSheet": "A-19",
+      "sourceBBoxPx": [
+        1057,
+        503,
+        1114,
+        555
+      ],
+      "centrePt": [
+        717.9497117784288,
+        328.64060574001735
+      ],
+      "sizeM": [
+        1.0357088082002632,
+        0.944857158358135
+      ],
+      "head": "north",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-1-diningTable-042",
+      "floor": "level-1",
+      "room": 11,
+      "kind": "diningTable",
+      "sourceSheet": "A-19",
+      "sourceBBoxPx": [
+        882,
+        481,
+        916,
+        581
+      ],
+      "centrePt": [
+        594.5986097547743,
+        329.9634057617187
+      ],
+      "sizeM": [
+        0.6177912189264729,
+        1.8170329968425671
+      ],
+      "head": "north",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-1-cabinet-043",
+      "floor": "level-1",
+      "room": 11,
+      "kind": "cabinet",
+      "sourceSheet": "A-19",
+      "sourceBBoxPx": [
+        840,
+        483,
+        881,
+        513
+      ],
+      "centrePt": [
+        569.1347093370225,
+        308.13720540364585
+      ],
+      "sizeM": [
+        0.7449835287054526,
+        0.5451098990527702
+      ],
+      "head": "north",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-1-cabinet-044",
+      "floor": "level-1",
+      "room": 13,
+      "kind": "cabinet",
+      "sourceSheet": "A-19",
+      "sourceBBoxPx": [
+        1018,
+        159,
+        1185,
+        187
+      ],
+      "centrePt": [
+        728.5321119520399,
+        93.18220187717014
+      ],
+      "sizeM": [
+        3.0344451047270873,
+        0.5087692391159189
+      ],
+      "head": "north",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-1-cabinet-045",
+      "floor": "level-1",
+      "room": 13,
+      "kind": "cabinet",
+      "sourceSheet": "A-19",
+      "sourceBBoxPx": [
+        847,
+        266,
+        1185,
+        299
+      ],
+      "centrePt": [
+        671.9824110243055,
+        165.60550306532116
+      ],
+      "sizeM": [
+        6.141571529327877,
+        0.5996208889580472
+      ],
+      "head": "north",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-1-cabinet-046",
+      "floor": "level-1",
+      "room": 13,
+      "kind": "cabinet",
+      "sourceSheet": "A-19",
+      "sourceBBoxPx": [
+        1188,
+        159,
+        1242,
+        189
+      ],
+      "centrePt": [
+        803.6010131835938,
+        93.84360188802084
+      ],
+      "sizeM": [
+        0.9811978182949863,
+        0.5451098990527702
+      ],
+      "head": "north",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-1-bed-047",
+      "floor": "level-1",
+      "room": 14,
+      "kind": "bed",
+      "sourceSheet": "A-19",
+      "sourceBBoxPx": [
+        1248,
+        161,
+        1356,
+        215
+      ],
+      "centrePt": [
+        861.1428141276042,
+        103.10320203993057
+      ],
+      "sizeM": [
+        1.9623956365899726,
+        0.9811978182949863
+      ],
+      "head": "north",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-1-nightstand-048",
+      "floor": "level-1",
+      "room": 14,
+      "kind": "nightstand",
+      "sourceSheet": "A-19",
+      "sourceBBoxPx": [
+        1221,
+        161,
+        1245,
+        189
+      ],
+      "centrePt": [
+        815.5062133789063,
+        94.50500189887153
+      ],
+      "sizeM": [
+        0.4360879192422161,
+        0.5087692391159189
+      ],
+      "head": "north",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-1-bench-049",
+      "floor": "level-1",
+      "room": 10,
+      "kind": "bench",
+      "sourceSheet": "A-19",
+      "sourceBBoxPx": [
+        1230,
+        699,
+        1310,
+        735
+      ],
+      "centrePt": [
+        839.978013780382,
+        452.9838077799479
+      ],
+      "sizeM": [
+        1.4536263974740538,
+        0.6541318788633241
+      ],
+      "head": "north",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-1-cabinet-050",
+      "floor": "level-1",
+      "room": 10,
+      "kind": "cabinet",
+      "sourceSheet": "A-19",
+      "sourceBBoxPx": [
+        1353,
+        644,
+        1387,
+        745
+      ],
+      "centrePt": [
+        906.1180148654514,
+        438.10230753580726
+      ],
+      "sizeM": [
+        0.6177912189264729,
+        1.835203326810993
+      ],
+      "head": "north",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-1-cabinet-051",
+      "floor": "level-1",
+      "room": 15,
+      "kind": "cabinet",
+      "sourceSheet": "A-19",
+      "sourceBBoxPx": [
+        1452,
+        234,
+        1476,
+        361
+      ],
+      "centrePt": [
+        968.2896158854167,
+        175.5265032280816
+      ],
+      "sizeM": [
+        0.4360879192422161,
+        2.30763190599006
+      ],
+      "head": "north",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-1-bed-052",
+      "floor": "level-1",
+      "room": 17,
+      "kind": "bed",
+      "sourceSheet": "A-19",
+      "sourceBBoxPx": [
+        1526,
+        499,
+        1603,
+        605
+      ],
+      "centrePt": [
+        1034.7603169759116,
+        343.8528059895833
+      ],
+      "sizeM": [
+        1.3991154075687766,
+        1.9260549766531212
+      ],
+      "head": "north",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-1-nightstand-053",
+      "floor": "level-1",
+      "room": 17,
+      "kind": "nightstand",
+      "sourceSheet": "A-19",
+      "sourceBBoxPx": [
+        1475,
+        491,
+        1521,
+        520
+      ],
+      "centrePt": [
+        990.7772162543403,
+        313.09770548502604
+      ],
+      "sizeM": [
+        0.8358351785475809,
+        0.5269395690843445
+      ],
+      "head": "north",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-1-nightstand-054",
+      "floor": "level-1",
+      "room": 17,
+      "kind": "nightstand",
+      "sourceSheet": "A-19",
+      "sourceBBoxPx": [
+        1607,
+        491,
+        1650,
+        520
+      ],
+      "centrePt": [
+        1077.0899176703558,
+        313.09770548502604
+      ],
+      "sizeM": [
+        0.7813241886423039,
+        0.5269395690843445
+      ],
+      "head": "north",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-1-cabinet-055",
+      "floor": "level-1",
+      "room": 17,
+      "kind": "cabinet",
+      "sourceSheet": "A-19",
+      "sourceBBoxPx": [
+        1474,
+        630,
+        1650,
+        653
+      ],
+      "centrePt": [
+        1033.1068169487846,
+        403.0481069607205
+      ],
+      "sizeM": [
+        3.197978074442918,
+        0.41791758927379047
+      ],
+      "head": "north",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-1-counter-056",
+      "floor": "level-1",
+      "room": 16,
+      "kind": "counter",
+      "sourceSheet": "A-19",
+      "sourceBBoxPx": [
+        1468,
+        663,
+        1648,
+        693
+      ],
+      "centrePt": [
+        1030.461216905382,
+        427.18920735677085
+      ],
+      "sizeM": [
+        3.270659394316621,
+        0.5451098990527702
+      ],
+      "head": "north",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-1-hob-057",
+      "floor": "level-1",
+      "room": 16,
+      "kind": "hob",
+      "sourceSheet": "A-19",
+      "sourceBBoxPx": [
+        1567,
+        665,
+        1593,
+        690
+      ],
+      "centrePt": [
+        1045.0120171440972,
+        426.85850735134545
+      ],
+      "sizeM": [
+        0.4724285791790675,
+        0.4542582492106418
+      ],
+      "head": "north",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-1-diningTable-058",
+      "floor": "level-1",
+      "room": 16,
+      "kind": "diningTable",
+      "sourceSheet": "A-19",
+      "sourceBBoxPx": [
+        1522,
+        766,
+        1556,
+        810
+      ],
+      "centrePt": [
+        1017.8946166992188,
+        499.9432085503472
+      ],
+      "sizeM": [
+        0.6177912189264729,
+        0.7994945186107295
+      ],
+      "head": "north",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-1-sofa-059",
+      "floor": "level-1",
+      "room": 16,
+      "kind": "sofa",
+      "sourceSheet": "A-19",
+      "sourceBBoxPx": [
+        1408,
+        746,
+        1446,
+        824
+      ],
+      "centrePt": [
+        943.817815483941,
+        497.95900851779516
+      ],
+      "sizeM": [
+        0.6904725388001756,
+        1.4172857375372026
+      ],
+      "head": "north",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-1-counter-060",
+      "floor": "level-1",
+      "room": 3,
+      "kind": "counter",
+      "sourceSheet": "A-19",
+      "sourceBBoxPx": [
+        217,
+        785,
+        316,
+        809
+      ],
+      "centrePt": [
+        176.26310289171008,
+        505.8958086480035
+      ],
+      "sizeM": [
+        1.7988626668741414,
+        0.4360879192422161
+      ],
+      "head": "north",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-1-counter-061",
+      "floor": "level-1",
+      "room": 3,
+      "kind": "counter",
+      "sourceSheet": "A-19",
+      "sourceBBoxPx": [
+        300,
+        646,
+        334,
+        786
+      ],
+      "centrePt": [
+        209.66380343967015,
+        452.3224077690972
+      ],
+      "sizeM": [
+        0.6177912189264729,
+        2.543846195579594
+      ],
+      "head": "north",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-1-hob-062",
+      "floor": "level-1",
+      "room": 3,
+      "kind": "hob",
+      "sourceSheet": "A-19",
+      "sourceBBoxPx": [
+        155,
+        645,
+        185,
+        679
+      ],
+      "centrePt": [
+        112.43800184461806,
+        416.60680718315973
+      ],
+      "sizeM": [
+        0.5451098990527702,
+        0.6177912189264729
+      ],
+      "head": "north",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-2-rug-063",
+      "floor": "level-2",
+      "room": 5,
+      "kind": "rug",
+      "sourceSheet": "A-20",
+      "sourceBBoxPx": [
+        220,
+        229,
+        364,
+        370
+      ],
+      "centrePt": [
+        193.12880316840278,
+        198.08930324978297
+      ],
+      "sizeM": [
+        2.6165275154532965,
+        2.5620165255480196
+      ],
+      "head": "north",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-2-bed-064",
+      "floor": "level-2",
+      "room": 5,
+      "kind": "bed",
+      "sourceSheet": "A-20",
+      "sourceBBoxPx": [
+        222,
+        245,
+        333,
+        346
+      ],
+      "centrePt": [
+        183.53850301106772,
+        195.4437032063802
+      ],
+      "sizeM": [
+        2.0169066264952495,
+        1.835203326810993
+      ],
+      "head": "west",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-2-nightstand-065",
+      "floor": "level-2",
+      "room": 5,
+      "kind": "nightstand",
+      "sourceSheet": "A-20",
+      "sourceBBoxPx": [
+        223,
+        230,
+        248,
+        247
+      ],
+      "centrePt": [
+        155.75970255533855,
+        157.74390258789063
+      ],
+      "sizeM": [
+        0.4542582492106418,
+        0.30889560946323646
+      ],
+      "head": "north",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-2-nightstand-066",
+      "floor": "level-2",
+      "room": 5,
+      "kind": "nightstand",
+      "sourceSheet": "A-20",
+      "sourceBBoxPx": [
+        223,
+        349,
+        248,
+        371
+      ],
+      "centrePt": [
+        155.75970255533855,
+        238.10400390625
+      ],
+      "sizeM": [
+        0.4542582492106418,
+        0.39974725930536475
+      ],
+      "head": "north",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-2-desk-067",
+      "floor": "level-2",
+      "room": 5,
+      "kind": "desk",
+      "sourceSheet": "A-20",
+      "sourceBBoxPx": [
+        283,
+        371,
+        394,
+        396
+      ],
+      "centrePt": [
+        223.88390367296006,
+        253.6469041612413
+      ],
+      "sizeM": [
+        2.0169066264952495,
+        0.4542582492106418
+      ],
+      "head": "north",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-2-rug-068",
+      "floor": "level-2",
+      "room": 7,
+      "kind": "rug",
+      "sourceSheet": "A-20",
+      "sourceBBoxPx": [
+        680,
+        263,
+        835,
+        388
+      ],
+      "centrePt": [
+        501.01050821940106,
+        215.28570353190105
+      ],
+      "sizeM": [
+        2.816401145105979,
+        2.271291246053209
+      ],
+      "head": "north",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-2-bed-069",
+      "floor": "level-2",
+      "room": 7,
+      "kind": "bed",
+      "sourceSheet": "A-20",
+      "sourceBBoxPx": [
+        723,
+        279,
+        804,
+        382
+      ],
+      "centrePt": [
+        504.9789082845052,
+        218.5927035861545
+      ],
+      "sizeM": [
+        1.4717967274424795,
+        1.871543986747844
+      ],
+      "head": "south",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-2-nightstand-070",
+      "floor": "level-2",
+      "room": 7,
+      "kind": "nightstand",
+      "sourceSheet": "A-20",
+      "sourceBBoxPx": [
+        688,
+        353,
+        717,
+        385
+      ],
+      "centrePt": [
+        464.63350762261285,
+        244.05660400390624
+      ],
+      "sizeM": [
+        0.5269395690843445,
+        0.5814505589896215
+      ],
+      "head": "north",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-2-nightstand-071",
+      "floor": "level-2",
+      "room": 7,
+      "kind": "nightstand",
+      "sourceSheet": "A-20",
+      "sourceBBoxPx": [
+        810,
+        353,
+        833,
+        385
+      ],
+      "centrePt": [
+        543.3401089138455,
+        244.05660400390624
+      ],
+      "sizeM": [
+        0.41791758927379047,
+        0.5814505589896215
+      ],
+      "head": "north",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-2-desk-072",
+      "floor": "level-2",
+      "room": 7,
+      "kind": "desk",
+      "sourceSheet": "A-20",
+      "sourceBBoxPx": [
+        714,
+        223,
+        787,
+        245
+      ],
+      "centrePt": [
+        496.38070814344616,
+        154.7676025390625
+      ],
+      "sizeM": [
+        1.3264340876950742,
+        0.39974725930536475
+      ],
+      "head": "north",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-2-cabinet-073",
+      "floor": "level-2",
+      "room": 2,
+      "kind": "cabinet",
+      "sourceSheet": "A-20",
+      "sourceBBoxPx": [
+        221,
+        408,
+        412,
+        439
+      ],
+      "centrePt": [
+        209.3331034342448,
+        280.1029045952691
+      ],
+      "sizeM": [
+        3.4705330239693035,
+        0.5632802290211958
+      ],
+      "head": "north",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-2-cabinet-074",
+      "floor": "level-2",
+      "room": 2,
+      "kind": "cabinet",
+      "sourceSheet": "A-20",
+      "sourceBBoxPx": [
+        477,
+        410,
+        519,
+        552
+      ],
+      "centrePt": [
+        329.37720540364586,
+        318.133405219184
+      ],
+      "sizeM": [
+        0.7631538586738782,
+        2.5801868555164456
+      ],
+      "head": "north",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-2-cabinet-075",
+      "floor": "level-2",
+      "room": 2,
+      "kind": "cabinet",
+      "sourceSheet": "A-20",
+      "sourceBBoxPx": [
+        286,
+        533,
+        394,
+        556
+      ],
+      "centrePt": [
+        224.87600368923611,
+        360.13230590820314
+      ],
+      "sizeM": [
+        1.9623956365899726,
+        0.41791758927379047
+      ],
+      "head": "north",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-2-cabinet-076",
+      "floor": "level-2",
+      "room": 2,
+      "kind": "cabinet",
+      "sourceSheet": "A-20",
+      "sourceBBoxPx": [
+        391,
+        440,
+        419,
+        536
+      ],
+      "centrePt": [
+        267.86700439453125,
+        322.7632052951389
+      ],
+      "sizeM": [
+        0.5087692391159189,
+        1.7443516769688645
+      ],
+      "head": "north",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-2-rug-077",
+      "floor": "level-2",
+      "room": 3,
+      "kind": "rug",
+      "sourceSheet": "A-20",
+      "sourceBBoxPx": [
+        477,
+        657,
+        627,
+        833
+      ],
+      "centrePt": [
+        365.0928059895833,
+        492.74300808376734
+      ],
+      "sizeM": [
+        2.725549495263851,
+        3.197978074442918
+      ],
+      "head": "north",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-2-bed-078",
+      "floor": "level-2",
+      "room": 3,
+      "kind": "bed",
+      "sourceSheet": "A-20",
+      "sourceBBoxPx": [
+        492,
+        683,
+        604,
+        786
+      ],
+      "centrePt": [
+        362.44720594618053,
+        485.7983079698351
+      ],
+      "sizeM": [
+        2.0350769564636755,
+        1.871543986747844
+      ],
+      "head": "south",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-2-bench-079",
+      "floor": "level-2",
+      "room": 3,
+      "kind": "bench",
+      "sourceSheet": "A-20",
+      "sourceBBoxPx": [
+        488,
+        813,
+        620,
+        837
+      ],
+      "centrePt": [
+        366.4156060112847,
+        545.6550089518229
+      ],
+      "sizeM": [
+        2.398483555832189,
+        0.4360879192422161
+      ],
+      "head": "north",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-2-nightstand-080",
+      "floor": "level-2",
+      "room": 3,
+      "kind": "nightstand",
+      "sourceSheet": "A-20",
+      "sourceBBoxPx": [
+        477,
+        774,
+        490,
+        795
+      ],
+      "centrePt": [
+        319.78690524631077,
+        518.8683085123698
+      ],
+      "sizeM": [
+        0.23621428958953375,
+        0.3815769293369391
+      ],
+      "head": "north",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-2-nightstand-081",
+      "floor": "level-2",
+      "room": 3,
+      "kind": "nightstand",
+      "sourceSheet": "A-20",
+      "sourceBBoxPx": [
+        610,
+        774,
+        628,
+        798
+      ],
+      "centrePt": [
+        409.40660671657986,
+        519.8604085286458
+      ],
+      "sizeM": [
+        0.32706593943166207,
+        0.4360879192422161
+      ],
+      "head": "north",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-2-cabinet-082",
+      "floor": "level-2",
+      "room": 3,
+      "kind": "cabinet",
+      "sourceSheet": "A-20",
+      "sourceBBoxPx": [
+        424,
+        666,
+        450,
+        804
+      ],
+      "centrePt": [
+        289.0318047417535,
+        486.12900797526044
+      ],
+      "sizeM": [
+        0.4724285791790675,
+        2.5075055356427427
+      ],
+      "head": "north",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-2-counter-083",
+      "floor": "level-2",
+      "room": 4,
+      "kind": "counter",
+      "sourceSheet": "A-20",
+      "sourceBBoxPx": [
+        297,
+        651,
+        326,
+        742
+      ],
+      "centrePt": [
+        206.02610337999133,
+        460.6651075575087
+      ],
+      "sizeM": [
+        0.5269395690843445,
+        1.6535000271267362
+      ],
+      "head": "north",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-2-cabinet-084",
+      "floor": "level-2",
+      "room": 4,
+      "kind": "cabinet",
+      "sourceSheet": "A-20",
+      "sourceBBoxPx": [
+        340,
+        626,
+        408,
+        652
+      ],
+      "centrePt": [
+        247.36360405815972,
+        422.6346069335938
+      ],
+      "sizeM": [
+        1.2355824378529459,
+        0.4724285791790675
+      ],
+      "head": "north",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-2-cabinet-085",
+      "floor": "level-2",
+      "room": 4,
+      "kind": "cabinet",
+      "sourceSheet": "A-20",
+      "sourceBBoxPx": [
+        424,
+        672,
+        449,
+        781
+      ],
+      "centrePt": [
+        288.70110473632815,
+        480.5071078830295
+      ],
+      "sizeM": [
+        0.4542582492106418,
+        1.9805659665583981
+      ],
+      "head": "north",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-2-sofa-086",
+      "floor": "level-2",
+      "room": 8,
+      "kind": "sofa",
+      "sourceSheet": "A-20",
+      "sourceBBoxPx": [
+        889,
+        389,
+        1040,
+        445
+      ],
+      "centrePt": [
+        637.9203104654948,
+        275.8038045247396
+      ],
+      "sizeM": [
+        2.7437198252322763,
+        1.0175384782318377
+      ],
+      "head": "north",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-2-armchair-087",
+      "floor": "level-2",
+      "room": 8,
+      "kind": "armchair",
+      "sourceSheet": "A-20",
+      "sourceBBoxPx": [
+        1067,
+        403,
+        1110,
+        449
+      ],
+      "centrePt": [
+        719.9339118109809,
+        281.75640462239585
+      ],
+      "sizeM": [
+        0.7813241886423039,
+        0.8358351785475809
+      ],
+      "head": "north",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-2-armchair-088",
+      "floor": "level-2",
+      "room": 8,
+      "kind": "armchair",
+      "sourceSheet": "A-20",
+      "sourceBBoxPx": [
+        1067,
+        499,
+        1110,
+        542
+      ],
+      "centrePt": [
+        719.9339118109809,
+        344.2587056477865
+      ],
+      "sizeM": [
+        0.7813241886423039,
+        0.7813241886423039
+      ],
+      "head": "north",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-2-coffeeTable-089",
+      "floor": "level-2",
+      "room": 8,
+      "kind": "coffeeTable",
+      "sourceSheet": "A-20",
+      "sourceBBoxPx": [
+        890,
+        460,
+        947,
+        517
+      ],
+      "centrePt": [
+        607.4959099663629,
+        323.09390530056424
+      ],
+      "sizeM": [
+        1.0357088082002632,
+        1.0357088082002632
+      ],
+      "head": "north",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-2-roundTable-090",
+      "floor": "level-2",
+      "room": 8,
+      "kind": "roundTable",
+      "sourceSheet": "A-20",
+      "sourceBBoxPx": [
+        982,
+        470,
+        1024,
+        512
+      ],
+      "centrePt": [
+        663.3842108832465,
+        324.74740532769096
+      ],
+      "sizeM": [
+        0.7631538586738782,
+        0.7631538586738782
+      ],
+      "head": "north",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-2-roundTable-091",
+      "floor": "level-2",
+      "room": 8,
+      "kind": "roundTable",
+      "sourceSheet": "A-20",
+      "sourceBBoxPx": [
+        1006,
+        452,
+        1028,
+        474
+      ],
+      "centrePt": [
+        672.6438110351562,
+        306.2282050238715
+      ],
+      "sizeM": [
+        0.39974725930536475,
+        0.39974725930536475
+      ],
+      "head": "north",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-2-armchair-092",
+      "floor": "level-2",
+      "room": 8,
+      "kind": "armchair",
+      "sourceSheet": "A-20",
+      "sourceBBoxPx": [
+        790,
+        463,
+        820,
+        502
+      ],
+      "centrePt": [
+        532.4270087348091,
+        319.1255052354601
+      ],
+      "sizeM": [
+        0.5451098990527702,
+        0.7086428687686013
+      ],
+      "head": "north",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-2-cabinet-093",
+      "floor": "level-2",
+      "room": 1,
+      "kind": "cabinet",
+      "sourceSheet": "A-20",
+      "sourceBBoxPx": [
+        613,
+        416,
+        642,
+        558
+      ],
+      "centrePt": [
+        415.0285068088108,
+        322.1018052842882
+      ],
+      "sizeM": [
+        0.5269395690843445,
+        2.5801868555164456
+      ],
+      "head": "north",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-2-console-094",
+      "floor": "level-2",
+      "room": 1,
+      "kind": "console",
+      "sourceSheet": "A-20",
+      "sourceBBoxPx": [
+        739,
+        435,
+        787,
+        460
+      ],
+      "centrePt": [
+        504.6482082790799,
+        295.9765048556858
+      ],
+      "sizeM": [
+        0.8721758384844323,
+        0.4542582492106418
+      ],
+      "head": "north",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-2-bench-095",
+      "floor": "level-2",
+      "room": 9,
+      "kind": "bench",
+      "sourceSheet": "A-20",
+      "sourceBBoxPx": [
+        1066,
+        215,
+        1142,
+        235
+      ],
+      "centrePt": [
+        730.1856119791667,
+        148.81500244140625
+      ],
+      "sizeM": [
+        1.3809450776003511,
+        0.36340659936851344
+      ],
+      "head": "north",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-2-cabinet-096",
+      "floor": "level-2",
+      "room": 9,
+      "kind": "cabinet",
+      "sourceSheet": "A-20",
+      "sourceBBoxPx": [
+        983,
+        215,
+        1047,
+        245
+      ],
+      "centrePt": [
+        671.3210110134548,
+        152.12200249565973
+      ],
+      "sizeM": [
+        1.162901117979243,
+        0.5451098990527702
+      ],
+      "head": "north",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-2-counter-097",
+      "floor": "level-2",
+      "room": 10,
+      "kind": "counter",
+      "sourceSheet": "A-20",
+      "sourceBBoxPx": [
+        852,
+        223,
+        884,
+        298
+      ],
+      "centrePt": [
+        574.0952094184028,
+        172.2947028266059
+      ],
+      "sizeM": [
+        0.5814505589896215,
+        1.3627747476319254
+      ],
+      "head": "north",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-2-diningTable-098",
+      "floor": "level-2",
+      "room": 11,
+      "kind": "diningTable",
+      "sourceSheet": "A-20",
+      "sourceBBoxPx": [
+        1475,
+        651,
+        1534,
+        792
+      ],
+      "centrePt": [
+        995.0763163248698,
+        477.200107828776
+      ],
+      "sizeM": [
+        1.0720494681371147,
+        2.5620165255480196
+      ],
+      "head": "north",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-2-cabinet-099",
+      "floor": "level-2",
+      "room": 11,
+      "kind": "cabinet",
+      "sourceSheet": "A-20",
+      "sourceBBoxPx": [
+        1610,
+        555,
+        1643,
+        598
+      ],
+      "centrePt": [
+        1075.7671176486544,
+        381.2971062554253
+      ],
+      "sizeM": [
+        0.5996208889580472,
+        0.7813241886423039
+      ],
+      "head": "north",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-2-cabinet-100",
+      "floor": "level-2",
+      "room": 11,
+      "kind": "cabinet",
+      "sourceSheet": "A-20",
+      "sourceBBoxPx": [
+        1591,
+        637,
+        1621,
+        792
+      ],
+      "centrePt": [
+        1062.2084174262152,
+        472.5703077528212
+      ],
+      "sizeM": [
+        0.5451098990527702,
+        2.816401145105979
+      ],
+      "head": "north",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-2-counter-101",
+      "floor": "level-2",
+      "room": 12,
+      "kind": "counter",
+      "sourceSheet": "A-20",
+      "sourceBBoxPx": [
+        1407,
+        217,
+        1633,
+        249
+      ],
+      "centrePt": [
+        1005.3280164930555,
+        154.1062025282118
+      ],
+      "sizeM": [
+        4.106494572864202,
+        0.5814505589896215
+      ],
+      "head": "north",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-2-counter-102",
+      "floor": "level-2",
+      "room": 12,
+      "kind": "counter",
+      "sourceSheet": "A-20",
+      "sourceBBoxPx": [
+        1595,
+        249,
+        1633,
+        530
+      ],
+      "centrePt": [
+        1067.499617513021,
+        257.6153042263455
+      ],
+      "sizeM": [
+        0.6904725388001756,
+        5.105862721127614
+      ],
+      "head": "north",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-2-counter-103",
+      "floor": "level-2",
+      "room": 12,
+      "kind": "counter",
+      "sourceSheet": "A-20",
+      "sourceBBoxPx": [
+        1406,
+        325,
+        1438,
+        519
+      ],
+      "centrePt": [
+        940.5108154296875,
+        279.11080457899305
+      ],
+      "sizeM": [
+        0.5814505589896215,
+        3.5250440138745804
+      ],
+      "head": "north",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-2-island-104",
+      "floor": "level-2",
+      "room": 12,
+      "kind": "island",
+      "sourceSheet": "A-20",
+      "sourceBBoxPx": [
+        1476,
+        387,
+        1560,
+        440
+      ],
+      "centrePt": [
+        1004.0052164713542,
+        273.4889044867621
+      ],
+      "sizeM": [
+        1.5263077173477564,
+        0.9630274883265606
+      ],
+      "head": "north",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-2-hob-105",
+      "floor": "level-2",
+      "room": 12,
+      "kind": "hob",
+      "sourceSheet": "A-20",
+      "sourceBBoxPx": [
+        1530,
+        219,
+        1556,
+        245
+      ],
+      "centrePt": [
+        1020.5402167426215,
+        153.4448025173611
+      ],
+      "sizeM": [
+        0.4724285791790675,
+        0.4724285791790675
+      ],
+      "head": "north",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-3-bed-106",
+      "floor": "level-3",
+      "room": 2,
+      "kind": "bed",
+      "sourceSheet": "A-21",
+      "sourceBBoxPx": [
+        425,
+        303,
+        520,
+        405
+      ],
+      "centrePt": [
+        308.19150512695313,
+        241.13560384114584
+      ],
+      "sizeM": [
+        1.7261813470004388,
+        1.8533736567794188
+      ],
+      "head": "north",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-3-bed-107",
+      "floor": "level-3",
+      "room": 3,
+      "kind": "bed",
+      "sourceSheet": "A-21",
+      "sourceBBoxPx": [
+        798,
+        319,
+        906,
+        381
+      ],
+      "centrePt": [
+        559.1928092447916,
+        238.49000379774304
+      ],
+      "sizeM": [
+        1.9623956365899726,
+        1.1265604580423916
+      ],
+      "head": "east",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-3-nightstand-108",
+      "floor": "level-3",
+      "room": 3,
+      "kind": "nightstand",
+      "sourceSheet": "A-21",
+      "sourceBBoxPx": [
+        769,
+        317,
+        794,
+        343
+      ],
+      "centrePt": [
+        512.5641084798176,
+        225.26200358072916
+      ],
+      "sizeM": [
+        0.4542582492106418,
+        0.4724285791790675
+      ],
+      "head": "north",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-3-cabinet-109",
+      "floor": "level-3",
+      "room": 3,
+      "kind": "cabinet",
+      "sourceSheet": "A-21",
+      "sourceBBoxPx": [
+        682,
+        316,
+        765,
+        349
+      ],
+      "centrePt": [
+        474.20290785047746,
+        226.9155036078559
+      ],
+      "sizeM": [
+        1.508137387379331,
+        0.5996208889580472
+      ],
+      "head": "north",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-3-cabinet-110",
+      "floor": "level-3",
+      "room": 3,
+      "kind": "cabinet",
+      "sourceSheet": "A-21",
+      "sourceBBoxPx": [
+        792,
+        422,
+        920,
+        437
+      ],
+      "centrePt": [
+        561.8384092881944,
+        291.07130466037324
+      ],
+      "sizeM": [
+        2.325802235958486,
+        0.2725549495263851
+      ],
+      "head": "north",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-3-sofa-111",
+      "floor": "level-3",
+      "room": 3,
+      "kind": "sofa",
+      "sourceSheet": "A-21",
+      "sourceBBoxPx": [
+        966,
+        505,
+        1097,
+        562
+      ],
+      "centrePt": [
+        677.9141111924913,
+        359.8569057888455
+      ],
+      "sizeM": [
+        2.380313225863763,
+        1.0357088082002632
+      ],
+      "head": "south",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-3-cabinet-112",
+      "floor": "level-3",
+      "room": 3,
+      "kind": "cabinet",
+      "sourceSheet": "A-21",
+      "sourceBBoxPx": [
+        921,
+        497,
+        958,
+        560
+      ],
+      "centrePt": [
+        617.0653101942273,
+        356.549905734592
+      ],
+      "sizeM": [
+        0.6723022088317498,
+        1.1447307880108175
+      ],
+      "head": "north",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-3-desk-113",
+      "floor": "level-3",
+      "room": 2,
+      "kind": "desk",
+      "sourceSheet": "A-21",
+      "sourceBBoxPx": [
+        428,
+        528,
+        462,
+        597
+      ],
+      "centrePt": [
+        290.003004828559,
+        379.0375061035156
+      ],
+      "sizeM": [
+        0.6177912189264729,
+        1.2537527678213714
+      ],
+      "head": "north",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-3-officeChair-114",
+      "floor": "level-3",
+      "room": 2,
+      "kind": "officeChair",
+      "sourceSheet": "A-21",
+      "sourceBBoxPx": [
+        464,
+        540,
+        487,
+        566
+      ],
+      "centrePt": [
+        310.17570515950524,
+        372.754206000434
+      ],
+      "sizeM": [
+        0.41791758927379047,
+        0.4724285791790675
+      ],
+      "head": "north",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-3-desk-115",
+      "floor": "level-3",
+      "room": 2,
+      "kind": "desk",
+      "sourceSheet": "A-21",
+      "sourceBBoxPx": [
+        617,
+        542,
+        687,
+        578
+      ],
+      "centrePt": [
+        426.9128070746528,
+        377.3840060763889
+      ],
+      "sizeM": [
+        1.271923097789797,
+        0.6541318788633241
+      ],
+      "head": "north",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-3-officeChair-116",
+      "floor": "level-3",
+      "room": 2,
+      "kind": "officeChair",
+      "sourceSheet": "A-21",
+      "sourceBBoxPx": [
+        651,
+        579,
+        678,
+        603
+      ],
+      "centrePt": [
+        435.18030721028646,
+        397.8874064127604
+      ],
+      "sizeM": [
+        0.49059890914749316,
+        0.4360879192422161
+      ],
+      "head": "north",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-3-cabinet-117",
+      "floor": "level-3",
+      "room": 2,
+      "kind": "cabinet",
+      "sourceSheet": "A-21",
+      "sourceBBoxPx": [
+        520,
+        449,
+        553,
+        539
+      ],
+      "centrePt": [
+        350.52110582139755,
+        333.73160536024307
+      ],
+      "sizeM": [
+        0.5996208889580472,
+        1.6353296971583104
+      ],
+      "head": "north",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-3-sofa-118",
+      "floor": "level-3",
+      "room": 2,
+      "kind": "sofa",
+      "sourceSheet": "A-21",
+      "sourceBBoxPx": [
+        662,
+        648,
+        718,
+        786
+      ],
+      "centrePt": [
+        452.0460074869792,
+        481.2238077799479
+      ],
+      "sizeM": [
+        1.0175384782318377,
+        2.5075055356427427
+      ],
+      "head": "east",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-3-cabinet-119",
+      "floor": "level-3",
+      "room": 2,
+      "kind": "cabinet",
+      "sourceSheet": "A-21",
+      "sourceBBoxPx": [
+        539,
+        802,
+        738,
+        823
+      ],
+      "centrePt": [
+        417.9839069281684,
+        544.3875088161892
+      ],
+      "sizeM": [
+        3.615895663716709,
+        0.3815769293369391
+      ],
+      "head": "north",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-3-cabinet-120",
+      "floor": "level-3",
+      "room": 2,
+      "kind": "cabinet",
+      "sourceSheet": "A-21",
+      "sourceBBoxPx": [
+        540,
+        667,
+        566,
+        787
+      ],
+      "centrePt": [
+        361.434206000434,
+        487.83780788845485
+      ],
+      "sizeM": [
+        0.4724285791790675,
+        2.1804395962110807
+      ],
+      "head": "north",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-3-counter-121",
+      "floor": "level-3",
+      "room": 4,
+      "kind": "counter",
+      "sourceSheet": "A-21",
+      "sourceBBoxPx": [
+        530,
+        409,
+        578,
+        432
+      ],
+      "centrePt": [
+        362.0956060112847,
+        285.118704562717
+      ],
+      "sizeM": [
+        0.8721758384844323,
+        0.41791758927379047
+      ],
+      "head": "north",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-1-chair-122",
+      "floor": "level-1",
+      "room": 2,
+      "kind": "chair",
+      "sourceSheet": "A-19",
+      "sourceBBoxPx": [
+        493,
+        737,
+        513,
+        757
+      ],
+      "centrePt": [
+        332.6842054578993,
+        472.82580810546875
+      ],
+      "sizeM": [
+        0.36340659936851344,
+        0.36340659936851344
+      ],
+      "head": "north",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-1-chair-123",
+      "floor": "level-1",
+      "room": 2,
+      "kind": "chair",
+      "sourceSheet": "A-19",
+      "sourceBBoxPx": [
+        543,
+        737,
+        563,
+        757
+      ],
+      "centrePt": [
+        365.754206000434,
+        472.82580810546875
+      ],
+      "sizeM": [
+        0.36340659936851344,
+        0.36340659936851344
+      ],
+      "head": "north",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-1-chair-124",
+      "floor": "level-1",
+      "room": 2,
+      "kind": "chair",
+      "sourceSheet": "A-19",
+      "sourceBBoxPx": [
+        493,
+        803,
+        513,
+        823
+      ],
+      "centrePt": [
+        332.6842054578993,
+        516.4782088216145
+      ],
+      "sizeM": [
+        0.36340659936851344,
+        0.36340659936851344
+      ],
+      "head": "north",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-1-chair-125",
+      "floor": "level-1",
+      "room": 2,
+      "kind": "chair",
+      "sourceSheet": "A-19",
+      "sourceBBoxPx": [
+        543,
+        803,
+        563,
+        823
+      ],
+      "centrePt": [
+        365.754206000434,
+        516.4782088216145
+      ],
+      "sizeM": [
+        0.36340659936851344,
+        0.36340659936851344
+      ],
+      "head": "north",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-1-chair-126",
+      "floor": "level-1",
+      "room": 2,
+      "kind": "chair",
+      "sourceSheet": "A-19",
+      "sourceBBoxPx": [
+        467,
+        770,
+        487,
+        790
+      ],
+      "centrePt": [
+        315.48780517578126,
+        494.6520084635416
+      ],
+      "sizeM": [
+        0.36340659936851344,
+        0.36340659936851344
+      ],
+      "head": "north",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-1-chair-127",
+      "floor": "level-1",
+      "room": 2,
+      "kind": "chair",
+      "sourceSheet": "A-19",
+      "sourceBBoxPx": [
+        584,
+        770,
+        604,
+        790
+      ],
+      "centrePt": [
+        392.8716064453125,
+        494.6520084635416
+      ],
+      "sizeM": [
+        0.36340659936851344,
+        0.36340659936851344
+      ],
+      "head": "north",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-1-chair-128",
+      "floor": "level-1",
+      "room": 16,
+      "kind": "chair",
+      "sourceSheet": "A-19",
+      "sourceBBoxPx": [
+        1529,
+        747,
+        1549,
+        767
+      ],
+      "centrePt": [
+        1017.8946166992188,
+        479.4398082139757
+      ],
+      "sizeM": [
+        0.36340659936851344,
+        0.36340659936851344
+      ],
+      "head": "north",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-1-chair-129",
+      "floor": "level-1",
+      "room": 16,
+      "kind": "chair",
+      "sourceSheet": "A-19",
+      "sourceBBoxPx": [
+        1529,
+        807,
+        1549,
+        827
+      ],
+      "centrePt": [
+        1017.8946166992188,
+        519.1238088650174
+      ],
+      "sizeM": [
+        0.36340659936851344,
+        0.36340659936851344
+      ],
+      "head": "north",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-1-chair-130",
+      "floor": "level-1",
+      "room": 16,
+      "kind": "chair",
+      "sourceSheet": "A-19",
+      "sourceBBoxPx": [
+        1504,
+        778,
+        1524,
+        798
+      ],
+      "centrePt": [
+        1001.3596164279514,
+        499.9432085503472
+      ],
+      "sizeM": [
+        0.36340659936851344,
+        0.36340659936851344
+      ],
+      "head": "north",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-1-chair-131",
+      "floor": "level-1",
+      "room": 16,
+      "kind": "chair",
+      "sourceSheet": "A-19",
+      "sourceBBoxPx": [
+        1556,
+        778,
+        1576,
+        798
+      ],
+      "centrePt": [
+        1035.7524169921876,
+        499.9432085503472
+      ],
+      "sizeM": [
+        0.36340659936851344,
+        0.36340659936851344
+      ],
+      "head": "north",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-1-chair-132",
+      "floor": "level-1",
+      "room": 11,
+      "kind": "chair",
+      "sourceSheet": "A-19",
+      "sourceBBoxPx": [
+        857,
+        532,
+        877,
+        552
+      ],
+      "centrePt": [
+        573.4338094075521,
+        337.23880588107636
+      ],
+      "sizeM": [
+        0.36340659936851344,
+        0.36340659936851344
+      ],
+      "head": "north",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-1-chair-133",
+      "floor": "level-1",
+      "room": 11,
+      "kind": "chair",
+      "sourceSheet": "A-19",
+      "sourceBBoxPx": [
+        930,
+        532,
+        950,
+        552
+      ],
+      "centrePt": [
+        621.7160101996528,
+        337.23880588107636
+      ],
+      "sizeM": [
+        0.36340659936851344,
+        0.36340659936851344
+      ],
+      "head": "north",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-2-chair-134",
+      "floor": "level-2",
+      "room": 11,
+      "kind": "chair",
+      "sourceSheet": "A-20",
+      "sourceBBoxPx": [
+        1450,
+        668,
+        1470,
+        688
+      ],
+      "centrePt": [
+        965.6440158420139,
+        448.42920735677086
+      ],
+      "sizeM": [
+        0.36340659936851344,
+        0.36340659936851344
+      ],
+      "head": "north",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-2-chair-135",
+      "floor": "level-2",
+      "room": 11,
+      "kind": "chair",
+      "sourceSheet": "A-20",
+      "sourceBBoxPx": [
+        1450,
+        710,
+        1470,
+        730
+      ],
+      "centrePt": [
+        965.6440158420139,
+        476.2080078125
+      ],
+      "sizeM": [
+        0.36340659936851344,
+        0.36340659936851344
+      ],
+      "head": "north",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-2-chair-136",
+      "floor": "level-2",
+      "room": 11,
+      "kind": "chair",
+      "sourceSheet": "A-20",
+      "sourceBBoxPx": [
+        1450,
+        752,
+        1470,
+        772
+      ],
+      "centrePt": [
+        965.6440158420139,
+        503.98680826822914
+      ],
+      "sizeM": [
+        0.36340659936851344,
+        0.36340659936851344
+      ],
+      "head": "north",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-2-chair-137",
+      "floor": "level-2",
+      "room": 11,
+      "kind": "chair",
+      "sourceSheet": "A-20",
+      "sourceBBoxPx": [
+        1538,
+        668,
+        1558,
+        688
+      ],
+      "centrePt": [
+        1023.847216796875,
+        448.42920735677086
+      ],
+      "sizeM": [
+        0.36340659936851344,
+        0.36340659936851344
+      ],
+      "head": "north",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-2-chair-138",
+      "floor": "level-2",
+      "room": 11,
+      "kind": "chair",
+      "sourceSheet": "A-20",
+      "sourceBBoxPx": [
+        1538,
+        710,
+        1558,
+        730
+      ],
+      "centrePt": [
+        1023.847216796875,
+        476.2080078125
+      ],
+      "sizeM": [
+        0.36340659936851344,
+        0.36340659936851344
+      ],
+      "head": "north",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-2-chair-139",
+      "floor": "level-2",
+      "room": 11,
+      "kind": "chair",
+      "sourceSheet": "A-20",
+      "sourceBBoxPx": [
+        1538,
+        752,
+        1558,
+        772
+      ],
+      "centrePt": [
+        1023.847216796875,
+        503.98680826822914
+      ],
+      "sizeM": [
+        0.36340659936851344,
+        0.36340659936851344
+      ],
+      "head": "north",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-2-chair-140",
+      "floor": "level-2",
+      "room": 11,
+      "kind": "chair",
+      "sourceSheet": "A-20",
+      "sourceBBoxPx": [
+        1493,
+        629,
+        1513,
+        649
+      ],
+      "centrePt": [
+        994.0842163085938,
+        422.6346069335938
+      ],
+      "sizeM": [
+        0.36340659936851344,
+        0.36340659936851344
+      ],
+      "head": "north",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-2-chair-141",
+      "floor": "level-2",
+      "room": 11,
+      "kind": "chair",
+      "sourceSheet": "A-20",
+      "sourceBBoxPx": [
+        1493,
+        795,
+        1513,
+        815
+      ],
+      "centrePt": [
+        994.0842163085938,
+        532.4270087348091
+      ],
+      "sizeM": [
+        0.36340659936851344,
+        0.36340659936851344
+      ],
+      "head": "north",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-2-chair-142",
+      "floor": "level-2",
+      "room": 12,
+      "kind": "chair",
+      "sourceSheet": "A-20",
+      "sourceBBoxPx": [
+        1481,
+        365,
+        1501,
+        385
+      ],
+      "centrePt": [
+        986.1474161783855,
+        248.0250040690104
+      ],
+      "sizeM": [
+        0.36340659936851344,
+        0.36340659936851344
+      ],
+      "head": "north",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-2-chair-143",
+      "floor": "level-2",
+      "room": 12,
+      "kind": "chair",
+      "sourceSheet": "A-20",
+      "sourceBBoxPx": [
+        1525,
+        365,
+        1545,
+        385
+      ],
+      "centrePt": [
+        1015.2490166558159,
+        248.0250040690104
+      ],
+      "sizeM": [
+        0.36340659936851344,
+        0.36340659936851344
+      ],
+      "head": "north",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-2-chair-144",
+      "floor": "level-2",
+      "room": 12,
+      "kind": "chair",
+      "sourceSheet": "A-20",
+      "sourceBBoxPx": [
+        1481,
+        442,
+        1501,
+        462
+      ],
+      "centrePt": [
+        986.1474161783855,
+        298.95280490451387
+      ],
+      "sizeM": [
+        0.36340659936851344,
+        0.36340659936851344
+      ],
+      "head": "north",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-2-chair-145",
+      "floor": "level-2",
+      "room": 12,
+      "kind": "chair",
+      "sourceSheet": "A-20",
+      "sourceBBoxPx": [
+        1525,
+        442,
+        1545,
+        462
+      ],
+      "centrePt": [
+        1015.2490166558159,
+        298.95280490451387
+      ],
+      "sizeM": [
+        0.36340659936851344,
+        0.36340659936851344
+      ],
+      "head": "north",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-1-washer-146",
+      "floor": "level-1",
+      "room": 8,
+      "kind": "washer",
+      "sourceSheet": "A-19",
+      "sourceBBoxPx": [
+        533,
+        216,
+        571,
+        250
+      ],
+      "centrePt": [
+        365.0928059895833,
+        132.8662025282118
+      ],
+      "sizeM": [
+        0.6904725388001756,
+        0.6177912189264729
+      ],
+      "head": "north",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-1-washer-147",
+      "floor": "level-1",
+      "room": 8,
+      "kind": "washer",
+      "sourceSheet": "A-19",
+      "sourceBBoxPx": [
+        574,
+        216,
+        612,
+        250
+      ],
+      "centrePt": [
+        392.2102064344618,
+        132.8662025282118
+      ],
+      "sizeM": [
+        0.6904725388001756,
+        0.6177912189264729
+      ],
+      "head": "north",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "garage-sink-148",
+      "floor": "garage",
+      "room": 2,
+      "kind": "sink",
+      "sourceSheet": "A-18",
+      "sourceBBoxPx": [
+        360,
+        322,
+        389,
+        351
+      ],
+      "centrePt": [
+        247.69430406358507,
+        222.5611036512587
+      ],
+      "sizeM": [
+        0.5269395690843445,
+        0.5269395690843445
+      ],
+      "head": "north",
+      "specSheet": "A-22",
+      "specMarks": [
+        "08",
+        "09"
+      ],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "garage-sink-149",
+      "floor": "garage",
+      "room": 5,
+      "kind": "sink",
+      "sourceSheet": "A-18",
+      "sourceBBoxPx": [
+        323,
+        729,
+        348,
+        758
+      ],
+      "centrePt": [
+        221.89970364040798,
+        491.7509080674913
+      ],
+      "sizeM": [
+        0.4542582492106418,
+        0.5269395690843445
+      ],
+      "head": "north",
+      "specSheet": "A-22",
+      "specMarks": [
+        "01",
+        "02"
+      ],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "garage-toilet-150",
+      "floor": "garage",
+      "room": 5,
+      "kind": "toilet",
+      "sourceSheet": "A-18",
+      "sourceBBoxPx": [
+        255,
+        648,
+        284,
+        675
+      ],
+      "centrePt": [
+        178.24730292426216,
+        437.5161071777344
+      ],
+      "sizeM": [
+        0.5269395690843445,
+        0.49059890914749316
+      ],
+      "head": "north",
+      "specSheet": "A-22",
+      "specMarks": [
+        "03",
+        "04",
+        "05"
+      ],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "garage-shower-151",
+      "floor": "garage",
+      "room": 5,
+      "kind": "shower",
+      "sourceSheet": "A-18",
+      "sourceBBoxPx": [
+        305,
+        648,
+        351,
+        704
+      ],
+      "centrePt": [
+        216.9392035590278,
+        447.10640733506943
+      ],
+      "sizeM": [
+        0.8358351785475809,
+        1.0175384782318377
+      ],
+      "head": "north",
+      "specSheet": "A-22",
+      "specMarks": [
+        "06",
+        "07"
+      ],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-1-sink-152",
+      "floor": "level-1",
+      "room": 3,
+      "kind": "sink",
+      "sourceSheet": "A-19",
+      "sourceBBoxPx": [
+        155,
+        753,
+        180,
+        778
+      ],
+      "centrePt": [
+        110.78450181749132,
+        485.0617083062066
+      ],
+      "sizeM": [
+        0.4542582492106418,
+        0.4542582492106418
+      ],
+      "head": "north",
+      "specSheet": "A-23",
+      "specMarks": [
+        "10",
+        "11"
+      ],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-1-sink-153",
+      "floor": "level-1",
+      "room": 7,
+      "kind": "sink",
+      "sourceSheet": "A-19",
+      "sourceBBoxPx": [
+        263,
+        217,
+        294,
+        237
+      ],
+      "centrePt": [
+        184.1999030219184,
+        128.89780246310764
+      ],
+      "sizeM": [
+        0.5632802290211958,
+        0.36340659936851344
+      ],
+      "head": "north",
+      "specSheet": "A-23",
+      "specMarks": [
+        "12",
+        "13"
+      ],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-1-sink-154",
+      "floor": "level-1",
+      "room": 7,
+      "kind": "sink",
+      "sourceSheet": "A-19",
+      "sourceBBoxPx": [
+        311,
+        217,
+        343,
+        237
+      ],
+      "centrePt": [
+        216.27780354817708,
+        128.89780246310764
+      ],
+      "sizeM": [
+        0.5814505589896215,
+        0.36340659936851344
+      ],
+      "head": "north",
+      "specSheet": "A-23",
+      "specMarks": [
+        "12",
+        "13"
+      ],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-1-shower-155",
+      "floor": "level-1",
+      "room": 7,
+      "kind": "shower",
+      "sourceSheet": "A-19",
+      "sourceBBoxPx": [
+        224,
+        239,
+        297,
+        326
+      ],
+      "centrePt": [
+        172.2947028266059,
+        165.60550306532116
+      ],
+      "sizeM": [
+        1.3264340876950742,
+        1.5808187072530335
+      ],
+      "head": "north",
+      "specSheet": "A-23",
+      "specMarks": [
+        "14",
+        "15",
+        "16а",
+        "17а"
+      ],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-1-toilet-156",
+      "floor": "level-1",
+      "room": 7,
+      "kind": "toilet",
+      "sourceSheet": "A-19",
+      "sourceBBoxPx": [
+        246,
+        358,
+        268,
+        386
+      ],
+      "centrePt": [
+        169.97980278862846,
+        224.80080403645832
+      ],
+      "sizeM": [
+        0.39974725930536475,
+        0.5087692391159189
+      ],
+      "head": "north",
+      "specSheet": "A-23",
+      "specMarks": [
+        "18",
+        "19",
+        "20"
+      ],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-1-sink-157",
+      "floor": "level-1",
+      "room": 8,
+      "kind": "sink",
+      "sourceSheet": "A-19",
+      "sourceBBoxPx": [
+        618,
+        302,
+        642,
+        330
+      ],
+      "centrePt": [
+        416.6820068359375,
+        187.76240342881943
+      ],
+      "sizeM": [
+        0.4360879192422161,
+        0.5087692391159189
+      ],
+      "head": "north",
+      "specSheet": "A-24",
+      "specMarks": [
+        "21",
+        "22"
+      ],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-1-sink-158",
+      "floor": "level-1",
+      "room": 9,
+      "kind": "sink",
+      "sourceSheet": "A-19",
+      "sourceBBoxPx": [
+        698,
+        369,
+        729,
+        393
+      ],
+      "centrePt": [
+        471.9089077419705,
+        230.75340413411456
+      ],
+      "sizeM": [
+        0.5632802290211958,
+        0.4360879192422161
+      ],
+      "head": "north",
+      "specSheet": "A-24",
+      "specMarks": [
+        "23",
+        "24"
+      ],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-1-toilet-159",
+      "floor": "level-1",
+      "room": 9,
+      "kind": "toilet",
+      "sourceSheet": "A-19",
+      "sourceBBoxPx": [
+        805,
+        319,
+        829,
+        346
+      ],
+      "centrePt": [
+        540.3638088650174,
+        198.6755036078559
+      ],
+      "sizeM": [
+        0.4360879192422161,
+        0.49059890914749316
+      ],
+      "head": "north",
+      "specSheet": "A-24",
+      "specMarks": [
+        "25",
+        "26",
+        "27"
+      ],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-1-sink-160",
+      "floor": "level-1",
+      "room": 12,
+      "kind": "sink",
+      "sourceSheet": "A-19",
+      "sourceBBoxPx": [
+        748,
+        416,
+        777,
+        444
+      ],
+      "centrePt": [
+        504.31750827365454,
+        263.1620046657986
+      ],
+      "sizeM": [
+        0.5269395690843445,
+        0.5087692391159189
+      ],
+      "head": "north",
+      "specSheet": "A-25",
+      "specMarks": [
+        "28",
+        "29"
+      ],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-1-toilet-161",
+      "floor": "level-1",
+      "room": 12,
+      "kind": "toilet",
+      "sourceSheet": "A-19",
+      "sourceBBoxPx": [
+        685,
+        414,
+        710,
+        443
+      ],
+      "centrePt": [
+        461.3265075683594,
+        262.16990464952255
+      ],
+      "sizeM": [
+        0.4542582492106418,
+        0.5269395690843445
+      ],
+      "head": "north",
+      "specSheet": "A-25",
+      "specMarks": [
+        "30",
+        "31",
+        "32"
+      ],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-1-sink-162",
+      "floor": "level-1",
+      "room": 18,
+      "kind": "sink",
+      "sourceSheet": "A-19",
+      "sourceBBoxPx": [
+        1487,
+        392,
+        1520,
+        417
+      ],
+      "centrePt": [
+        994.4149163140191,
+        246.2963043891059
+      ],
+      "sizeM": [
+        0.5996208889580472,
+        0.4542582492106418
+      ],
+      "head": "north",
+      "specSheet": "A-25",
+      "specMarks": [
+        "33",
+        "34"
+      ],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-1-toilet-163",
+      "floor": "level-1",
+      "room": 18,
+      "kind": "toilet",
+      "sourceSheet": "A-19",
+      "sourceBBoxPx": [
+        1557,
+        392,
+        1582,
+        420
+      ],
+      "centrePt": [
+        1038.067317030165,
+        247.28840440538193
+      ],
+      "sizeM": [
+        0.4542582492106418,
+        0.5087692391159189
+      ],
+      "head": "north",
+      "specSheet": "A-25",
+      "specMarks": [
+        "35",
+        "36",
+        "37"
+      ],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-1-shower-164",
+      "floor": "level-1",
+      "room": 18,
+      "kind": "shower",
+      "sourceSheet": "A-19",
+      "sourceBBoxPx": [
+        1611,
+        443,
+        1653,
+        482
+      ],
+      "centrePt": [
+        1079.4048177083334,
+        284.65750501844616
+      ],
+      "sizeM": [
+        0.7631538586738782,
+        0.7086428687686013
+      ],
+      "head": "north",
+      "specSheet": "A-25",
+      "specMarks": [
+        "38",
+        "39"
+      ],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-1-sink-165",
+      "floor": "level-1",
+      "room": 16,
+      "kind": "sink",
+      "sourceSheet": "A-19",
+      "sourceBBoxPx": [
+        1506,
+        665,
+        1533,
+        690
+      ],
+      "centrePt": [
+        1004.9973164876302,
+        426.85850735134545
+      ],
+      "sizeM": [
+        0.49059890914749316,
+        0.4542582492106418
+      ],
+      "head": "north",
+      "specSheet": "A-25",
+      "specMarks": [
+        "40",
+        "41"
+      ],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-2-sink-166",
+      "floor": "level-2",
+      "room": 4,
+      "kind": "sink",
+      "sourceSheet": "A-20",
+      "sourceBBoxPx": [
+        299,
+        672,
+        322,
+        700
+      ],
+      "centrePt": [
+        205.3647033691406,
+        453.7204074435764
+      ],
+      "sizeM": [
+        0.41791758927379047,
+        0.5087692391159189
+      ],
+      "head": "north",
+      "specSheet": "A-26",
+      "specMarks": [
+        "42",
+        "43"
+      ],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-2-sink-167",
+      "floor": "level-2",
+      "room": 4,
+      "kind": "sink",
+      "sourceSheet": "A-20",
+      "sourceBBoxPx": [
+        299,
+        718,
+        322,
+        741
+      ],
+      "centrePt": [
+        205.3647033691406,
+        482.4913079155816
+      ],
+      "sizeM": [
+        0.41791758927379047,
+        0.41791758927379047
+      ],
+      "head": "north",
+      "specSheet": "A-26",
+      "specMarks": [
+        "42",
+        "43"
+      ],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-2-shower-168",
+      "floor": "level-2",
+      "room": 4,
+      "kind": "shower",
+      "sourceSheet": "A-20",
+      "sourceBBoxPx": [
+        221,
+        559,
+        346,
+        617
+      ],
+      "centrePt": [
+        187.50690307617188,
+        388.90320638020836
+      ],
+      "sizeM": [
+        2.271291246053209,
+        1.053879138168689
+      ],
+      "head": "north",
+      "specSheet": "A-26",
+      "specMarks": [
+        "44",
+        "45",
+        "46",
+        "47",
+        "48"
+      ],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-2-bath-169",
+      "floor": "level-2",
+      "room": 4,
+      "kind": "bath",
+      "sourceSheet": "A-20",
+      "sourceBBoxPx": [
+        174,
+        681,
+        216,
+        780
+      ],
+      "centrePt": [
+        128.9730021158854,
+        483.1527079264323
+      ],
+      "sizeM": [
+        0.7631538586738782,
+        1.7988626668741414
+      ],
+      "head": "north",
+      "specSheet": "A-26",
+      "specMarks": [
+        "49",
+        "50"
+      ],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-2-toilet-170",
+      "floor": "level-2",
+      "room": 4,
+      "kind": "toilet",
+      "sourceSheet": "A-20",
+      "sourceBBoxPx": [
+        344,
+        622,
+        371,
+        650
+      ],
+      "centrePt": [
+        236.45050387912326,
+        420.65040690104166
+      ],
+      "sizeM": [
+        0.49059890914749316,
+        0.5087692391159189
+      ],
+      "head": "north",
+      "specSheet": "A-26",
+      "specMarks": [
+        "51",
+        "52",
+        "53"
+      ],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-2-sink-171",
+      "floor": "level-2",
+      "room": 6,
+      "kind": "sink",
+      "sourceSheet": "A-20",
+      "sourceBBoxPx": [
+        587,
+        267,
+        611,
+        298
+      ],
+      "centrePt": [
+        396.17860649956594,
+        186.84550306532117
+      ],
+      "sizeM": [
+        0.4360879192422161,
+        0.5632802290211958
+      ],
+      "head": "north",
+      "specSheet": "A-27",
+      "specMarks": [
+        "54",
+        "55"
+      ],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-2-toilet-172",
+      "floor": "level-2",
+      "room": 6,
+      "kind": "toilet",
+      "sourceSheet": "A-20",
+      "sourceBBoxPx": [
+        461,
+        282,
+        485,
+        311
+      ],
+      "centrePt": [
+        312.84220513237847,
+        196.1051032172309
+      ],
+      "sizeM": [
+        0.4360879192422161,
+        0.5269395690843445
+      ],
+      "head": "north",
+      "specSheet": "A-27",
+      "specMarks": [
+        "56",
+        "57",
+        "58"
+      ],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-2-shower-173",
+      "floor": "level-2",
+      "room": 6,
+      "kind": "shower",
+      "sourceSheet": "A-20",
+      "sourceBBoxPx": [
+        488,
+        218,
+        546,
+        269
+      ],
+      "centrePt": [
+        341.94380560980903,
+        161.0509026421441
+      ],
+      "sizeM": [
+        1.053879138168689,
+        0.9266868283897094
+      ],
+      "head": "north",
+      "specSheet": "A-27",
+      "specMarks": [
+        "59",
+        "60",
+        "61",
+        "62"
+      ],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-2-sink-174",
+      "floor": "level-2",
+      "room": 10,
+      "kind": "sink",
+      "sourceSheet": "A-20",
+      "sourceBBoxPx": [
+        855,
+        241,
+        880,
+        276
+      ],
+      "centrePt": [
+        573.7645094129774,
+        170.97190280490452
+      ],
+      "sizeM": [
+        0.4542582492106418,
+        0.6359615488948985
+      ],
+      "head": "north",
+      "specSheet": "A-28",
+      "specMarks": [
+        "63",
+        "64"
+      ],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-2-toilet-175",
+      "floor": "level-2",
+      "room": 10,
+      "kind": "toilet",
+      "sourceSheet": "A-20",
+      "sourceBBoxPx": [
+        923,
+        215,
+        946,
+        244
+      ],
+      "centrePt": [
+        618.078310139974,
+        151.7913024902344
+      ],
+      "sizeM": [
+        0.41791758927379047,
+        0.5269395690843445
+      ],
+      "head": "north",
+      "specSheet": "A-28",
+      "specMarks": [
+        "65",
+        "66",
+        "67"
+      ],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-2-sink-176",
+      "floor": "level-2",
+      "room": 12,
+      "kind": "sink",
+      "sourceSheet": "A-20",
+      "sourceBBoxPx": [
+        1596,
+        277,
+        1624,
+        307
+      ],
+      "centrePt": [
+        1064.8540174696182,
+        193.12880316840278
+      ],
+      "sizeM": [
+        0.5087692391159189,
+        0.5451098990527702
+      ],
+      "head": "north",
+      "specSheet": "A-28",
+      "specMarks": [
+        "68"
+      ],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-3-sink-177",
+      "floor": "level-3",
+      "room": 4,
+      "kind": "sink",
+      "sourceSheet": "A-21",
+      "sourceBBoxPx": [
+        539,
+        412,
+        568,
+        431
+      ],
+      "centrePt": [
+        361.76490600585936,
+        285.7801045735677
+      ],
+      "sizeM": [
+        0.5269395690843445,
+        0.3452362694000878
+      ],
+      "head": "north",
+      "specSheet": "A-29",
+      "specMarks": [
+        "69",
+        "70"
+      ],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-3-toilet-178",
+      "floor": "level-3",
+      "room": 4,
+      "kind": "toilet",
+      "sourceSheet": "A-21",
+      "sourceBBoxPx": [
+        597,
+        368,
+        623,
+        389
+      ],
+      "centrePt": [
+        399.1340066189236,
+        257.3399041069879
+      ],
+      "sizeM": [
+        0.4724285791790675,
+        0.3815769293369391
+      ],
+      "head": "north",
+      "specSheet": "A-29",
+      "specMarks": [
+        "71",
+        "72",
+        "73"
+      ],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-3-shower-179",
+      "floor": "level-3",
+      "room": 4,
+      "kind": "shower",
+      "sourceSheet": "A-21",
+      "sourceBBoxPx": [
+        584,
+        391,
+        671,
+        432
+      ],
+      "centrePt": [
+        410.7085068088108,
+        279.16610446506076
+      ],
+      "sizeM": [
+        1.5808187072530335,
+        0.7449835287054526
+      ],
+      "head": "north",
+      "specSheet": "A-29",
+      "specMarks": [
+        "74",
+        "75"
+      ],
+      "polygonPt": null,
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    },
+    {
+      "id": "level-1-counter-180",
+      "floor": "level-1",
+      "room": 3,
+      "kind": "counter",
+      "sourceSheet": "A-19",
+      "sourceBBoxPx": [
+        136,
+        643,
+        315,
+        809
+      ],
+      "centrePt": [
+        149.1457024468316,
+        458.93640787760415
+      ],
+      "sizeM": [
+        3.2524890643481954,
+        3.016274774758662
+      ],
+      "head": "north",
+      "specSheet": null,
+      "specMarks": [],
+      "polygonPt": [
+        [
+          119.7134019639757,
+          404.0402069769965
+        ],
+        [
+          143.5238023546007,
+          404.0402069769965
+        ],
+        [
+          143.5238023546007,
+          425.8664073350694
+        ],
+        [
+          119.052001953125,
+          435.78740749782986
+        ],
+        [
+          106.4854017469618,
+          457.6136078559028
+        ],
+        [
+          115.08360188802084,
+          482.08540825737845
+        ],
+        [
+          145.50800238715277,
+          497.95900851779516
+        ],
+        [
+          208.34100341796875,
+          497.95900851779516
+        ],
+        [
+          208.34100341796875,
+          513.8326087782118
+        ],
+        [
+          140.87820231119792,
+          513.8326087782118
+        ],
+        [
+          107.8082017686632,
+          496.6362084960938
+        ],
+        [
+          89.95040147569445,
+          473.48720811631944
+        ],
+        [
+          93.91880154079861,
+          441.0786075846354
+        ]
+      ],
+      "positionStatus": "visually-traced-plan-symbol",
+      "dimensionsStatus": "source-symbol-footprint-approximate",
+      "modelStatus": "simplified-procedural-3d"
+    }
+  ],
+  "unresolved": [
+    {
+      "sheet": "A-27",
+      "mark": "54",
+      "note": "Basin visible on A-20; its specification row is missing. Geometry is from the plan, product identity unconfirmed."
+    }
+  ]
+}

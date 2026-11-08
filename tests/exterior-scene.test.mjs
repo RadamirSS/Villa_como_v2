@@ -153,6 +153,8 @@ test('garage is on the right and the yard entrance faces the balcony side', () =
  const site=createExteriorContext()
  const parts=meshes(site).flatMap(m=>m.userData.parts??[m.userData])
  assert(parts.some(p=>p.siteObject==='courtyard-gate'&&p.facing==='balcony-front-positive-z'))
+ assert(parts.some(p=>p.siteObject==='ground-level-courtyard'&&p.elevationM===0))
+ assert(!parts.some(p=>/ramp|bridge|elevated-court/.test(p.siteObject??'')))
 })
 
 test('unused attic is a physical floor area and is not added to the room register', () => {

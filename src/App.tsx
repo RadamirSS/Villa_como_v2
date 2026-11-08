@@ -276,7 +276,7 @@ export default function App() {
         <div className="intro">
           <div className="eyebrow"><span className="eyebrow-line" /> ARCHITECTURE FOR SMART LIVING <span className="muted">/ VILLA COMO</span></div>
           <h1>Villa <em>Como.</em></h1>
-          <div className="intro-bottom"><p>Интерактивная модель виллы для презентации умного дома. Три этажа, терраса и гараж; панорамные окна по размерам обмерных планов и посадка нижнего этажа в склон. Вращайте дом, откройте этаж изнутри или сравните его с исходным чертежом. Следующие этапы — интерьер, материалы и световые сценарии.</p><span className="intro-step"><span>ЭТАП ПРОЕКТА</span><b>03<small>/05</small></b><small>Дом на склоне · архитектура</small></span></div>
+          <div className="intro-bottom"><p>Интерактивная модель виллы для презентации умного дома. Три этажа, терраса и гараж; панорамные окна по размерам обмерных планов и посадка нижнего этажа в склон. Вращайте дом, откройте этаж изнутри или сравните его с исходным чертежом. Внутри этажей показаны объёмная мебель, кухни и сантехника по планам. Далее — отделка и световые сценарии.</p><span className="intro-step"><span>ЭТАП ПРОЕКТА</span><b>03<small>/05</small></b><small>Дом на склоне · архитектура</small></span></div>
         </div>
         <section className="metrics" aria-label="Показатели проекта">
           <div><span>УРОВНИ</span><strong>04</strong><small>3 этажа и гараж</small></div>
