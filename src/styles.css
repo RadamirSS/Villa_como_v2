@@ -77,3 +77,13 @@
 .calibration-row strong {font-variant-numeric:tabular-nums;color:#dec89a}
 .architecture-calibration small {display:block;padding-top:10px;color:#9eafa7;line-height:1.5}
 @media (max-width:580px){.calibration-row,.calibration-row-head {grid-template-columns:minmax(0,1fr) 74px 80px;gap:5px;font-size:10px}.architecture-calibration {padding:10px}}
+
+/* Stage 3.5 B – a clear separation between conceptual finished facade and source cutaway */
+.model-presentation{display:flex;flex-wrap:wrap;gap:5px;align-items:center;padding:0 3px;border-left:1px solid rgba(198,174,134,.32)}
+.model-presentation button{font-size:10px;white-space:nowrap;padding:9px 11px;color:#bbc9be;background:rgba(55,75,66,.72);border:1px solid rgba(152,173,158,.32);border-radius:4px;cursor:pointer;transition:background .15s,color .15s}
+.model-presentation button.selected{color:#243a33;background:#e0cba6;border-color:#e0cba6;font-weight:800}
+.model-presentation button:not(.selected):hover{background:#39544a;color:#fff}
+.model-viewport{background:#b9cecb}
+.model-eyebrow{letter-spacing:.11em}
+@media(max-width:1100px){.model-presentation{border-left:0;order:2}}
+@media(max-width:700px){.model-presentation{width:100%;order:2;padding:2px 0}.model-presentation button{flex:1;white-space:normal;font-size:9px;padding:8px 5px}.model-switches{order:1}.model-checks{order:3}}

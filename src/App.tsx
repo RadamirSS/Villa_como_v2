@@ -270,20 +270,20 @@ export default function App() {
     <nav className="side-rail" aria-label="Навигация"><a href="/" aria-label="Villa Como v2" className="brand-mark">V<span>.</span>C</a><div className="rail-rule"><i /><i /><i /></div><span className="rail-caption">MÈTRE<br/>2026</span></nav>
     <main className="main-content">
       <header className="topbar">
-        <div className="breadcrumbs"><span>VILLA COMO</span><i>/</i><b>INTERACTIVE 3D</b><i>/</i><span>ЭТАП 3.5 · ПАКЕТ А</span></div>
-        <div className="header-actions"><span className="status-light" /> <span>3D СТРОИТСЯ ИЗ 2D ИСХОДНИКОВ</span> <a href="https://github.com/RadamirSS/Villa_como_v2" target="_blank" rel="noreferrer">GitHub ↗</a></div>
+        <div className="breadcrumbs"><span>VILLA COMO</span><i>/</i><b>INTERACTIVE 3D</b><i>/</i><span>ЭТАП 3.5 · ПАКЕТ Б</span></div>
+        <div className="header-actions"><span className="status-light" /> <span>ВНЕШНИЙ ОБЛИК · ДЕМОНСТРАЦИОННАЯ ВЕРСИЯ</span> <a href="https://github.com/RadamirSS/Villa_como_v2" target="_blank" rel="noreferrer">GitHub ↗</a></div>
       </header>
       <div className="page-content">
         <div className="intro">
-          <div className="eyebrow"><span className="eyebrow-line" /> SOURCE-DRIVEN ARCHITECTURAL 3D <span className="muted">/ 3.5 A</span></div>
+          <div className="eyebrow"><span className="eyebrow-line" /> SOURCE-DRIVEN EXTERIOR CONCEPT <span className="muted">/ 3.5 B</span></div>
           <h1>Villa <em>Como.</em></h1>
-          <div className="intro-bottom"><p>3D-сцена строится из стеновых контуров PDF. Пакет А добавляет точные источниковые символы дверей, проверку масштаба и индивидуальные ID стен. Исходные 2D-чертежи, мебель и сантехнические схемы сохранены.</p><span className="intro-step"><span>ЭТАП ПРОЕКТА</span><b>03<small>/03</small></b><small>Архитектурная геометрия · пакет А</small></span></div>
+          <div className="intro-bottom"><p>3D-сцена строится из стеновых контуров PDF. Внешний облик восстановлен как демонстрационная концепция поверх архитектуры A-14–A-17. Есть объёмные фасады, остекление, терраса и крыша; для отсутствующих фасадных чертежей реконструкция помечена как условная. Исходные 2D и 3D-планы сохранены.</p><span className="intro-step"><span>ЭТАП ПРОЕКТА</span><b>03<small>/03</small></b><small>Внешний облик · пакет Б</small></span></div>
         </div>
         <section className="metrics" aria-label="Показатели проекта">
           <div><span>УРОВНИ</span><strong>04</strong><small>3 этажа и гараж</small></div>
           <div><span>ПЛОЩАДЬ ПО ВЕДОМОСТЯМ</span><strong>{area(totalScheduledArea)}</strong><small>без подмены геометрическими расчётами</small></div>
           <div><span>ПОЗИЦИИ ПОМЕЩЕНИЙ</span><strong>44</strong><small>7 + 19 + 13 + 5</small></div>
-          <div><span>ДВЕРНЫЕ МАРКИ В 3D</span><strong>33</strong><small>источниковые символы A-14–A-17</small></div>
+          <div><span>КОНЦЕПЦИЯ ФАСАДОВ</span><strong>04</strong><small>3 уровня и отдельный гараж</small></div>
         </section>
         <section className="architecture-section">
           <div className="section-head"><div><span className="section-index">01 / ARCHITECTURAL WORKSPACE</span><h2>3D-модель и проектные 2D-чертежи</h2></div><div className="design-mode-tabs" role="tablist" aria-label="Формат просмотра"><button role="tab" aria-selected={displayMode === '3d'} className={displayMode === '3d' ? 'selected' : ''} onClick={() => setDisplayMode('3d')}>◈ 3D модель</button><button role="tab" aria-selected={displayMode === '2d'} className={displayMode === '2d' ? 'selected' : ''} onClick={() => setDisplayMode('2d')}>▤ 2D чертёж</button></div></div>
@@ -306,7 +306,7 @@ export default function App() {
             <div><span>МЕБЕЛЬНЫЙ ПЛАН</span><b>{data.furnitureSheet}</b><p>Мебель и планировочные позиции</p></div>
           </div>
         </section>
-        <div className="audit-note"><div><span>!</span><strong>Архитектурная геометрия · пакет А, граница точности</strong></div><p>Для 368 стеновых полигонов созданы устойчивые ID, восемь опорных размеров из A‑03/A‑05/A‑06/A‑15/A‑16 проверены по геометрии векторных размерных линий. Все <b>33 дверные марки</b> связаны с источниковыми символами открытых полотен и ведомостями их ширины/высоты. Для <b>18 проёмов</b> программа однозначно сопоставляет дверное полотно с просветом на исходном плане; оставшиеся 15 пока не разрешены. Точное положение створки в 3D воспроизводит <b>условную открытую ориентацию на чертеже</b>. Конструктивные перекрытия, лестничные марши, оконные высоты, мансардная кровля и привязка гаража к участку остаются неподтверждёнными. Эти части не подменяются придуманной BIM-геометрией. <b>Пакет А требует дальнейшей инженерной доработки</b> до заявления «в точности по проекту».</p></div>
+        <div className="audit-note"><div><span>!</span><strong>Внешний облик · пакет Б, граница точности</strong></div><p>Для 368 стеновых полигонов созданы устойчивые ID, восемь опорных размеров из A‑03/A‑05/A‑06/A‑15/A‑16 проверены по геометрии векторных размерных линий. Все <b>33 дверные марки</b> связаны с источниковыми символами открытых полотен и ведомостями их ширины/высоты. Для <b>18 проёмов</b> программа однозначно сопоставляет дверное полотно с просветом на исходном плане; оставшиеся 15 пока не разрешены. Точное положение створки в 3D воспроизводит <b>условную открытую ориентацию на чертеже</b>. Конструктивные перекрытия, лестничные марши, оконные высоты, мансардная кровля и привязка гаража к участку остаются неподтверждёнными. Эти части не подменяются придуманной BIM-геометрией. <b>Пакет А требует дальнейшей инженерной доработки</b> до заявления «в точности по проекту».</p></div>
         <div className="bottom-actions"><a href="https://github.com/RadamirSS/Villa_como_v2/tree/main/docs" target="_blank" rel="noreferrer">Методика и незакрытые вопросы ↗</a><button onClick={() => setInfoExpanded(!infoExpanded)}>{infoExpanded ? 'Скрыть инженерные требования' : 'Что необходимо для BIM-точности?'} <span>{infoExpanded ? '−' : '+'}</span></button></div>
         {infoExpanded && <div className="expanded-note">Следующий инженерный шаг: закрыть все размерные цепочки каждого этажа, определить геометрию оставшихся 15 дверных проёмов, зарегистрировать окна, лестничные марши и отверстия в перекрытиях; получить фасады, разрезы, конструкцию крыши и топосъёмку. Тогда можно согласовать одну метрическую пространственную модель для 2D и 3D.</div>}
         <footer><span>VILLA COMO / DIGITAL DESIGN</span><span>MÈTRE · Рабочая документация</span><span>© 2026</span></footer>

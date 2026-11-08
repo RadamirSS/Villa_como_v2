@@ -5,6 +5,7 @@ import rawSpatial from '../data/spatial-model.json'
 import rawArchitectural from '../data/architectural-geometry.json'
 import rawPlans from '../data/architectural-plans.json'
 import furnitureVectors from '../data/furniture-vectors.json'
+import { createExteriorConcept, createExteriorContext, exteriorConcept } from './ExteriorConcept'
 
 /**
  * Stage 3: generated from SOURCE PRINT GEOMETRY, not semantic/millimetre BIM.
@@ -62,6 +63,7 @@ const floorOrder = ['level-1', 'level-2', 'level-3'] as const
 type FloorId = 'garage' | 'level-1' | 'level-2' | 'level-3'
 type StageView = 'one' | 'all'
 type StageArrangement = 'assembled' | 'exploded'
+type PresentationMode = 'exterior' | 'section' | 'source'
 const globalOrigin = { x: 600, y: 350 }
 const pX = (pt: number) => (pt - globalOrigin.x) / ptPerM
 const pZ = (pt: number) => (pt - globalOrigin.y) / ptPerM
@@ -279,10 +281,14 @@ export default function Villa3D({ floorId, selectedRoom, onSelectRoom }: {
   const drawingsRef = useRef<THREE.Group | null>(null)
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null)
   const onSelectRef = useRef(onSelectRoom)
-  const [view, setView] = useState<StageView>('one')
-  const [arrangement, setArrangement] = useState<StageArrangement>('exploded')
-  const [furniture, setFurniture] = useState(true)
-  const [labels, setLabels] = useState(true)
+  const [view, setView] = useState<StageView>('all')
+  const [arrangement, setArrangement] = useState<StageArrangement>('assembled')
+  const [presentation, setPresentation] = useState<PresentationMode>('exterior')
+  const [roof, setRoof] = useState(true)
+  const [glazing, setGlazing] = useState(true)
+  const [terrace, setTerrace] = useState(true)
+  const [furniture, setFurniture] = useState(false)
+  const [labels, setLabels] = useState(false)
   const [walls, setWalls] = useState(true)
   const [doors, setDoors] = useState(true)
   const [top, setTop] = useState(false)
@@ -311,8 +317,8 @@ export default function Villa3D({ floorId, selectedRoom, onSelectRoom }: {
     rendererRef.current = renderer
     container.appendChild(renderer.domElement)
     const scene = new THREE.Scene()
-    scene.background = new THREE.Color('#142323')
-    scene.fog = new THREE.Fog('#142323', 70, 125)
+    scene.background = new THREE.Color('#b9cecb')
+    scene.fog = new THREE.Fog('#b9cecb', 75, 160)
     sceneRef.current = scene
     const camera = new THREE.PerspectiveCamera(36, 1, .04, 200)
     camera.position.set(24, 29, 31)
@@ -348,6 +354,8 @@ export default function Villa3D({ floorId, selectedRoom, onSelectRoom }: {
     ground.position.y = -.43
     ground.receiveShadow = true
     scene.add(ground)
+    const exteriorContext = createExteriorContext()
+    scene.add(exteriorContext)
     let frame = 0
     const draw = () => { frame = requestAnimationFrame(draw); controls.update(); renderer.render(scene, camera) }
     draw()
@@ -372,6 +380,7 @@ export default function Villa3D({ floorId, selectedRoom, onSelectRoom }: {
       resize.disconnect(); cancelAnimationFrame(frame)
       if (drawingsRef.current) { scene.remove(drawingsRef.current); disposeSceneGroup(drawingsRef.current) }
       drawingsRef.current = null
+      disposeSceneGroup(exteriorContext); scene.remove(exteriorContext)
       controls.dispose(); renderer.dispose(); renderer.domElement.remove()
       rendererRef.current = null; controlsRef.current = null; cameraRef.current = null; sceneRef.current = null
     }
@@ -387,38 +396,47 @@ export default function Villa3D({ floorId, selectedRoom, onSelectRoom }: {
     const root = new THREE.Group()
     drawingsRef.current = root
     scene.add(root)
-    for (const id of all) {
-      const current = id === floorId
-      const base = viewAll ? vertical(id, arrangement) : 0
-      const group = wallAndSlabGroup(id, id === 'level-3' ? 2.3 : spatial.displayAssumptions.wallHeightM, current, walls)
-      group.position.y = base
-      root.add(group)
-      if (walls && doors) {
-        const doorGroup = sourceDoorGroup(id, current, true)
-        doorGroup.position.y = base
-        root.add(doorGroup)
-      }
-      if (current && labels) {
-        for (const room of plans[id].rooms) {
-          if (!room.marker) continue
-          const item = roomSprite(room.number)
-          const vp = spatial.floors[id].sourceViewport
-          item.position.set(pX(vp.xPt + room.marker[0]), base + .22, pZ(vp.yPt + room.marker[1]))
-          group.add(item)
+    const isExterior = presentation === 'exterior'
+    if (isExterior) {
+      // Exterior is expressly a conceptual wrapper over the registered source footprint.
+      // Roof/facade and window heights cannot be read from absent elevation drawings.
+      root.add(createExteriorConcept({ floors: all, roof, windows: glazing, terrace, garage: true,
+        assembled: arrangement === 'assembled' && (viewAll || floorId === 'garage') }))
+    } else {
+      for (const id of all) {
+        const current = id === floorId
+        const base = viewAll ? vertical(id, arrangement) : 0
+        const group = wallAndSlabGroup(id, id === 'level-3' ? 2.3 : spatial.displayAssumptions.wallHeightM, current, walls)
+        group.position.y = base
+        root.add(group)
+        if (walls && doors) {
+          const doorGroup = sourceDoorGroup(id, current, true)
+          doorGroup.position.y = base
+          root.add(doorGroup)
+        }
+        if (current && labels) {
+          for (const room of plans[id].rooms) {
+            if (!room.marker) continue
+            const item = roomSprite(room.number)
+            const vp = spatial.floors[id].sourceViewport
+            item.position.set(pX(vp.xPt + room.marker[0]), base + .22, pZ(vp.yPt + room.marker[1]))
+            group.add(item)
+          }
         }
       }
+      if (furniture) {
+        setLoadingTexture(true)
+        furnitureOverlay(floorId).then(mesh => {
+          if (!live) { disposeSceneGroup(mesh); return }
+          mesh.position.y += viewAll ? vertical(floorId, arrangement) : 0
+          root.add(mesh)
+          setLoadingTexture(false)
+        }).catch(e => { if (live) { setLoadingTexture(false); setError('Не удалось загрузить мебельную проекцию: ' + String(e)) } })
+      } else setLoadingTexture(false)
     }
-    if (furniture) {
-      setLoadingTexture(true)
-      furnitureOverlay(floorId).then(mesh => {
-        if (!live) { disposeSceneGroup(mesh); return }
-        mesh.position.y += viewAll ? vertical(floorId, arrangement) : 0
-        root.add(mesh)
-        setLoadingTexture(false)
-      }).catch(e => { if (live) { setLoadingTexture(false); setError('Не удалось загрузить мебельную проекцию: ' + String(e)) } })
-    } else setLoadingTexture(false)
+    if (isExterior) setLoadingTexture(false)
     return () => { live = false }
-  }, [floorId, viewAll, arrangement, furniture, walls, doors, labels])
+  }, [floorId, viewAll, arrangement, furniture, walls, doors, labels, presentation, roof, glazing, terrace])
 
   useEffect(() => {
     drawingsRef.current?.traverse(item => {
@@ -449,7 +467,7 @@ export default function Villa3D({ floorId, selectedRoom, onSelectRoom }: {
 
   return <div className="villa3d">
     <div className="model-top-strip">
-      <div className="model-title"><span className="live-indicator"/><b>3D · АВТОМАТИЧЕСКАЯ ГЕНЕРАЦИЯ</b><small>{spatial.floors[floorId].sourceSheet} → объём стен</small></div>
+      <div className="model-title"><span className="live-indicator"/><b>3D · ВИЛЛА COMO / ПАКЕТ Б</b><small>{presentation === 'exterior' ? 'КОНЦЕПЦИЯ ФАСАДОВ И КРОВЛИ' : `${spatial.floors[floorId].sourceSheet} · исходная архитектура`}</small></div>
       <div className="model-tools">
         <button onClick={() => zoomCamera(1.22)} aria-label="Отдалить 3D">−</button>
         <button onClick={() => zoomCamera(.82)} aria-label="Приблизить 3D">+</button>
@@ -460,27 +478,38 @@ export default function Villa3D({ floorId, selectedRoom, onSelectRoom }: {
     <div className="model-layers">
       <div className="model-switches" role="group" aria-label="Показ 3D уровней">
         <button className={!viewAll ? 'selected' : ''} onClick={() => setView('one')}>Один этаж</button>
-        <button className={viewAll ? 'selected' : ''} onClick={() => setView('all')} disabled={floorId === 'garage'} title={floorId === 'garage' ? 'Гараж без проверенной привязки к дому' : undefined}>Все этажи</button>
-        {viewAll && <button className="mode-light" onClick={() => setArrangement(v => v === 'assembled' ? 'exploded' : 'assembled')}>{arrangement === 'exploded' ? 'Собрать уровни' : 'Раздвинуть уровни'}</button>}
+        <button className={viewAll ? 'selected' : ''} onClick={() => { setView('all'); setArrangement('assembled') }} disabled={floorId === 'garage'} title={floorId === 'garage' ? 'Гараж без проверенной привязки к дому' : undefined}>Все этажи</button>
+        {viewAll && <button className="mode-light" onClick={() => { setPresentation('section'); setArrangement(v => v === 'assembled' ? 'exploded' : 'assembled') }}>{arrangement === 'exploded' ? 'Собрать уровни' : 'Раздвинуть уровни'}</button>}
+      </div>
+      <div className="model-presentation" role="group" aria-label="Режим архитектурной визуализации">
+        <button className={presentation === 'exterior' ? 'selected' : ''} aria-pressed={presentation === 'exterior'} onClick={() => { setPresentation('exterior'); setView('all'); setArrangement('assembled'); resetCamera(false) }}>Готовый дом</button>
+        <button className={presentation === 'section' ? 'selected' : ''} aria-pressed={presentation === 'section'} onClick={() => setPresentation('section')}>Без оболочки</button>
+        <button className={presentation === 'source' ? 'selected' : ''} aria-pressed={presentation === 'source'} onClick={() => setPresentation('source')}>Исходные стены</button>
       </div>
       <div className="model-checks">
-        <button aria-pressed={walls} onClick={() => setWalls(x => !x)} className={walls ? 'active' : ''}>Стены</button>
-        <button aria-pressed={doors} onClick={() => setDoors(x => !x)} className={doors ? 'active' : ''}>Двери · 3D</button>
-        <button aria-pressed={furniture} onClick={() => setFurniture(x => !x)} className={furniture ? 'active' : ''}>Мебель · 2D</button>
-        <button aria-pressed={labels} onClick={() => setLabels(x => !x)} className={labels ? 'active' : ''}>Помещения</button>
+        {presentation === 'exterior' ? <>
+          <button aria-pressed={roof} onClick={() => setRoof(x => !x)} className={roof ? 'active' : ''}>Крыша</button>
+          <button aria-pressed={glazing} onClick={() => setGlazing(x => !x)} className={glazing ? 'active' : ''}>Остекление</button>
+          <button aria-pressed={terrace} onClick={() => setTerrace(x => !x)} className={terrace ? 'active' : ''}>Терраса</button>
+        </> : <>
+          <button aria-pressed={walls} onClick={() => setWalls(x => !x)} className={walls ? 'active' : ''}>Стены</button>
+          <button aria-pressed={doors} onClick={() => setDoors(x => !x)} className={doors ? 'active' : ''}>Двери · 3D</button>
+          <button aria-pressed={furniture} onClick={() => setFurniture(x => !x)} className={furniture ? 'active' : ''}>Мебель · 2D</button>
+          <button aria-pressed={labels} onClick={() => setLabels(x => !x)} className={labels ? 'active' : ''}>Помещения</button>
+        </>}
       </div>
     </div>
     <div className="model-viewport" ref={mount} aria-label="Интерактивная 3D модель этажей Villa Como: перетаскивайте для вращения, колесо мыши для масштаба">
       {error && <div className="model-error" role="alert">{error}<button onClick={() => setError(null)}>Закрыть</button></div>}
       <div className="model-overlay">
-        <span className="model-eyebrow">MÈTRE / SOURCE-BASED 3D</span>
+        <span className="model-eyebrow">{presentation === 'exterior' ? 'EXTERIOR CONCEPT / NOT PROJECT ELEVATIONS' : 'MÈTRE / SOURCE-BASED 3D'}</span>
         <b>{floorId === 'garage' ? 'ГАРАЖ · ОТДЕЛЬНО' : viewAll ? 'ЭТАЖИ 1–3' : floorId === 'level-1' ? 'ПЕРВЫЙ ЭТАЖ' : floorId === 'level-2' ? 'ВТОРОЙ ЭТАЖ' : 'ТРЕТИЙ ЭТАЖ'}</b>
-        <small>{spatial.floors[floorId].wallPolygonCount} стен · {architecture.floors[floorId].doors.length} дверных марок</small>
+        <small>{presentation === 'exterior' ? `${exteriorConcept.floors[floorId].facadeSegments.length} линий фасада · ${exteriorConcept.floors[floorId].windowsApproxCount} условных окон` : `${spatial.floors[floorId].wallPolygonCount} стен · ${architecture.floors[floorId].doors.length} дверей`}</small>
       </div>
       <div className="model-gesture-hint">↻ Вращайте · ≋ Увеличивайте · Выбирайте помещения</div>
       {loadingTexture && <div className="model-loading">Проекция мебели загружается…</div>}
     </div>
-    <div className="model-footnote"><span>Стеновые контуры: {spatial.floors[floorId].sourceSheet} · из PDF; мебель: плоская проекция {plans[floorId].furnitureSheet}</span><strong>ПРЕДВАРИТЕЛЬНАЯ 3D · НЕ BIM</strong></div>
+    <div className="model-footnote"><span>{presentation === 'exterior' ? `Внешний контур: ${exteriorConcept.floors[floorId].sourceSheet} · облицовка, крыша и окна — концепция` : `Стеновые контуры: ${spatial.floors[floorId].sourceSheet} · мебель: ${plans[floorId].furnitureSheet}`}</span><strong>{presentation === 'exterior' ? 'ДЕМОНСТРАЦИЯ · НЕ УТВЕРЖДЁННЫЙ ФАСАД' : 'ПРЕДВАРИТЕЛЬНАЯ 3D · НЕ BIM'}</strong></div>
     <details className="architecture-calibration" open>
       <summary>Геометрический контроль · {architecture.floors[floorId].calibrationChecks.length} независимые размерные привязки</summary>
       <div className="calibration-row-head"><span>Исходный лист</span><span>Размер</span><span>Расхождение с моделью</span></div>
@@ -491,6 +520,10 @@ export default function Villa3D({ floorId, selectedRoom, onSelectRoom }: {
       </div>)}
       <small>Расхождение измерений в PDF с масштабом предпросмотра; не погрешность готового строительного CAD. Размерные цепочки полностью не замкнуты.</small>
     </details>
-    <div className="model-warning">Контуры стен и положения {architecture.floors[floorId].doors.length} дверных полотен перенесены из PDF, размеры дверей — из ведомости {spatial.floors[floorId].sourceSheet}. <b>{architecture.floors[floorId].openingCountResolved} проёмов подтверждены сопоставлением с просветами на плане, остальные оставлены неразрешёнными.</b> 3D полотна показаны в условно открытом положении с листа. Высоты стен, плит, мансарды и перемычки над проёмами остаются предварительными. Конструктивные лестницы, оконные высоты, кровля и посадка гаража не подтверждены.</div>
+    <div className="model-warning">{presentation === 'exterior' ? <>
+      <b>Фасады, остекление, крыша и материалы — демонстрационная реконструкция.</b> Их геометрия следует очертаниям A-14–A-17, но в исходном 94-страничном PDF нет полного плана кровли, фасадов, разрезов и генплана. Отметки и композиция окон не утверждены. Гараж показан отдельно, его положение относительно виллы не задано. Режим «Без оболочки» возвращает исходные объёмные стены.
+    </> : <>
+      Контуры стен и положения {architecture.floors[floorId].doors.length} дверных полотен перенесены из PDF, размеры дверей — из ведомости {spatial.floors[floorId].sourceSheet}. <b>{architecture.floors[floorId].openingCountResolved} проёмов сопоставлены с просветами на плане, остальные оставлены неразрешёнными.</b> Конструктивная крыша и фасады пока не подтверждены.
+    </>}</div>
   </div>
 }

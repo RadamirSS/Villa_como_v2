@@ -1,0 +1,1998 @@
+{
+  "schema": "villa-como-exterior-concept/1",
+  "sourceDocument": "MÈTRE Villa Como, 94-page working PDF 09.02.2026",
+  "sourceSheets": [
+    "A-14",
+    "A-15",
+    "A-16",
+    "A-17",
+    "A-20"
+  ],
+  "geometryMeaning": "Architectural concept envelope reconstructed from PDF plan silhouettes, NOT surveyed facades, architectural elevations or exact roof geometry",
+  "isApprovedArchitecturalModel": false,
+  "originPt": {
+    "xPt": 600,
+    "yPt": 350
+  },
+  "pointsPerMeter": 36.4,
+  "missingSources": [
+    "roof plan",
+    "exterior elevations",
+    "building sections",
+    "site/master plan",
+    "verified windows and glazing schedules",
+    "garage geospatial relation"
+  ],
+  "materialPalette": {
+    "stone": "warm limestone (concept)",
+    "roof": "charcoal standing seam (concept)",
+    "glass": "cool neutral glass (concept)",
+    "frames": "bronze metal (concept)"
+  },
+  "floors": {
+    "level-1": {
+      "sourceSheet": "A-15",
+      "sourceViewport": {
+        "xPt": 47.36,
+        "yPt": 50.96,
+        "widthPt": 1099.76,
+        "heightPt": 542.24
+      },
+      "status": "source-informed-provisional-exterior-silhouette",
+      "baseM": 0.0,
+      "displayWallHeightM": 2.65,
+      "outlinePt": [
+        [
+          132.371,
+          106.062
+        ],
+        [
+          480.977,
+          106.062
+        ],
+        [
+          480.977,
+          119.217
+        ],
+        [
+          550.04,
+          119.217
+        ],
+        [
+          550.04,
+          75.641
+        ],
+        [
+          929.888,
+          75.641
+        ],
+        [
+          929.888,
+          106.062
+        ],
+        [
+          950.443,
+          106.062
+        ],
+        [
+          950.443,
+          119.217
+        ],
+        [
+          1090.214,
+          119.217
+        ],
+        [
+          1090.214,
+          230.213
+        ],
+        [
+          1110.768,
+          230.213
+        ],
+        [
+          1110.768,
+          550.043
+        ],
+        [
+          929.888,
+          550.043
+        ],
+        [
+          929.888,
+          478.513
+        ],
+        [
+          763.807,
+          478.513
+        ],
+        [
+          763.807,
+          394.65
+        ],
+        [
+          460.422,
+          394.65
+        ],
+        [
+          460.422,
+          550.043
+        ],
+        [
+          133.194,
+          550.043
+        ],
+        [
+          133.194,
+          527.022
+        ],
+        [
+          112.639,
+          519.623
+        ],
+        [
+          92.907,
+          501.534
+        ],
+        [
+          82.218,
+          478.513
+        ],
+        [
+          81.396,
+          438.226
+        ],
+        [
+          92.084,
+          413.56
+        ],
+        [
+          112.639,
+          391.361
+        ],
+        [
+          132.371,
+          375.74
+        ]
+      ],
+      "facadeSegments": [
+        {
+          "id": "level-1-EX-00",
+          "fromPt": [
+            132.371,
+            106.062
+          ],
+          "toPt": [
+            480.977,
+            106.062
+          ],
+          "lengthM": 9.577,
+          "windows": [
+            {
+              "id": "level-1-W-467-129",
+              "at": 0.7217,
+              "widthM": 1.7,
+              "sillM": 0.66,
+              "heightM": 1.43,
+              "status": "hypothetical-window-size-and-design",
+              "sourceHintPx": [
+                467,
+                129
+              ]
+            }
+          ]
+        },
+        {
+          "id": "level-1-EX-01",
+          "fromPt": [
+            480.977,
+            106.062
+          ],
+          "toPt": [
+            480.977,
+            119.217
+          ],
+          "lengthM": 0.361,
+          "windows": []
+        },
+        {
+          "id": "level-1-EX-02",
+          "fromPt": [
+            480.977,
+            119.217
+          ],
+          "toPt": [
+            550.04,
+            119.217
+          ],
+          "lengthM": 1.897,
+          "windows": []
+        },
+        {
+          "id": "level-1-EX-03",
+          "fromPt": [
+            550.04,
+            119.217
+          ],
+          "toPt": [
+            550.04,
+            75.641
+          ],
+          "lengthM": 1.197,
+          "windows": []
+        },
+        {
+          "id": "level-1-EX-04",
+          "fromPt": [
+            550.04,
+            75.641
+          ],
+          "toPt": [
+            929.888,
+            75.641
+          ],
+          "lengthM": 10.435,
+          "windows": [
+            {
+              "id": "level-1-W-745-92",
+              "at": 0.1645,
+              "widthM": 1.8,
+              "sillM": 0.66,
+              "heightM": 1.43,
+              "status": "hypothetical-window-size-and-design",
+              "sourceHintPx": [
+                745,
+                92
+              ]
+            }
+          ]
+        },
+        {
+          "id": "level-1-EX-05",
+          "fromPt": [
+            929.888,
+            75.641
+          ],
+          "toPt": [
+            929.888,
+            106.062
+          ],
+          "lengthM": 0.836,
+          "windows": []
+        },
+        {
+          "id": "level-1-EX-06",
+          "fromPt": [
+            929.888,
+            106.062
+          ],
+          "toPt": [
+            950.443,
+            106.062
+          ],
+          "lengthM": 0.565,
+          "windows": []
+        },
+        {
+          "id": "level-1-EX-07",
+          "fromPt": [
+            950.443,
+            106.062
+          ],
+          "toPt": [
+            950.443,
+            119.217
+          ],
+          "lengthM": 0.361,
+          "windows": []
+        },
+        {
+          "id": "level-1-EX-08",
+          "fromPt": [
+            950.443,
+            119.217
+          ],
+          "toPt": [
+            1090.214,
+            119.217
+          ],
+          "lengthM": 3.84,
+          "windows": [
+            {
+              "id": "level-1-W-1180-145",
+              "at": 0.1412,
+              "widthM": 1.5,
+              "sillM": 0.66,
+              "heightM": 1.43,
+              "status": "hypothetical-window-size-and-design",
+              "sourceHintPx": [
+                1180,
+                145
+              ]
+            }
+          ]
+        },
+        {
+          "id": "level-1-EX-09",
+          "fromPt": [
+            1090.214,
+            119.217
+          ],
+          "toPt": [
+            1090.214,
+            230.213
+          ],
+          "lengthM": 3.049,
+          "windows": [
+            {
+              "id": "level-1-W-1326-214",
+              "at": 0.5111,
+              "widthM": 1.25,
+              "sillM": 0.66,
+              "heightM": 1.43,
+              "status": "hypothetical-window-size-and-design",
+              "sourceHintPx": [
+                1326,
+                214
+              ]
+            }
+          ]
+        },
+        {
+          "id": "level-1-EX-10",
+          "fromPt": [
+            1090.214,
+            230.213
+          ],
+          "toPt": [
+            1110.768,
+            230.213
+          ],
+          "lengthM": 0.565,
+          "windows": []
+        },
+        {
+          "id": "level-1-EX-11",
+          "fromPt": [
+            1110.768,
+            230.213
+          ],
+          "toPt": [
+            1110.768,
+            550.043
+          ],
+          "lengthM": 8.787,
+          "windows": [
+            {
+              "id": "level-1-W-1351-398",
+              "at": 0.3033,
+              "widthM": 1.8,
+              "sillM": 0.66,
+              "heightM": 1.43,
+              "status": "hypothetical-window-size-and-design",
+              "sourceHintPx": [
+                1351,
+                398
+              ]
+            },
+            {
+              "id": "level-1-W-1351-586",
+              "at": 0.7866,
+              "widthM": 1.55,
+              "sillM": 0.66,
+              "heightM": 1.43,
+              "status": "hypothetical-window-size-and-design",
+              "sourceHintPx": [
+                1351,
+                586
+              ]
+            }
+          ]
+        },
+        {
+          "id": "level-1-EX-12",
+          "fromPt": [
+            1110.768,
+            550.043
+          ],
+          "toPt": [
+            929.888,
+            550.043
+          ],
+          "lengthM": 4.969,
+          "windows": [
+            {
+              "id": "level-1-W-1216-669",
+              "at": 0.6136,
+              "widthM": 1.8,
+              "sillM": 0.66,
+              "heightM": 1.43,
+              "status": "hypothetical-window-size-and-design",
+              "sourceHintPx": [
+                1216,
+                669
+              ]
+            }
+          ]
+        },
+        {
+          "id": "level-1-EX-13",
+          "fromPt": [
+            929.888,
+            550.043
+          ],
+          "toPt": [
+            929.888,
+            478.513
+          ],
+          "lengthM": 1.965,
+          "windows": []
+        },
+        {
+          "id": "level-1-EX-14",
+          "fromPt": [
+            929.888,
+            478.513
+          ],
+          "toPt": [
+            763.807,
+            478.513
+          ],
+          "lengthM": 4.563,
+          "windows": [
+            {
+              "id": "level-1-W-1005-582",
+              "at": 0.6238,
+              "widthM": 1.7,
+              "sillM": 0.66,
+              "heightM": 1.43,
+              "status": "hypothetical-window-size-and-design",
+              "sourceHintPx": [
+                1005,
+                582
+              ]
+            }
+          ]
+        },
+        {
+          "id": "level-1-EX-15",
+          "fromPt": [
+            763.807,
+            478.513
+          ],
+          "toPt": [
+            763.807,
+            394.65
+          ],
+          "lengthM": 2.304,
+          "windows": []
+        },
+        {
+          "id": "level-1-EX-16",
+          "fromPt": [
+            763.807,
+            394.65
+          ],
+          "toPt": [
+            460.422,
+            394.65
+          ],
+          "lengthM": 8.335,
+          "windows": [
+            {
+              "id": "level-1-W-720-480",
+              "at": 0.5664,
+              "widthM": 1.75,
+              "sillM": 0.66,
+              "heightM": 1.43,
+              "status": "hypothetical-window-size-and-design",
+              "sourceHintPx": [
+                720,
+                480
+              ]
+            }
+          ]
+        },
+        {
+          "id": "level-1-EX-17",
+          "fromPt": [
+            460.422,
+            394.65
+          ],
+          "toPt": [
+            460.422,
+            550.043
+          ],
+          "lengthM": 4.269,
+          "windows": []
+        },
+        {
+          "id": "level-1-EX-18",
+          "fromPt": [
+            460.422,
+            550.043
+          ],
+          "toPt": [
+            133.194,
+            550.043
+          ],
+          "lengthM": 8.99,
+          "windows": [
+            {
+              "id": "level-1-W-424-669",
+              "at": 0.3417,
+              "widthM": 1.4,
+              "sillM": 0.66,
+              "heightM": 1.43,
+              "status": "hypothetical-window-size-and-design",
+              "sourceHintPx": [
+                424,
+                669
+              ]
+            },
+            {
+              "id": "level-1-W-320-669",
+              "at": 0.603,
+              "widthM": 1.6,
+              "sillM": 0.66,
+              "heightM": 1.43,
+              "status": "hypothetical-window-size-and-design",
+              "sourceHintPx": [
+                320,
+                669
+              ]
+            },
+            {
+              "id": "level-1-W-231-669",
+              "at": 0.8266,
+              "widthM": 1.3,
+              "sillM": 0.66,
+              "heightM": 1.43,
+              "status": "hypothetical-window-size-and-design",
+              "sourceHintPx": [
+                231,
+                669
+              ]
+            }
+          ]
+        },
+        {
+          "id": "level-1-EX-19",
+          "fromPt": [
+            133.194,
+            550.043
+          ],
+          "toPt": [
+            133.194,
+            527.022
+          ],
+          "lengthM": 0.632,
+          "windows": []
+        },
+        {
+          "id": "level-1-EX-20",
+          "fromPt": [
+            133.194,
+            527.022
+          ],
+          "toPt": [
+            112.639,
+            519.623
+          ],
+          "lengthM": 0.6,
+          "windows": []
+        },
+        {
+          "id": "level-1-EX-21",
+          "fromPt": [
+            112.639,
+            519.623
+          ],
+          "toPt": [
+            92.907,
+            501.534
+          ],
+          "lengthM": 0.735,
+          "windows": []
+        },
+        {
+          "id": "level-1-EX-22",
+          "fromPt": [
+            92.907,
+            501.534
+          ],
+          "toPt": [
+            82.218,
+            478.513
+          ],
+          "lengthM": 0.697,
+          "windows": []
+        },
+        {
+          "id": "level-1-EX-23",
+          "fromPt": [
+            82.218,
+            478.513
+          ],
+          "toPt": [
+            81.396,
+            438.226
+          ],
+          "lengthM": 1.107,
+          "windows": [
+            {
+              "id": "level-1-W-100-559",
+              "at": 0.4692,
+              "widthM": 0.6,
+              "sillM": 0.66,
+              "heightM": 1.43,
+              "status": "hypothetical-window-size-and-design",
+              "sourceHintPx": [
+                100,
+                559
+              ]
+            }
+          ]
+        },
+        {
+          "id": "level-1-EX-24",
+          "fromPt": [
+            81.396,
+            438.226
+          ],
+          "toPt": [
+            92.084,
+            413.56
+          ],
+          "lengthM": 0.739,
+          "windows": []
+        },
+        {
+          "id": "level-1-EX-25",
+          "fromPt": [
+            92.084,
+            413.56
+          ],
+          "toPt": [
+            112.639,
+            391.361
+          ],
+          "lengthM": 0.831,
+          "windows": [
+            {
+              "id": "level-1-W-119-493",
+              "at": 0.3287,
+              "widthM": 0.5309999999999999,
+              "sillM": 0.66,
+              "heightM": 1.43,
+              "status": "hypothetical-window-size-and-design",
+              "sourceHintPx": [
+                119,
+                493
+              ]
+            }
+          ]
+        },
+        {
+          "id": "level-1-EX-26",
+          "fromPt": [
+            112.639,
+            391.361
+          ],
+          "toPt": [
+            132.371,
+            375.74
+          ],
+          "lengthM": 0.691,
+          "windows": []
+        },
+        {
+          "id": "level-1-EX-27",
+          "fromPt": [
+            132.371,
+            375.74
+          ],
+          "toPt": [
+            132.371,
+            106.062
+          ],
+          "lengthM": 7.409,
+          "windows": [
+            {
+              "id": "level-1-W-164-268",
+              "at": 0.5762,
+              "widthM": 1.4,
+              "sillM": 0.66,
+              "heightM": 1.43,
+              "status": "hypothetical-window-size-and-design",
+              "sourceHintPx": [
+                164,
+                268
+              ]
+            }
+          ]
+        }
+      ],
+      "planAreaM2": 292.25,
+      "windowsApproxCount": 15
+    },
+    "level-2": {
+      "sourceSheet": "A-16",
+      "sourceViewport": {
+        "xPt": 47.6,
+        "yPt": 103.76,
+        "widthPt": 1098.56,
+        "heightPt": 510.8
+      },
+      "status": "source-informed-provisional-exterior-silhouette",
+      "baseM": 2.93,
+      "displayWallHeightM": 2.65,
+      "outlinePt": [
+        [
+          133.194,
+          129.083
+        ],
+        [
+          773.674,
+          129.083
+        ],
+        [
+          773.674,
+          196.503
+        ],
+        [
+          915.911,
+          196.503
+        ],
+        [
+          915.911,
+          128.261
+        ],
+        [
+          1090.214,
+          128.261
+        ],
+        [
+          1090.214,
+          269.678
+        ],
+        [
+          1111.591,
+          269.678
+        ],
+        [
+          1111.591,
+          430.826
+        ],
+        [
+          1088.569,
+          430.826
+        ],
+        [
+          1088.569,
+          574.709
+        ],
+        [
+          915.089,
+          574.709
+        ],
+        [
+          915.089,
+          499.068
+        ],
+        [
+          763.807,
+          499.068
+        ],
+        [
+          763.807,
+          403.694
+        ],
+        [
+          451.378,
+          403.694
+        ],
+        [
+          451.378,
+          569.776
+        ],
+        [
+          133.194,
+          569.776
+        ],
+        [
+          133.194,
+          552.51
+        ],
+        [
+          110.172,
+          537.711
+        ],
+        [
+          91.262,
+          513.045
+        ],
+        [
+          81.396,
+          485.913
+        ],
+        [
+          81.396,
+          443.981
+        ],
+        [
+          94.551,
+          420.96
+        ],
+        [
+          133.194,
+          402.05
+        ]
+      ],
+      "facadeSegments": [
+        {
+          "id": "level-2-EX-00",
+          "fromPt": [
+            133.194,
+            129.083
+          ],
+          "toPt": [
+            773.674,
+            129.083
+          ],
+          "lengthM": 17.596,
+          "windows": [
+            {
+              "id": "level-2-W-281-157",
+              "at": 0.1528,
+              "widthM": 1.55,
+              "sillM": 0.66,
+              "heightM": 1.43,
+              "status": "hypothetical-window-size-and-design",
+              "sourceHintPx": [
+                281,
+                157
+              ]
+            },
+            {
+              "id": "level-2-W-457-157",
+              "at": 0.3787,
+              "widthM": 1.4,
+              "sillM": 0.66,
+              "heightM": 1.43,
+              "status": "hypothetical-window-size-and-design",
+              "sourceHintPx": [
+                457,
+                157
+              ]
+            },
+            {
+              "id": "level-2-W-609-157",
+              "at": 0.5738,
+              "widthM": 1.65,
+              "sillM": 0.66,
+              "heightM": 1.43,
+              "status": "hypothetical-window-size-and-design",
+              "sourceHintPx": [
+                609,
+                157
+              ]
+            },
+            {
+              "id": "level-2-W-876-157",
+              "at": 0.9166,
+              "widthM": 1.55,
+              "sillM": 0.66,
+              "heightM": 1.43,
+              "status": "hypothetical-window-size-and-design",
+              "sourceHintPx": [
+                876,
+                157
+              ]
+            }
+          ]
+        },
+        {
+          "id": "level-2-EX-01",
+          "fromPt": [
+            773.674,
+            129.083
+          ],
+          "toPt": [
+            773.674,
+            196.503
+          ],
+          "lengthM": 1.852,
+          "windows": []
+        },
+        {
+          "id": "level-2-EX-02",
+          "fromPt": [
+            773.674,
+            196.503
+          ],
+          "toPt": [
+            915.911,
+            196.503
+          ],
+          "lengthM": 3.908,
+          "windows": []
+        },
+        {
+          "id": "level-2-EX-03",
+          "fromPt": [
+            915.911,
+            196.503
+          ],
+          "toPt": [
+            915.911,
+            128.261
+          ],
+          "lengthM": 1.875,
+          "windows": []
+        },
+        {
+          "id": "level-2-EX-04",
+          "fromPt": [
+            915.911,
+            128.261
+          ],
+          "toPt": [
+            1090.214,
+            128.261
+          ],
+          "lengthM": 4.789,
+          "windows": [
+            {
+              "id": "level-2-W-1187-156",
+              "at": 0.3443,
+              "widthM": 1.65,
+              "sillM": 0.66,
+              "heightM": 1.43,
+              "status": "hypothetical-window-size-and-design",
+              "sourceHintPx": [
+                1187,
+                156
+              ]
+            }
+          ]
+        },
+        {
+          "id": "level-2-EX-05",
+          "fromPt": [
+            1090.214,
+            128.261
+          ],
+          "toPt": [
+            1090.214,
+            269.678
+          ],
+          "lengthM": 3.885,
+          "windows": []
+        },
+        {
+          "id": "level-2-EX-06",
+          "fromPt": [
+            1090.214,
+            269.678
+          ],
+          "toPt": [
+            1111.591,
+            269.678
+          ],
+          "lengthM": 0.587,
+          "windows": []
+        },
+        {
+          "id": "level-2-EX-07",
+          "fromPt": [
+            1111.591,
+            269.678
+          ],
+          "toPt": [
+            1111.591,
+            430.826
+          ],
+          "lengthM": 4.427,
+          "windows": [
+            {
+              "id": "level-2-W-1352-427",
+              "at": 0.5051,
+              "widthM": 1.35,
+              "sillM": 0.66,
+              "heightM": 1.43,
+              "status": "hypothetical-window-size-and-design",
+              "sourceHintPx": [
+                1352,
+                427
+              ]
+            }
+          ]
+        },
+        {
+          "id": "level-2-EX-08",
+          "fromPt": [
+            1111.591,
+            430.826
+          ],
+          "toPt": [
+            1088.569,
+            430.826
+          ],
+          "lengthM": 0.632,
+          "windows": []
+        },
+        {
+          "id": "level-2-EX-09",
+          "fromPt": [
+            1088.569,
+            430.826
+          ],
+          "toPt": [
+            1088.569,
+            574.709
+          ],
+          "lengthM": 3.953,
+          "windows": [
+            {
+              "id": "level-2-W-1324-615",
+              "at": 0.52,
+              "widthM": 1.1,
+              "sillM": 0.66,
+              "heightM": 1.43,
+              "status": "hypothetical-window-size-and-design",
+              "sourceHintPx": [
+                1324,
+                615
+              ]
+            }
+          ]
+        },
+        {
+          "id": "level-2-EX-10",
+          "fromPt": [
+            1088.569,
+            574.709
+          ],
+          "toPt": [
+            915.089,
+            574.709
+          ],
+          "lengthM": 4.766,
+          "windows": [
+            {
+              "id": "level-2-W-1210-699",
+              "at": 0.5403,
+              "widthM": 1.65,
+              "sillM": 0.66,
+              "heightM": 1.43,
+              "status": "hypothetical-window-size-and-design",
+              "sourceHintPx": [
+                1210,
+                699
+              ]
+            }
+          ]
+        },
+        {
+          "id": "level-2-EX-11",
+          "fromPt": [
+            915.089,
+            574.709
+          ],
+          "toPt": [
+            915.089,
+            499.068
+          ],
+          "lengthM": 2.078,
+          "windows": []
+        },
+        {
+          "id": "level-2-EX-12",
+          "fromPt": [
+            915.089,
+            499.068
+          ],
+          "toPt": [
+            763.807,
+            499.068
+          ],
+          "lengthM": 4.156,
+          "windows": [
+            {
+              "id": "level-2-W-1020-607",
+              "at": 0.5054,
+              "widthM": 1.3,
+              "sillM": 0.66,
+              "heightM": 1.43,
+              "status": "hypothetical-window-size-and-design",
+              "sourceHintPx": [
+                1020,
+                607
+              ]
+            }
+          ]
+        },
+        {
+          "id": "level-2-EX-13",
+          "fromPt": [
+            763.807,
+            499.068
+          ],
+          "toPt": [
+            763.807,
+            403.694
+          ],
+          "lengthM": 2.62,
+          "windows": []
+        },
+        {
+          "id": "level-2-EX-14",
+          "fromPt": [
+            763.807,
+            403.694
+          ],
+          "toPt": [
+            451.378,
+            403.694
+          ],
+          "lengthM": 8.583,
+          "windows": [
+            {
+              "id": "level-2-W-736-491",
+              "at": 0.5079,
+              "widthM": 1.8,
+              "sillM": 0.66,
+              "heightM": 1.43,
+              "status": "hypothetical-window-size-and-design",
+              "sourceHintPx": [
+                736,
+                491
+              ]
+            }
+          ]
+        },
+        {
+          "id": "level-2-EX-15",
+          "fromPt": [
+            451.378,
+            403.694
+          ],
+          "toPt": [
+            451.378,
+            569.776
+          ],
+          "lengthM": 4.563,
+          "windows": []
+        },
+        {
+          "id": "level-2-EX-16",
+          "fromPt": [
+            451.378,
+            569.776
+          ],
+          "toPt": [
+            133.194,
+            569.776
+          ],
+          "lengthM": 8.741,
+          "windows": [
+            {
+              "id": "level-2-W-457-693",
+              "at": 0.2377,
+              "widthM": 1.8,
+              "sillM": 0.66,
+              "heightM": 1.43,
+              "status": "hypothetical-window-size-and-design",
+              "sourceHintPx": [
+                457,
+                693
+              ]
+            },
+            {
+              "id": "level-2-W-280-693",
+              "at": 0.6951,
+              "widthM": 1.7,
+              "sillM": 0.66,
+              "heightM": 1.43,
+              "status": "hypothetical-window-size-and-design",
+              "sourceHintPx": [
+                280,
+                693
+              ]
+            }
+          ]
+        },
+        {
+          "id": "level-2-EX-17",
+          "fromPt": [
+            133.194,
+            569.776
+          ],
+          "toPt": [
+            133.194,
+            552.51
+          ],
+          "lengthM": 0.474,
+          "windows": []
+        },
+        {
+          "id": "level-2-EX-18",
+          "fromPt": [
+            133.194,
+            552.51
+          ],
+          "toPt": [
+            110.172,
+            537.711
+          ],
+          "lengthM": 0.752,
+          "windows": []
+        },
+        {
+          "id": "level-2-EX-19",
+          "fromPt": [
+            110.172,
+            537.711
+          ],
+          "toPt": [
+            91.262,
+            513.045
+          ],
+          "lengthM": 0.854,
+          "windows": []
+        },
+        {
+          "id": "level-2-EX-20",
+          "fromPt": [
+            91.262,
+            513.045
+          ],
+          "toPt": [
+            81.396,
+            485.913
+          ],
+          "lengthM": 0.793,
+          "windows": []
+        },
+        {
+          "id": "level-2-EX-21",
+          "fromPt": [
+            81.396,
+            485.913
+          ],
+          "toPt": [
+            81.396,
+            443.981
+          ],
+          "lengthM": 1.152,
+          "windows": [
+            {
+              "id": "level-2-W-99-568",
+              "at": 0.451,
+              "widthM": 0.65,
+              "sillM": 0.66,
+              "heightM": 1.43,
+              "status": "hypothetical-window-size-and-design",
+              "sourceHintPx": [
+                99,
+                568
+              ]
+            }
+          ]
+        },
+        {
+          "id": "level-2-EX-22",
+          "fromPt": [
+            81.396,
+            443.981
+          ],
+          "toPt": [
+            94.551,
+            420.96
+          ],
+          "lengthM": 0.728,
+          "windows": []
+        },
+        {
+          "id": "level-2-EX-23",
+          "fromPt": [
+            94.551,
+            420.96
+          ],
+          "toPt": [
+            133.194,
+            402.05
+          ],
+          "lengthM": 1.182,
+          "windows": []
+        },
+        {
+          "id": "level-2-EX-24",
+          "fromPt": [
+            133.194,
+            402.05
+          ],
+          "toPt": [
+            133.194,
+            129.083
+          ],
+          "lengthM": 7.499,
+          "windows": [
+            {
+              "id": "level-2-W-163-405",
+              "at": 0.253,
+              "widthM": 1.2,
+              "sillM": 0.66,
+              "heightM": 1.43,
+              "status": "hypothetical-window-size-and-design",
+              "sourceHintPx": [
+                163,
+                405
+              ]
+            }
+          ]
+        }
+      ],
+      "planAreaM2": 271.41,
+      "windowsApproxCount": 14
+    },
+    "level-3": {
+      "sourceSheet": "A-17",
+      "sourceViewport": {
+        "xPt": 218.96,
+        "yPt": 167.36,
+        "widthPt": 561.2,
+        "heightPt": 439.88
+      },
+      "status": "source-informed-provisional-exterior-silhouette",
+      "baseM": 5.9,
+      "displayWallHeightM": 2.3,
+      "outlinePt": [
+        [
+          252.41,
+          191.57
+        ],
+        [
+          745.719,
+          191.57
+        ],
+        [
+          745.719,
+          424.249
+        ],
+        [
+          514.686,
+          424.249
+        ],
+        [
+          514.686,
+          567.309
+        ],
+        [
+          252.41,
+          567.309
+        ]
+      ],
+      "facadeSegments": [
+        {
+          "id": "level-3-EX-00",
+          "fromPt": [
+            252.41,
+            191.57
+          ],
+          "toPt": [
+            745.719,
+            191.57
+          ],
+          "lengthM": 13.552,
+          "windows": [
+            {
+              "id": "level-3-W-390-233",
+              "at": 0.1383,
+              "widthM": 1.05,
+              "sillM": 0.66,
+              "heightM": 1.43,
+              "status": "hypothetical-window-size-and-design",
+              "sourceHintPx": [
+                390,
+                233
+              ]
+            },
+            {
+              "id": "level-3-W-655-233",
+              "at": 0.58,
+              "widthM": 1.2,
+              "sillM": 0.66,
+              "heightM": 1.43,
+              "status": "hypothetical-window-size-and-design",
+              "sourceHintPx": [
+                655,
+                233
+              ]
+            }
+          ]
+        },
+        {
+          "id": "level-3-EX-01",
+          "fromPt": [
+            745.719,
+            191.57
+          ],
+          "toPt": [
+            745.719,
+            424.249
+          ],
+          "lengthM": 6.392,
+          "windows": [
+            {
+              "id": "level-3-W-907-361",
+              "at": 0.4523,
+              "widthM": 1.05,
+              "sillM": 0.66,
+              "heightM": 1.43,
+              "status": "hypothetical-window-size-and-design",
+              "sourceHintPx": [
+                907,
+                361
+              ]
+            }
+          ]
+        },
+        {
+          "id": "level-3-EX-02",
+          "fromPt": [
+            745.719,
+            424.249
+          ],
+          "toPt": [
+            514.686,
+            424.249
+          ],
+          "lengthM": 6.347,
+          "windows": []
+        },
+        {
+          "id": "level-3-EX-03",
+          "fromPt": [
+            514.686,
+            424.249
+          ],
+          "toPt": [
+            514.686,
+            567.309
+          ],
+          "lengthM": 3.93,
+          "windows": [
+            {
+              "id": "level-3-W-626-597",
+              "at": 0.4655,
+              "widthM": 1.05,
+              "sillM": 0.66,
+              "heightM": 1.43,
+              "status": "hypothetical-window-size-and-design",
+              "sourceHintPx": [
+                626,
+                597
+              ]
+            }
+          ]
+        },
+        {
+          "id": "level-3-EX-04",
+          "fromPt": [
+            514.686,
+            567.309
+          ],
+          "toPt": [
+            252.41,
+            567.309
+          ],
+          "lengthM": 7.205,
+          "windows": [
+            {
+              "id": "level-3-W-437-690",
+              "at": 0.5925,
+              "widthM": 1.15,
+              "sillM": 0.66,
+              "heightM": 1.43,
+              "status": "hypothetical-window-size-and-design",
+              "sourceHintPx": [
+                437,
+                690
+              ]
+            }
+          ]
+        },
+        {
+          "id": "level-3-EX-05",
+          "fromPt": [
+            252.41,
+            567.309
+          ],
+          "toPt": [
+            252.41,
+            191.57
+          ],
+          "lengthM": 10.322,
+          "windows": [
+            {
+              "id": "level-3-W-307-385",
+              "at": 0.6674,
+              "widthM": 1.0,
+              "sillM": 0.66,
+              "heightM": 1.43,
+              "status": "hypothetical-window-size-and-design",
+              "sourceHintPx": [
+                307,
+                385
+              ]
+            }
+          ]
+        }
+      ],
+      "planAreaM2": 114.95,
+      "windowsApproxCount": 6
+    },
+    "garage": {
+      "sourceSheet": "A-14",
+      "sourceViewport": {
+        "xPt": 114.32,
+        "yPt": 127.16,
+        "widthPt": 837.44,
+        "heightPt": 499.52
+      },
+      "status": "source-informed-provisional-exterior-silhouette",
+      "baseM": 0.0,
+      "displayWallHeightM": 2.65,
+      "outlinePt": [
+        [
+          221.167,
+          152.105
+        ],
+        [
+          591.149,
+          152.105
+        ],
+        [
+          591.149,
+          235.146
+        ],
+        [
+          699.677,
+          235.146
+        ],
+        [
+          699.677,
+          531.133
+        ],
+        [
+          148.815,
+          531.133
+        ],
+        [
+          148.815,
+          249.123
+        ],
+        [
+          221.167,
+          249.123
+        ]
+      ],
+      "facadeSegments": [
+        {
+          "id": "garage-EX-00",
+          "fromPt": [
+            221.167,
+            152.105
+          ],
+          "toPt": [
+            591.149,
+            152.105
+          ],
+          "lengthM": 10.164,
+          "windows": [
+            {
+              "id": "garage-W-472-185",
+              "at": 0.4511,
+              "widthM": 1.25,
+              "sillM": 0.95,
+              "heightM": 1.12,
+              "status": "hypothetical-window-size-and-design",
+              "sourceHintPx": [
+                472,
+                185
+              ]
+            },
+            {
+              "id": "garage-W-635-185",
+              "at": 0.8133,
+              "widthM": 1.25,
+              "sillM": 0.95,
+              "heightM": 1.12,
+              "status": "hypothetical-window-size-and-design",
+              "sourceHintPx": [
+                635,
+                185
+              ]
+            }
+          ]
+        },
+        {
+          "id": "garage-EX-01",
+          "fromPt": [
+            591.149,
+            152.105
+          ],
+          "toPt": [
+            591.149,
+            235.146
+          ],
+          "lengthM": 2.281,
+          "windows": [
+            {
+              "id": "garage-W-719-222",
+              "at": 0.3663,
+              "widthM": 0.85,
+              "sillM": 0.95,
+              "heightM": 1.12,
+              "status": "hypothetical-window-size-and-design",
+              "sourceHintPx": [
+                719,
+                222
+              ]
+            }
+          ]
+        },
+        {
+          "id": "garage-EX-02",
+          "fromPt": [
+            591.149,
+            235.146
+          ],
+          "toPt": [
+            699.677,
+            235.146
+          ],
+          "lengthM": 2.982,
+          "windows": []
+        },
+        {
+          "id": "garage-EX-03",
+          "fromPt": [
+            699.677,
+            235.146
+          ],
+          "toPt": [
+            699.677,
+            531.133
+          ],
+          "lengthM": 8.132,
+          "windows": [
+            {
+              "id": "garage-W-851-437",
+              "at": 0.4194,
+              "widthM": 1.4,
+              "sillM": 0.95,
+              "heightM": 1.12,
+              "status": "hypothetical-window-size-and-design",
+              "sourceHintPx": [
+                851,
+                437
+              ]
+            }
+          ]
+        },
+        {
+          "id": "garage-EX-04",
+          "fromPt": [
+            699.677,
+            531.133
+          ],
+          "toPt": [
+            148.815,
+            531.133
+          ],
+          "lengthM": 15.134,
+          "windows": []
+        },
+        {
+          "id": "garage-EX-05",
+          "fromPt": [
+            148.815,
+            531.133
+          ],
+          "toPt": [
+            148.815,
+            249.123
+          ],
+          "lengthM": 7.748,
+          "windows": [
+            {
+              "id": "garage-W-181-418",
+              "at": 0.6647,
+              "widthM": 0.85,
+              "sillM": 0.95,
+              "heightM": 1.12,
+              "status": "hypothetical-window-size-and-design",
+              "sourceHintPx": [
+                181,
+                418
+              ]
+            }
+          ]
+        },
+        {
+          "id": "garage-EX-06",
+          "fromPt": [
+            148.815,
+            249.123
+          ],
+          "toPt": [
+            221.167,
+            249.123
+          ],
+          "lengthM": 1.988,
+          "windows": []
+        },
+        {
+          "id": "garage-EX-07",
+          "fromPt": [
+            221.167,
+            249.123
+          ],
+          "toPt": [
+            221.167,
+            152.105
+          ],
+          "lengthM": 2.665,
+          "windows": [
+            {
+              "id": "garage-W-269-240",
+              "at": 0.5339,
+              "widthM": 1.15,
+              "sillM": 0.95,
+              "heightM": 1.12,
+              "status": "hypothetical-window-size-and-design",
+              "sourceHintPx": [
+                269,
+                240
+              ]
+            }
+          ]
+        }
+      ],
+      "planAreaM2": 145.48,
+      "windowsApproxCount": 6
+    }
+  },
+  "roof": {
+    "status": "conceptual-massing-only-not-source-verified",
+    "style": "contemporary-gable-and-flat-roof-demonstration",
+    "gableWings": [
+      {
+        "id": "attic-main",
+        "originSheet": "A-17",
+        "rectPt": [
+          [
+            250.766,
+            189.925
+          ],
+          [
+            749.008,
+            189.925
+          ],
+          [
+            749.008,
+            426.715
+          ],
+          [
+            250.766,
+            426.715
+          ]
+        ],
+        "eaveYMetres": 8.15,
+        "ridgeRiseM": 1.55,
+        "overhangM": 0.26,
+        "ridgeDirection": "x"
+      },
+      {
+        "id": "attic-south-wing",
+        "originSheet": "A-17",
+        "rectPt": [
+          [
+            252.41,
+            422.604
+          ],
+          [
+            517.153,
+            422.604
+          ],
+          [
+            517.153,
+            568.954
+          ],
+          [
+            252.41,
+            568.954
+          ]
+        ],
+        "eaveYMetres": 8.15,
+        "ridgeRiseM": 0.88,
+        "overhangM": 0.24,
+        "ridgeDirection": "x"
+      }
+    ],
+    "lowRoofs": [
+      {
+        "id": "west-north",
+        "outlinePt": [
+          [
+            132.371,
+            126.617
+          ],
+          [
+            251.588,
+            126.617
+          ],
+          [
+            251.588,
+            192.392
+          ],
+          [
+            559.084,
+            192.392
+          ],
+          [
+            559.084,
+            268.033
+          ],
+          [
+            345.317,
+            268.033
+          ],
+          [
+            345.317,
+            402.872
+          ],
+          [
+            132.371,
+            402.872
+          ]
+        ],
+        "heightM": 5.7
+      },
+      {
+        "id": "east-upper",
+        "outlinePt": [
+          [
+            749.83,
+            123.328
+          ],
+          [
+            773.674,
+            123.328
+          ],
+          [
+            773.674,
+            198.147
+          ],
+          [
+            913.445,
+            198.147
+          ],
+          [
+            913.445,
+            124.973
+          ],
+          [
+            1092.68,
+            124.973
+          ],
+          [
+            1092.68,
+            269.678
+          ],
+          [
+            914.267,
+            269.678
+          ],
+          [
+            914.267,
+            235.968
+          ],
+          [
+            749.008,
+            235.968
+          ]
+        ],
+        "heightM": 5.7
+      },
+      {
+        "id": "east-lower",
+        "outlinePt": [
+          [
+            913.445,
+            430.826
+          ],
+          [
+            1089.392,
+            430.826
+          ],
+          [
+            1089.392,
+            576.353
+          ],
+          [
+            913.445,
+            576.353
+          ]
+        ],
+        "heightM": 5.7
+      }
+    ]
+  },
+  "terrace": {
+    "sourceSheet": "A-20",
+    "roomNumber": 13,
+    "scheduleAreaM2": 22.51,
+    "status": "inferred-plan-outline-not-surveyed-edge",
+    "polygonPt": [
+      [
+        458.778,
+        406.161
+      ],
+      [
+        760.519,
+        406.161
+      ],
+      [
+        760.519,
+        494.957
+      ],
+      [
+        458.778,
+        494.957
+      ]
+    ],
+    "elevationM": 2.93,
+    "balustradeHeightM": 1.06,
+    "confirmedPosition": false
+  },
+  "garageAppendix": {
+    "sourceSheet": "A-14",
+    "status": "outline-present-but-conceptual-roof",
+    "outlinePt": [
+      [
+        753.119,
+        387.25
+      ],
+      [
+        915.911,
+        390.539
+      ],
+      [
+        913.445,
+        519.623
+      ],
+      [
+        756.408,
+        512.223
+      ]
+    ],
+    "heightM": 2.65
+  },
+  "garagePlacement": {
+    "mode": "isolated-only",
+    "rotationToHouseDegrees": 90,
+    "relationToHouse": "owner-reported-right-side-at-level-1",
+    "xyMeters": null,
+    "source": "owner clarification, no master plan",
+    "onSitePositionApproved": false
+  },
+  "context": {
+    "vegetation": "illustrative-only",
+    "ground": "illustrative-only",
+    "water": "not shown, no verified lake view in source"
+  }
+}
