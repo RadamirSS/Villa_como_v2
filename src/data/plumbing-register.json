@@ -1,0 +1,669 @@
+{
+  "A-22": {
+    "sheet": "A-22",
+    "page": 22,
+    "floor": "garage",
+    "rooms": [
+      2,
+      5
+    ],
+    "title": "Гараж · санузел и лаборатория",
+    "viewport": {
+      "width": 695.0,
+      "height": 327.0
+    },
+    "fixtures": [
+      {
+        "mark": "01",
+        "name": "Раковина",
+        "quantity": 1,
+        "sheet": "A-22",
+        "status": "specified"
+      },
+      {
+        "mark": "02",
+        "name": "Смеситель для раковины",
+        "quantity": 1,
+        "sheet": "A-22",
+        "status": "specified"
+      },
+      {
+        "mark": "03",
+        "name": "Инсталяция Geberit с белой кнопкой",
+        "quantity": 1,
+        "sheet": "A-22",
+        "status": "specified"
+      },
+      {
+        "mark": "04",
+        "name": "Унитаз подвесной Hansgrohe GladeLake S 540x360",
+        "quantity": 1,
+        "sheet": "A-22",
+        "status": "specified"
+      },
+      {
+        "mark": "05",
+        "name": "Гигиенический душ Hansgrohe Bidette 29232000",
+        "quantity": 1,
+        "sheet": "A-22",
+        "status": "specified"
+      },
+      {
+        "mark": "06",
+        "name": "Трап Hansgrohe RainDrain Flex 800мм",
+        "quantity": 1,
+        "sheet": "A-22",
+        "status": "specified"
+      },
+      {
+        "mark": "07",
+        "name": "Душевая стойка Hansgrohe Crometta S 240 1jet Showerpipe",
+        "quantity": 1,
+        "sheet": "A-22",
+        "status": "specified"
+      },
+      {
+        "mark": "08",
+        "name": "Кухонная мойка",
+        "quantity": 1,
+        "sheet": "A-22",
+        "status": "specified"
+      },
+      {
+        "mark": "09",
+        "name": "Кухонный смеситель",
+        "quantity": 1,
+        "sheet": "A-22",
+        "status": "specified"
+      }
+    ],
+    "confidence": "source-specifications",
+    "note": "Марки и наименования из таблицы PDF; координаты выводов показываются только на исходном листе, не перенесены в общий координатный базис."
+  },
+  "A-23": {
+    "sheet": "A-23",
+    "page": 23,
+    "floor": "level-1",
+    "rooms": [
+      3,
+      7
+    ],
+    "title": "Апартаменты · кухня и санузел",
+    "viewport": {
+      "width": 715.0,
+      "height": 343.0
+    },
+    "fixtures": [
+      {
+        "mark": "10",
+        "name": "Кухонная мойка",
+        "quantity": 1,
+        "sheet": "A-23",
+        "status": "specified"
+      },
+      {
+        "mark": "11",
+        "name": "Кухонный смеситель",
+        "quantity": 1,
+        "sheet": "A-23",
+        "status": "specified"
+      },
+      {
+        "mark": "12",
+        "name": "Раковина",
+        "quantity": 2,
+        "sheet": "A-23",
+        "status": "specified"
+      },
+      {
+        "mark": "13",
+        "name": "Смеситель для раковины Hansgrohe Talis E 150 71754000",
+        "quantity": 2,
+        "sheet": "A-23",
+        "status": "specified"
+      },
+      {
+        "mark": "14",
+        "name": "Трап Hansgrohe RainDrain Flex 1000мм",
+        "quantity": 1,
+        "sheet": "A-23",
+        "status": "specified"
+      },
+      {
+        "mark": "15",
+        "name": "Hansgrohe DuoTurn S Смеситель для душа встраиваемый на 2 потребителя",
+        "quantity": 1,
+        "sheet": "A-23",
+        "status": "specified"
+      },
+      {
+        "mark": "16а",
+        "name": "Душевая штанга с ручной лейкой Hansgrohe",
+        "quantity": 1,
+        "sheet": "A-23",
+        "status": "specified"
+      },
+      {
+        "mark": "17а",
+        "name": "Тропическая лейка Croma 280 Air 1jet",
+        "quantity": 1,
+        "sheet": "A-23",
+        "status": "specified"
+      },
+      {
+        "mark": "18",
+        "name": "Инсталяция Geberit с белой кнопкой",
+        "quantity": 1,
+        "sheet": "A-23",
+        "status": "specified"
+      },
+      {
+        "mark": "19",
+        "name": "Приставной унитаз Villeroy Boch o.nuovo",
+        "quantity": 1,
+        "sheet": "A-23",
+        "status": "specified"
+      },
+      {
+        "mark": "20",
+        "name": "Гигиенический душ Hansgrohe Bidette 29232000",
+        "quantity": 1,
+        "sheet": "A-23",
+        "status": "specified"
+      }
+    ],
+    "confidence": "source-specifications",
+    "note": "Марки и наименования из таблицы PDF; координаты выводов показываются только на исходном листе, не перенесены в общий координатный базис."
+  },
+  "A-24": {
+    "sheet": "A-24",
+    "page": 24,
+    "floor": "level-1",
+    "rooms": [
+      8,
+      9
+    ],
+    "title": "Первый этаж · хозяйственная и постирочная",
+    "viewport": {
+      "width": 665.0,
+      "height": 380.0
+    },
+    "fixtures": [
+      {
+        "mark": "21",
+        "name": "Кухонная мойка",
+        "quantity": 1,
+        "sheet": "A-24",
+        "status": "specified"
+      },
+      {
+        "mark": "22",
+        "name": "Кухонный смеситель",
+        "quantity": 1,
+        "sheet": "A-24",
+        "status": "specified"
+      },
+      {
+        "mark": "23",
+        "name": "Раковина",
+        "quantity": 1,
+        "sheet": "A-24",
+        "status": "specified"
+      },
+      {
+        "mark": "24",
+        "name": "Смеситель для раковины",
+        "quantity": 1,
+        "sheet": "A-24",
+        "status": "specified"
+      },
+      {
+        "mark": "25",
+        "name": "Инсталяция Geberit с белой кнопкой",
+        "quantity": 1,
+        "sheet": "A-24",
+        "status": "specified"
+      },
+      {
+        "mark": "26",
+        "name": "Унитаз подвесной Hansgrohe GladeLake S 540x360",
+        "quantity": 1,
+        "sheet": "A-24",
+        "status": "specified"
+      },
+      {
+        "mark": "27",
+        "name": "Гигиенический душ Hansgrohe Bidette 29232000",
+        "quantity": 1,
+        "sheet": "A-24",
+        "status": "specified"
+      }
+    ],
+    "confidence": "source-specifications",
+    "note": "Марки и наименования из таблицы PDF; координаты выводов показываются только на исходном листе, не перенесены в общий координатный базис."
+  },
+  "A-25": {
+    "sheet": "A-25",
+    "page": 25,
+    "floor": "level-1",
+    "rooms": [
+      12,
+      16,
+      18
+    ],
+    "title": "Первый этаж · кабинет, персонал и кухня",
+    "viewport": {
+      "width": 715.0,
+      "height": 435.0
+    },
+    "fixtures": [
+      {
+        "mark": "28",
+        "name": "Смеситель для раковины",
+        "quantity": 1,
+        "sheet": "A-25",
+        "status": "specified"
+      },
+      {
+        "mark": "29",
+        "name": "Раковина",
+        "quantity": 1,
+        "sheet": "A-25",
+        "status": "specified"
+      },
+      {
+        "mark": "30",
+        "name": "Смывной бачок скрытого монтажа Geberit Sigma 8 с латунной кнопкой Gessi",
+        "quantity": 1,
+        "sheet": "A-25",
+        "status": "specified"
+      },
+      {
+        "mark": "31",
+        "name": "Пристаной унитаз Ideal Standard Calla E222501",
+        "quantity": 1,
+        "sheet": "A-25",
+        "status": "specified"
+      },
+      {
+        "mark": "32",
+        "name": "Гигиенический душ Gessi",
+        "quantity": 1,
+        "sheet": "A-25",
+        "status": "specified"
+      },
+      {
+        "mark": "33",
+        "name": "Раковина",
+        "quantity": 1,
+        "sheet": "A-25",
+        "status": "specified"
+      },
+      {
+        "mark": "34",
+        "name": "Смеситель для раковины",
+        "quantity": 1,
+        "sheet": "A-25",
+        "status": "specified"
+      },
+      {
+        "mark": "35",
+        "name": "Инсталяция Geberit с белой кнопкой",
+        "quantity": 1,
+        "sheet": "A-25",
+        "status": "specified"
+      },
+      {
+        "mark": "36",
+        "name": "Унитаз подвесной Hansgrohe GladeLake S 540x360",
+        "quantity": 1,
+        "sheet": "A-25",
+        "status": "specified"
+      },
+      {
+        "mark": "37",
+        "name": "Гигиенический душ Hansgrohe Bidette 29232000",
+        "quantity": 1,
+        "sheet": "A-25",
+        "status": "specified"
+      },
+      {
+        "mark": "38",
+        "name": "Трап Hansgrohe RainDrain Flex 800мм",
+        "quantity": 1,
+        "sheet": "A-25",
+        "status": "specified"
+      },
+      {
+        "mark": "39",
+        "name": "Душевая стойка Hansgrohe Crometta S 240 1jet Showerpipe",
+        "quantity": 1,
+        "sheet": "A-25",
+        "status": "specified"
+      },
+      {
+        "mark": "40",
+        "name": "Кухонная мойка",
+        "quantity": 1,
+        "sheet": "A-25",
+        "status": "specified"
+      },
+      {
+        "mark": "41",
+        "name": "Кухонный смеситель",
+        "quantity": 1,
+        "sheet": "A-25",
+        "status": "specified"
+      }
+    ],
+    "confidence": "source-specifications",
+    "note": "Марки и наименования из таблицы PDF; координаты выводов показываются только на исходном листе, не перенесены в общий координатный базис."
+  },
+  "A-26": {
+    "sheet": "A-26",
+    "page": 26,
+    "floor": "level-2",
+    "rooms": [
+      4
+    ],
+    "title": "Второй этаж · мастер-санузел",
+    "viewport": {
+      "width": 565.0,
+      "height": 419.0
+    },
+    "fixtures": [
+      {
+        "mark": "42",
+        "name": "Раковина",
+        "quantity": 2,
+        "sheet": "A-26",
+        "status": "specified"
+      },
+      {
+        "mark": "43",
+        "name": "Смеситель для раковины",
+        "quantity": 2,
+        "sheet": "A-26",
+        "status": "specified"
+      },
+      {
+        "mark": "44",
+        "name": "Душевой трап Gessi Shower G, 900 мм, для серии Geberit Cleanline ,с латунной накладкой",
+        "quantity": 1,
+        "sheet": "A-26",
+        "status": "specified"
+      },
+      {
+        "mark": "45",
+        "name": "Смеситель для душа Gessi Venti20 термостатический, 5 запорных вентилей",
+        "quantity": 1,
+        "sheet": "A-26",
+        "status": "specified"
+      },
+      {
+        "mark": "46",
+        "name": "Излив Gessi Venti20",
+        "quantity": 1,
+        "sheet": "A-26",
+        "status": "specified"
+      },
+      {
+        "mark": "47",
+        "name": "Штанга для душа Gessi Venti20",
+        "quantity": 1,
+        "sheet": "A-26",
+        "status": "specified"
+      },
+      {
+        "mark": "48",
+        "name": "Потолочная душевая система Gessi 57016",
+        "quantity": 1,
+        "sheet": "A-26",
+        "status": "specified"
+      },
+      {
+        "mark": "49",
+        "name": "Ванна",
+        "quantity": 1,
+        "sheet": "A-26",
+        "status": "specified"
+      },
+      {
+        "mark": "50",
+        "name": "Смеситель для ванны Gessi Venti20 напольный",
+        "quantity": 1,
+        "sheet": "A-26",
+        "status": "specified"
+      },
+      {
+        "mark": "51",
+        "name": "Смывной бачок скрытого монтажа Geberit Sigma 8 с латунной кнопкой Gessi",
+        "quantity": 1,
+        "sheet": "A-26",
+        "status": "specified"
+      },
+      {
+        "mark": "52",
+        "name": "Пристаной унитаз Ideal Standard Calla E222501",
+        "quantity": 1,
+        "sheet": "A-26",
+        "status": "specified"
+      },
+      {
+        "mark": "53",
+        "name": "Гигиенический душ Gessi",
+        "quantity": 1,
+        "sheet": "A-26",
+        "status": "specified"
+      }
+    ],
+    "confidence": "source-specifications",
+    "note": "Марки и наименования из таблицы PDF; координаты выводов показываются только на исходном листе, не перенесены в общий координатный базис."
+  },
+  "A-27": {
+    "sheet": "A-27",
+    "page": 27,
+    "floor": "level-2",
+    "rooms": [
+      6
+    ],
+    "title": "Второй этаж · гостевой санузел",
+    "viewport": {
+      "width": 360.0,
+      "height": 435.0
+    },
+    "fixtures": [
+      {
+        "mark": "54",
+        "name": null,
+        "quantity": null,
+        "sheet": "A-27",
+        "status": "unresolved-row"
+      },
+      {
+        "mark": "55",
+        "name": "Смеситель для раковины",
+        "quantity": 1,
+        "sheet": "A-27",
+        "status": "specified"
+      },
+      {
+        "mark": "56",
+        "name": "Смывной бачок скрытого монтажа Geberit Sigma 8 с латунной кнопкой Gessi",
+        "quantity": 1,
+        "sheet": "A-27",
+        "status": "specified"
+      },
+      {
+        "mark": "57",
+        "name": "Приставной унитаз Villeroy Boch o.nuovo",
+        "quantity": 1,
+        "sheet": "A-27",
+        "status": "specified"
+      },
+      {
+        "mark": "58",
+        "name": "Гигиенический душ Gessi",
+        "quantity": 1,
+        "sheet": "A-27",
+        "status": "specified"
+      },
+      {
+        "mark": "59",
+        "name": "Душевой трап Gessi Shower G, 900 мм, для серии Geberit Cleanline ,с латунной накладкой",
+        "quantity": 1,
+        "sheet": "A-27",
+        "status": "specified"
+      },
+      {
+        "mark": "60",
+        "name": "Встроенный переключатель Gessi 727",
+        "quantity": 1,
+        "sheet": "A-27",
+        "status": "specified"
+      },
+      {
+        "mark": "61",
+        "name": "Штанга для душа Gessi Venti20",
+        "quantity": 1,
+        "sheet": "A-27",
+        "status": "specified"
+      },
+      {
+        "mark": "62",
+        "name": "Лейка для тропического душа Gessi 727",
+        "quantity": 1,
+        "sheet": "A-27",
+        "status": "specified"
+      }
+    ],
+    "confidence": "source-specifications",
+    "note": "Марки и наименования из таблицы PDF; координаты выводов показываются только на исходном листе, не перенесены в общий координатный базис."
+  },
+  "A-28": {
+    "sheet": "A-28",
+    "page": 28,
+    "floor": "level-2",
+    "rooms": [
+      10,
+      12
+    ],
+    "title": "Второй этаж · санузел и кухня",
+    "viewport": {
+      "width": 565.0,
+      "height": 405.0
+    },
+    "fixtures": [
+      {
+        "mark": "63",
+        "name": "Раковина",
+        "quantity": 1,
+        "sheet": "A-28",
+        "status": "specified"
+      },
+      {
+        "mark": "64",
+        "name": "Смеситель для раковины",
+        "quantity": 1,
+        "sheet": "A-28",
+        "status": "specified"
+      },
+      {
+        "mark": "65",
+        "name": "Смывной бачок скрытого монтажа Geberit Sigma 8 с латунной кнопкой Gessi",
+        "quantity": 1,
+        "sheet": "A-28",
+        "status": "specified"
+      },
+      {
+        "mark": "66",
+        "name": "Пристаной унитаз Ideal Standard Calla E222501",
+        "quantity": 1,
+        "sheet": "A-28",
+        "status": "specified"
+      },
+      {
+        "mark": "67",
+        "name": "Гигиенический душ Gessi",
+        "quantity": 1,
+        "sheet": "A-28",
+        "status": "specified"
+      },
+      {
+        "mark": "68",
+        "name": "Кухонный смеситель",
+        "quantity": 1,
+        "sheet": "A-28",
+        "status": "specified"
+      }
+    ],
+    "confidence": "source-specifications",
+    "note": "Марки и наименования из таблицы PDF; координаты выводов показываются только на исходном листе, не перенесены в общий координатный базис."
+  },
+  "A-29": {
+    "sheet": "A-29",
+    "page": 29,
+    "floor": "level-3",
+    "rooms": [
+      4
+    ],
+    "title": "Третий этаж · санузел",
+    "viewport": {
+      "width": 480.0,
+      "height": 385.0
+    },
+    "fixtures": [
+      {
+        "mark": "69",
+        "name": "Раковина",
+        "quantity": 1,
+        "sheet": "A-29",
+        "status": "specified"
+      },
+      {
+        "mark": "70",
+        "name": "Смеситель для раковины",
+        "quantity": 1,
+        "sheet": "A-29",
+        "status": "specified"
+      },
+      {
+        "mark": "71",
+        "name": "Инсталяция Geberit с белой кнопкой",
+        "quantity": 1,
+        "sheet": "A-29",
+        "status": "specified"
+      },
+      {
+        "mark": "72",
+        "name": "Унитаз подвесной Hansgrohe GladeLake S 540x360",
+        "quantity": 1,
+        "sheet": "A-29",
+        "status": "specified"
+      },
+      {
+        "mark": "73",
+        "name": "Гигиенический душ Hansgrohe Bidette 29232000",
+        "quantity": 1,
+        "sheet": "A-29",
+        "status": "specified"
+      },
+      {
+        "mark": "74",
+        "name": "Трап Hansgrohe RainDrain Flex 1000мм",
+        "quantity": 1,
+        "sheet": "A-29",
+        "status": "specified"
+      },
+      {
+        "mark": "75",
+        "name": "Душевая стойка Hansgrohe Crometta S 240 1jet Showerpipe",
+        "quantity": 1,
+        "sheet": "A-29",
+        "status": "specified"
+      }
+    ],
+    "confidence": "source-specifications",
+    "note": "Марки и наименования из таблицы PDF; координаты выводов показываются только на исходном листе, не перенесены в общий координатный базис."
+  }
+}

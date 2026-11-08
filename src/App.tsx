@@ -2,6 +2,10 @@ import { useEffect, useMemo, useRef, useState, type PointerEvent } from 'react'
 import { project, totalScheduledArea } from './domain/project'
 import rawPlans from './data/architectural-plans.json'
 import compressedTraces from './data/source-traces.json'
+import furnitureVectors from './data/furniture-vectors.json'
+import plumbingVectors from './data/plumbing-vectors.json'
+import plumbingRegister from './data/plumbing-register.json'
+import SourceVector from './components/SourceVector'
 import type { ArchitecturalPlan, ArchitecturalPlanSet, PlanRoom } from './data/plan-types'
 import type { FloorRecord } from './domain/types'
 
@@ -12,22 +16,28 @@ const area = (n: number) => format.format(n) + ' м²'
 const floorIds = ['level-1', 'level-2', 'level-3', 'garage'] as const
 const swingLabel = { left: 'Левое', right: 'Правое', double: 'Двустворчатое' } as const
 const partitionColor = { block: '#e3b95c', gypsum: '#dd9872', infill: '#7db5c1' }
-type PanelTab = 'rooms' | 'doors' | 'dimensions'
+type PanelTab = 'rooms' | 'plumbing' | 'doors' | 'dimensions'
+type PlumbingFixture = { mark: string; name: string | null; quantity: number | null; sheet: string; status: string }
+type PlumbingGroup = { sheet: string; page: number; floor: string; rooms: number[]; title: string; viewport: {width: number; height: number}; fixtures: PlumbingFixture[]; confidence: string; note: string }
+const plumbing = plumbingRegister as unknown as Record<string, PlumbingGroup>
+const plumbingByFloor = (id: string) => Object.values(plumbing).filter(p => p.floor === id)
+const totalSpecified = Object.values(plumbing).flatMap(p => p.fixtures).reduce((n, item) => n + (item.quantity ?? 0), 0)
 
-type ToggleLayers = { finish: boolean; construction: boolean; rooms: boolean }
+type ToggleLayers = { finish: boolean; construction: boolean; rooms: boolean; furniture: boolean; plumbing: boolean }
 
-function PlanViewer({ floor, data, selectedRoom, onSelectRoom }: {
+function PlanViewer({ floor, data, selectedRoom, onSelectRoom, onOpenPlumbing }: {
   floor: FloorRecord
   data: ArchitecturalPlan
   selectedRoom: number | null
   onSelectRoom: (value: number) => void
+  onOpenPlumbing: (sheet: string) => void
 }) {
   const [svg, setSvg] = useState<string>('')
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [zoom, setZoom] = useState(1)
   const [pan, setPan] = useState({ x: 0, y: 0 })
-  const [layers, setLayers] = useState<ToggleLayers>({ finish: true, construction: true, rooms: true })
+  const [layers, setLayers] = useState<ToggleLayers>({ finish: true, construction: false, rooms: true, furniture: true, plumbing: true })
   const stage = useRef<HTMLDivElement>(null)
   const pointer = useRef<{ pointerId: number; x: number; y: number; startX: number; startY: number } | null>(null)
 
@@ -95,7 +105,7 @@ function PlanViewer({ floor, data, selectedRoom, onSelectRoom }: {
     <div className="plan-top-strip">
       <div className="plan-title">
         <span className="live-indicator" />
-        <span>АРХИТЕКТУРНЫЙ 2D · ЛИНИИ ИЗ PDF</span>
+        <span>{layers.furniture ? 'МЕБЕЛИРОВАНИЕ · ИСХОДНЫЕ ВЕКТОРЫ ' + data.furnitureSheet : 'АРХИТЕКТУРНЫЙ 2D · ' + data.finalSheet}</span>
       </div>
       <div className="plan-controls">
         <button aria-label="Уменьшить" title="Уменьшить" onClick={() => changeZoom(1 / 1.2)}>−</button>
@@ -106,7 +116,13 @@ function PlanViewer({ floor, data, selectedRoom, onSelectRoom }: {
     </div>
     <div className="layer-bar" aria-label="Слои проекта">
       <span>СЛОИ</span>
-      <button className={layers.finish ? 'layer-active' : ''} onClick={() => toggle('finish')} aria-pressed={layers.finish}>
+      <button className={layers.furniture ? 'layer-active' : ''} onClick={() => toggle('furniture')} aria-pressed={layers.furniture}>
+        <i className="layer-marker furniture-marker" /> Мебель · {data.furnitureSheet}
+      </button>
+      <button className={layers.plumbing ? 'layer-active' : ''} onClick={() => toggle('plumbing')} aria-pressed={layers.plumbing}>
+        <i className="layer-marker plumbing-marker" /> Сантехнические зоны
+      </button>
+      <button disabled={layers.furniture} title={layers.furniture ? 'Переключитесь на архитектуру' : undefined} className={layers.finish ? 'layer-active' : ''} onClick={() => toggle('finish')} aria-pressed={layers.finish}>
         <i className="layer-marker finish-marker" /> Чистовые грани
       </button>
       <button className={layers.construction ? 'layer-active' : ''} onClick={() => toggle('construction')} aria-pressed={layers.construction}>
@@ -122,8 +138,15 @@ function PlanViewer({ floor, data, selectedRoom, onSelectRoom }: {
           <div className={'vector-document ' + (!layers.finish ? 'finish-hidden' : '')} style={{ aspectRatio: data.viewport.width + '/' + data.viewport.height }}>
             {loading && <div className="plan-loading">Загрузка исходных векторов…</div>}
             {error && <div className="plan-error">Не удалось загрузить векторный чертёж: {error}</div>}
-            {!!svg && <div className="vector-ink" dangerouslySetInnerHTML={{ __html: svg }} />}
+            {layers.furniture ? <SourceVector key={floor.id} encoded={furnitureVectors[floor.id]} alt={`Векторный мебельный план ${data.furnitureSheet}`} className="furniture-source-art" /> : !!svg && <div className="vector-ink" dangerouslySetInnerHTML={{ __html: svg }} />}
             <svg className="plan-overlay" viewBox={`0 0 ${data.viewport.width} ${data.viewport.height}`} role="img" aria-label="Проектные перегородки и номера помещений">
+              {layers.plumbing && plumbingByFloor(floor.id).flatMap(group => group.rooms.map(roomNum => {
+                const rm = data.rooms.find(item => item.number === roomNum)
+                if (!rm?.marker) return null
+                return <g key={group.sheet + '-' + roomNum} data-room-marker="true" transform={`translate(${rm.marker[0] + 16},${rm.marker[1] - 14})`} className="plumbing-pin" role="button" tabIndex={0}
+                  onClick={event => { event.stopPropagation(); onOpenPlumbing(group.sheet) }} onPointerDown={event => event.stopPropagation()}
+                  aria-label={`Сантехника ${group.sheet} · ${rm.name}`}><circle r="7.5"/><text textAnchor="middle" dominantBaseline="central">✚</text><title>Сантехнический лист {group.sheet} для помещения № {roomNum}: {rm.name}. Точка служит навигацией, не монтажной привязкой.</title></g>
+              }))}
               {layers.construction && data.newPartitionShapes.map((region, i) => <rect key={i} x={region.x} y={region.y} width={region.width} height={region.height}
                 fill={partitionColor[region.kind]} stroke="none" opacity="0.87" />)}
               {layers.rooms && data.rooms.filter((room): room is PlanRoom & { marker: [number, number] } => room.marker !== null).map(room => <g
@@ -141,20 +164,21 @@ function PlanViewer({ floor, data, selectedRoom, onSelectRoom }: {
         </div>
       </div>
       <div className="corner-axis corner-axis-tl">X / ARCH</div>
-      <div className="corner-axis corner-axis-br">SOURCE: {data.finalSheet} · МАСШТАБ ЭКРАНА НЕ ФИКСИРОВАН</div>
+      <div className="corner-axis corner-axis-br">SOURCE: {layers.furniture ? data.furnitureSheet : data.finalSheet} · ЭКРАННЫЙ МАСШТАБ УСЛОВНЫЙ</div>
     </div>
     <div className="plan-footbar">
-      <span>Векторный контур из {data.finalSheet} · монтаж {data.installSheet} · маркировка {data.furnitureSheet}</span>
-      <button type="button" onClick={downloadSvg} disabled={!svg}>Скачать SVG ↗</button>
+      <span>{layers.furniture ? `Мебель по ${data.furnitureSheet}: исходное расположение, не отдельные BIM-объекты` : `Чистовые контуры ${data.finalSheet} · монтаж ${data.installSheet}`}</span>
+      <button type="button" onClick={downloadSvg} disabled={!svg}>Архитектурный SVG ↗</button>
     </div>
   </div>
 }
 
-function InfoPanel({ floor, data, selectedRoom, onSelectRoom }: {
+function InfoPanel({ floor, data, selectedRoom, onSelectRoom, onOpenPlumbing }: {
   floor: FloorRecord
   data: ArchitecturalPlan
   selectedRoom: number | null
   onSelectRoom: (value: number) => void
+  onOpenPlumbing: (sheet: string) => void
 }) {
   const [tab, setTab] = useState<PanelTab>('rooms')
   const [query, setQuery] = useState('')
@@ -173,6 +197,7 @@ function InfoPanel({ floor, data, selectedRoom, onSelectRoom }: {
     </div>
     <div className="info-tabs" role="tablist" aria-label="Данные этажа">
       <button className={tab === 'rooms' ? 'selected' : ''} role="tab" aria-selected={tab === 'rooms'} onClick={() => setTab('rooms')}>Помещения</button>
+      <button className={tab === 'plumbing' ? 'selected' : ''} role="tab" aria-selected={tab === 'plumbing'} onClick={() => setTab('plumbing')}>Сантехника</button>
       <button className={tab === 'doors' ? 'selected' : ''} role="tab" aria-selected={tab === 'doors'} onClick={() => setTab('doors')}>Двери</button>
       <button className={tab === 'dimensions' ? 'selected' : ''} role="tab" aria-selected={tab === 'dimensions'} onClick={() => setTab('dimensions')}>Размеры</button>
     </div>
@@ -186,6 +211,14 @@ function InfoPanel({ floor, data, selectedRoom, onSelectRoom }: {
           {filtered.length === 0 && <p className="empty-search">Совпадений нет</p>}
         </div>
         <p className="source-note">Значения из {data.furnitureSheet}. Круги на плане привязаны к напечатанным номерам, а не рассчитаны как центроиды BIM-полигонов.</p>
+      </>}
+      {tab === 'plumbing' && <>
+        <p className="source-note">Точные марки приборов, количества и исходные планы выводов по A-22–A-29. Для просмотра нажмите на рабочий лист. Координаты выводов не выдуманы.</p>
+        {plumbingByFloor(floor.id).filter(group => selectedRoom === null || group.rooms.includes(selectedRoom)).map(group => <div className="plumbing-group" key={group.sheet}>
+          <div className="plumbing-group-head"><div><span>{group.sheet} · {group.fixtures.length} марок</span><b>{group.title}</b></div><button onClick={() => onOpenPlumbing(group.sheet)}>Смотреть план ↗</button></div>
+          {group.fixtures.map(item => <div key={item.mark} className="fixture-row"><span className="fixture-mark">{item.mark}</span><span>{item.name ?? 'Позиция обозначена на плане; описание не извлечено из ведомости'}{item.status !== 'specified' && <small>Требует проверки PDF</small>}</span><b>{item.quantity !== null ? '×' + item.quantity : '?'}</b></div>)}
+        </div>)}
+        {selectedRoom !== null && !plumbingByFloor(floor.id).some(group => group.rooms.includes(selectedRoom)) && <p className="source-note">Для выбранного помещения отдельный сантехнический лист в A-22–A-29 не указан. Снимите выделение, чтобы увидеть все схемы этажа.</p>}
       </>}
       {tab === 'doors' && <>
         <p className="source-note">Спецификация чистовых проёмов {data.finalSheet}. Размеры в мм, обозначения и направления открывания сохранены по рабочему листу.</p>
@@ -210,44 +243,58 @@ function InfoPanel({ floor, data, selectedRoom, onSelectRoom }: {
   </aside>
 }
 
+function PlumbingDetail({ sheet, onClose }: { sheet: string; onClose: () => void }) {
+  const group = plumbing[sheet]
+  if (!group) return null
+  return <div className="plumbing-backdrop" role="presentation" onClick={onClose}><section className="plumbing-modal" role="dialog" aria-modal="true" aria-labelledby="plumbing-modal-title" onClick={event => event.stopPropagation()}>
+    <div className="plumbing-modal-head"><div><span className="section-index">ИСХОДНЫЙ САНТЕХНИЧЕСКИЙ ЧЕРТЁЖ · {sheet}</span><h2 id="plumbing-modal-title">{group.title}</h2></div><button aria-label="Закрыть" onClick={onClose}>×</button></div>
+    <div className="plumbing-modal-body"><div className="plumbing-detail-art"><SourceVector encoded={plumbingVectors[sheet as keyof typeof plumbingVectors]} alt={`Исходный план выводов ${sheet}`} /></div>
+      <div className="plumbing-detail-list"><h3>Спецификация по {sheet}</h3><p>Графика взята из рабочего листа. Размеры на нём проектные, от чистового пола, требуют контрольных замеров.</p>
+        {group.fixtures.map(item => <div className="fixture-row" key={item.mark}><span className="fixture-mark">{item.mark}</span><span>{item.name ?? 'Неясная строка ведомости'}</span><b>{item.quantity ?? '?'}</b></div>)}
+        <p className="source-note">Точки на общем плане только открывают эту схему. A-22–A-29 выполнены в масштабе 1:35; их координаты пока не сопоставлены с полной моделью здания.</p>
+      </div></div>
+  </section></div>
+}
+
 export default function App() {
   const [floorId, setFloorId] = useState<typeof floorIds[number]>('level-1')
   const [selectedRoom, setSelectedRoom] = useState<number | null>(null)
   const [infoExpanded, setInfoExpanded] = useState(false)
+  const [openPlumbingSheet, setOpenPlumbingSheet] = useState<string | null>(null)
   const floor = useMemo(() => project.floors.find(item => item.id === floorId)!, [floorId])
   const data = plans.floors[floorId]
   const doorsTotal = Object.values(plans.floors).reduce((sum, item) => sum + item.doorSpecification.reduce((v, door) => v + door.count, 0), 0)
-  const chooseFloor = (id: typeof floorIds[number]) => { setFloorId(id); setSelectedRoom(null) }
+  const chooseFloor = (id: typeof floorIds[number]) => { setFloorId(id); setSelectedRoom(null); setOpenPlumbingSheet(null) }
   const selectRoom = (number: number) => setSelectedRoom(previous => previous === number ? null : number)
   return <div className="app-shell">
     <nav className="side-rail" aria-label="Навигация"><a href="/" aria-label="Villa Como v2" className="brand-mark">V<span>.</span>C</a><div className="rail-rule"><i /><i /><i /></div><span className="rail-caption">MÈTRE<br/>2026</span></nav>
     <main className="main-content">
       <header className="topbar">
-        <div className="breadcrumbs"><span>VILLA COMO</span><i>/</i><b>2D ARCHITECTURE</b><i>/</i><span>ЭТАП 01</span></div>
-        <div className="header-actions"><span className="status-light" /> <span>ПРОЕКТНЫЕ ЛИНИИ ПЕРЕНЕСЕНЫ</span> <a href="https://github.com/RadamirSS/Villa_como_v2" target="_blank" rel="noreferrer">GitHub ↗</a></div>
+        <div className="breadcrumbs"><span>VILLA COMO</span><i>/</i><b>2D INTERIORS</b><i>/</i><span>ЭТАП 02</span></div>
+        <div className="header-actions"><span className="status-light" /> <span>МЕБЕЛЬ И САНТЕХНИКА ИЗ PDF</span> <a href="https://github.com/RadamirSS/Villa_como_v2" target="_blank" rel="noreferrer">GitHub ↗</a></div>
       </header>
       <div className="page-content">
         <div className="intro">
-          <div className="eyebrow"><span className="eyebrow-line" /> CAD-SOURCED ARCHITECTURAL PLANS <span className="muted">/ 01</span></div>
+          <div className="eyebrow"><span className="eyebrow-line" /> CAD-SOURCED FURNISHING & PLUMBING <span className="muted">/ 02</span></div>
           <h1>Villa <em>Como.</em></h1>
-          <div className="intro-bottom"><p>Архитектура без догадок: исходные векторные линии, помещение за помещением, с привязкой к рабочим листам MÈTRE.</p><span className="intro-step"><span>ЭТАП ПРОЕКТА</span><b>01<small>/03</small></b><small>Двумерная архитектура</small></span></div>
+          <div className="intro-bottom"><p>Меблирование и сантехнические планы из исходных чертежей MÈTRE: без выдуманной расстановки и с проверяемыми марками приборов.</p><span className="intro-step"><span>ЭТАП ПРОЕКТА</span><b>02<small>/03</small></b><small>Мебель · сантехника</small></span></div>
         </div>
         <section className="metrics" aria-label="Показатели проекта">
           <div><span>УРОВНИ</span><strong>04</strong><small>3 этажа и гараж</small></div>
           <div><span>ПЛОЩАДЬ ПО ВЕДОМОСТЯМ</span><strong>{area(totalScheduledArea)}</strong><small>без подмены геометрическими расчётами</small></div>
           <div><span>ПОЗИЦИИ ПОМЕЩЕНИЙ</span><strong>44</strong><small>7 + 19 + 13 + 5</small></div>
-          <div><span>МАРКИ ДВЕРЕЙ / ПРОЁМОВ</span><strong>{doorsTotal}</strong><small>по A-14–A-17</small></div>
+          <div><span>САНТЕХНИЧЕСКИЕ ПОЗИЦИИ</span><strong>{totalSpecified}</strong><small>по A-22–A-29 · количество изделий</small></div>
         </section>
         <section className="architecture-section">
-          <div className="section-head"><div><span className="section-index">01 / ARCHITECTURAL WORKSPACE</span><h2>Планы помещений</h2></div><span className="verified-state"><i /> ВЕКТОРЫ ИЗ ИСХОДНОГО PDF</span></div>
+          <div className="section-head"><div><span className="section-index">01 / ARCHITECTURAL WORKSPACE</span><h2>Мебельные планы и сантехника</h2></div><span className="verified-state"><i /> ВЕКТОРЫ ИЗ ИСХОДНОГО PDF</span></div>
           <div className="floor-navigation" role="tablist" aria-label="Выбор этажа">
             {floorIds.map((id, i) => <button role="tab" aria-selected={floorId === id} key={id} className={'floor-choice ' + (id === floorId ? 'active' : '')} onClick={() => chooseFloor(id)}>
               <b>{id === 'garage' ? 'G' : String(i + 1).padStart(2, '0')}</b><span>{id === 'garage' ? 'Гараж' : (i + 1) + ' этаж'}</span><small>{area(project.floors.find(f => f.id === id)!.scheduleAreaM2)}</small>
             </button>)}
           </div>
           <div className="workspace-grid">
-            <PlanViewer floor={floor} data={data} selectedRoom={selectedRoom} onSelectRoom={selectRoom} />
-            <InfoPanel floor={floor} data={data} selectedRoom={selectedRoom} onSelectRoom={selectRoom} />
+            <PlanViewer floor={floor} data={data} selectedRoom={selectedRoom} onSelectRoom={selectRoom} onOpenPlumbing={setOpenPlumbingSheet} />
+            <InfoPanel floor={floor} data={data} selectedRoom={selectedRoom} onSelectRoom={selectRoom} onOpenPlumbing={setOpenPlumbingSheet} />
           </div>
         </section>
         <section className="provenance-section">
@@ -256,14 +303,15 @@ export default function App() {
             <div><span>ОБМЕРНЫЙ ПЛАН</span><b>{data.measuredSheet}</b><p>Первоначальные размеры и отметки</p></div>
             <div><span>ПЛАН МОНТАЖА</span><b>{data.installSheet}</b><p>Возводимые перегородки и зашивки</p></div>
             <div><span>ЧИСТОВЫЕ ПРОЁМЫ</span><b>{data.finalSheet}</b><p>Контуры стен, двери, чистовые грани</p></div>
-            <div><span>МЕБЕЛЬНЫЙ ПЛАН</span><b>{data.furnitureSheet}</b><p>Номера и площади помещений</p></div>
+            <div><span>МЕБЕЛЬНЫЙ ПЛАН</span><b>{data.furnitureSheet}</b><p>Мебель и планировочные позиции</p></div>
           </div>
         </section>
-        <div className="audit-note"><div><span>!</span><strong>Граница достоверности</strong></div><p>Отображаемые стены и линии являются прямым извлечением векторной графики проектного PDF (A‑14–A‑17), а не повторной ручной обводкой. Номера помещений привязаны к напечатанным меткам на A‑18–A‑21. <b>Метрическая BIM-модель пока не готова:</b> отсутствует семантическая разбивка всех стен на измеренные сегменты, не закрыты все размерные цепочки и не привязаны дверные марки к ID стен. Поэтому план нельзя использовать для изготовления дверей или строительства без контрольного обмера.</p></div>
+        <div className="audit-note"><div><span>!</span><strong>Граница достоверности</strong></div><p>Архитектурные и мебельные слои получены из векторной графики проектного PDF (A‑14–A‑21) с регистрацией общих конструкций. Сантехнические детали A‑22–A‑29 показываются в исходном масштабе и со спецификацией; точки на общем плане — навигационные, не монтажные. <b>Метрическая BIM-модель пока не готова:</b> отсутствует семантическая разбивка всех стен на измеренные сегменты, не закрыты все размерные цепочки и не привязаны дверные марки к ID стен. Поэтому план нельзя использовать для изготовления дверей или строительства без контрольного обмера.</p></div>
         <div className="bottom-actions"><a href="https://github.com/RadamirSS/Villa_como_v2/tree/main/docs" target="_blank" rel="noreferrer">Методика и незакрытые вопросы ↗</a><button onClick={() => setInfoExpanded(!infoExpanded)}>{infoExpanded ? 'Скрыть требования к 3D' : 'Что нужно для точного 3D?'} <span>{infoExpanded ? '−' : '+'}</span></button></div>
         {infoExpanded && <div className="expanded-note">Следующий инженерный шаг: привязать все текущие векторные контуры к координатам в целых миллиметрах, формализовать стенные сегменты, их толщины и проёмы, проверить замкнутые размерные цепочки по A‑03–A‑17 и согласовать межэтажные отметки. Только после этого один набор данных будет надёжно генерировать 2D и 3D.</div>}
         <footer><span>VILLA COMO / DIGITAL DESIGN</span><span>MÈTRE · Рабочая документация</span><span>© 2026</span></footer>
       </div>
     </main>
+    {openPlumbingSheet && <PlumbingDetail sheet={openPlumbingSheet} onClose={() => setOpenPlumbingSheet(null)} />}
   </div>
 }
