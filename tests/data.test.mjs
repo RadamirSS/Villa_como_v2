@@ -4,7 +4,7 @@ import test from 'node:test'
 const manifest = JSON.parse(readFileSync(new URL('../src/data/project.json',import.meta.url),'utf8'))
 const plans = JSON.parse(readFileSync(new URL('../src/data/architectural-plans.json',import.meta.url),'utf8'))
 test('source inventory accounts for all four project levels',()=>{
-  assert.equal(manifest.phase,2)
+  assert.equal(manifest.phase,3)
   assert.deepEqual(manifest.floors.map(f=>f.id),['garage','level-1','level-2','level-3'])
   assert.deepEqual(manifest.floors.map(f=>f.scheduleSheet),['A-18','A-19','A-20','A-21'])
 })

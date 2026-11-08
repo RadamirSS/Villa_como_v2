@@ -6,6 +6,7 @@ import furnitureVectors from './data/furniture-vectors.json'
 import plumbingVectors from './data/plumbing-vectors.json'
 import plumbingRegister from './data/plumbing-register.json'
 import SourceVector from './components/SourceVector'
+import Villa3D from './components/Villa3D'
 import type { ArchitecturalPlan, ArchitecturalPlanSet, PlanRoom } from './data/plan-types'
 import type { FloorRecord } from './domain/types'
 
@@ -21,7 +22,6 @@ type PlumbingFixture = { mark: string; name: string | null; quantity: number | n
 type PlumbingGroup = { sheet: string; page: number; floor: string; rooms: number[]; title: string; viewport: {width: number; height: number}; fixtures: PlumbingFixture[]; confidence: string; note: string }
 const plumbing = plumbingRegister as unknown as Record<string, PlumbingGroup>
 const plumbingByFloor = (id: string) => Object.values(plumbing).filter(p => p.floor === id)
-const totalSpecified = Object.values(plumbing).flatMap(p => p.fixtures).reduce((n, item) => n + (item.quantity ?? 0), 0)
 
 type ToggleLayers = { finish: boolean; construction: boolean; rooms: boolean; furniture: boolean; plumbing: boolean }
 
@@ -258,6 +258,7 @@ function PlumbingDetail({ sheet, onClose }: { sheet: string; onClose: () => void
 
 export default function App() {
   const [floorId, setFloorId] = useState<typeof floorIds[number]>('level-1')
+  const [displayMode, setDisplayMode] = useState<'3d' | '2d'>('3d')
   const [selectedRoom, setSelectedRoom] = useState<number | null>(null)
   const [infoExpanded, setInfoExpanded] = useState(false)
   const [openPlumbingSheet, setOpenPlumbingSheet] = useState<string | null>(null)
@@ -269,30 +270,30 @@ export default function App() {
     <nav className="side-rail" aria-label="Навигация"><a href="/" aria-label="Villa Como v2" className="brand-mark">V<span>.</span>C</a><div className="rail-rule"><i /><i /><i /></div><span className="rail-caption">MÈTRE<br/>2026</span></nav>
     <main className="main-content">
       <header className="topbar">
-        <div className="breadcrumbs"><span>VILLA COMO</span><i>/</i><b>2D INTERIORS</b><i>/</i><span>ЭТАП 02</span></div>
-        <div className="header-actions"><span className="status-light" /> <span>МЕБЕЛЬ И САНТЕХНИКА ИЗ PDF</span> <a href="https://github.com/RadamirSS/Villa_como_v2" target="_blank" rel="noreferrer">GitHub ↗</a></div>
+        <div className="breadcrumbs"><span>VILLA COMO</span><i>/</i><b>INTERACTIVE 3D</b><i>/</i><span>ЭТАП 03</span></div>
+        <div className="header-actions"><span className="status-light" /> <span>3D СТРОИТСЯ ИЗ 2D ИСХОДНИКОВ</span> <a href="https://github.com/RadamirSS/Villa_como_v2" target="_blank" rel="noreferrer">GitHub ↗</a></div>
       </header>
       <div className="page-content">
         <div className="intro">
-          <div className="eyebrow"><span className="eyebrow-line" /> CAD-SOURCED FURNISHING & PLUMBING <span className="muted">/ 02</span></div>
+          <div className="eyebrow"><span className="eyebrow-line" /> SOURCE-DRIVEN ARCHITECTURAL 3D <span className="muted">/ 03</span></div>
           <h1>Villa <em>Como.</em></h1>
-          <div className="intro-bottom"><p>Меблирование и сантехнические планы из исходных чертежей MÈTRE: без выдуманной расстановки и с проверяемыми марками приборов.</p><span className="intro-step"><span>ЭТАП ПРОЕКТА</span><b>02<small>/03</small></b><small>Мебель · сантехника</small></span></div>
+          <div className="intro-bottom"><p>3D-сцена автоматически строится из конструктивных контуров PDF. Переключайтесь между объёмом и исходными 2D-чертежами и проверяйте помещения, мебель и сантехнические схемы.</p><span className="intro-step"><span>ЭТАП ПРОЕКТА</span><b>03<small>/03</small></b><small>Автоматическое 3D</small></span></div>
         </div>
         <section className="metrics" aria-label="Показатели проекта">
           <div><span>УРОВНИ</span><strong>04</strong><small>3 этажа и гараж</small></div>
           <div><span>ПЛОЩАДЬ ПО ВЕДОМОСТЯМ</span><strong>{area(totalScheduledArea)}</strong><small>без подмены геометрическими расчётами</small></div>
           <div><span>ПОЗИЦИИ ПОМЕЩЕНИЙ</span><strong>44</strong><small>7 + 19 + 13 + 5</small></div>
-          <div><span>САНТЕХНИЧЕСКИЕ ПОЗИЦИИ</span><strong>{totalSpecified}</strong><small>по A-22–A-29 · количество изделий</small></div>
+          <div><span>ИСТОЧНИКИ ДЛЯ 3D</span><strong>04</strong><small>контурные планы A-14–A-17</small></div>
         </section>
         <section className="architecture-section">
-          <div className="section-head"><div><span className="section-index">01 / ARCHITECTURAL WORKSPACE</span><h2>Мебельные планы и сантехника</h2></div><span className="verified-state"><i /> ВЕКТОРЫ ИЗ ИСХОДНОГО PDF</span></div>
+          <div className="section-head"><div><span className="section-index">01 / ARCHITECTURAL WORKSPACE</span><h2>3D-модель и проектные 2D-чертежи</h2></div><div className="design-mode-tabs" role="tablist" aria-label="Формат просмотра"><button role="tab" aria-selected={displayMode === '3d'} className={displayMode === '3d' ? 'selected' : ''} onClick={() => setDisplayMode('3d')}>◈ 3D модель</button><button role="tab" aria-selected={displayMode === '2d'} className={displayMode === '2d' ? 'selected' : ''} onClick={() => setDisplayMode('2d')}>▤ 2D чертёж</button></div></div>
           <div className="floor-navigation" role="tablist" aria-label="Выбор этажа">
             {floorIds.map((id, i) => <button role="tab" aria-selected={floorId === id} key={id} className={'floor-choice ' + (id === floorId ? 'active' : '')} onClick={() => chooseFloor(id)}>
               <b>{id === 'garage' ? 'G' : String(i + 1).padStart(2, '0')}</b><span>{id === 'garage' ? 'Гараж' : (i + 1) + ' этаж'}</span><small>{area(project.floors.find(f => f.id === id)!.scheduleAreaM2)}</small>
             </button>)}
           </div>
           <div className="workspace-grid">
-            <PlanViewer floor={floor} data={data} selectedRoom={selectedRoom} onSelectRoom={selectRoom} onOpenPlumbing={setOpenPlumbingSheet} />
+            {displayMode === '3d' ? <Villa3D floorId={floorId} selectedRoom={selectedRoom} onSelectRoom={selectRoom} /> : <PlanViewer floor={floor} data={data} selectedRoom={selectedRoom} onSelectRoom={selectRoom} onOpenPlumbing={setOpenPlumbingSheet} />}
             <InfoPanel floor={floor} data={data} selectedRoom={selectedRoom} onSelectRoom={selectRoom} onOpenPlumbing={setOpenPlumbingSheet} />
           </div>
         </section>
@@ -305,9 +306,9 @@ export default function App() {
             <div><span>МЕБЕЛЬНЫЙ ПЛАН</span><b>{data.furnitureSheet}</b><p>Мебель и планировочные позиции</p></div>
           </div>
         </section>
-        <div className="audit-note"><div><span>!</span><strong>Граница достоверности</strong></div><p>Архитектурные и мебельные слои получены из векторной графики проектного PDF (A‑14–A‑21) с регистрацией общих конструкций. Сантехнические детали A‑22–A‑29 показываются в исходном масштабе и со спецификацией; точки на общем плане — навигационные, не монтажные. <b>Метрическая BIM-модель пока не готова:</b> отсутствует семантическая разбивка всех стен на измеренные сегменты, не закрыты все размерные цепочки и не привязаны дверные марки к ID стен. Поэтому план нельзя использовать для изготовления дверей или строительства без контрольного обмера.</p></div>
-        <div className="bottom-actions"><a href="https://github.com/RadamirSS/Villa_como_v2/tree/main/docs" target="_blank" rel="noreferrer">Методика и незакрытые вопросы ↗</a><button onClick={() => setInfoExpanded(!infoExpanded)}>{infoExpanded ? 'Скрыть требования к 3D' : 'Что нужно для точного 3D?'} <span>{infoExpanded ? '−' : '+'}</span></button></div>
-        {infoExpanded && <div className="expanded-note">Следующий инженерный шаг: привязать все текущие векторные контуры к координатам в целых миллиметрах, формализовать стенные сегменты, их толщины и проёмы, проверить замкнутые размерные цепочки по A‑03–A‑17 и согласовать межэтажные отметки. Только после этого один набор данных будет надёжно генерировать 2D и 3D.</div>}
+        <div className="audit-note"><div><span>!</span><strong>Граница достоверности 3D</strong></div><p>3D генерируется из извлечённых CAD-заливок серых стен исходных A-14–A-17. Масштаб откалиброван приблизительно по размерным цепочкам, а высоты стен, поверхности перекрытий и уровень третьего этажа являются <b>демонстрационными</b>. У мебели пока нет отдельной 3D-геометрии — она показана исходной 2D-проекцией. Кровля, полный набор окон и геометрия участка не построены. Архитектурные и мебельные слои получены из векторной графики проектного PDF (A‑14–A‑21) с регистрацией общих конструкций. Сантехнические детали A‑22–A‑29 показываются в исходном масштабе и со спецификацией; точки на общем плане — навигационные, не монтажные. <b>Метрическая BIM-модель пока не готова:</b> отсутствует семантическая разбивка всех стен на измеренные сегменты, не закрыты все размерные цепочки и не привязаны дверные марки к ID стен. Поэтому план нельзя использовать для изготовления дверей или строительства без контрольного обмера.</p></div>
+        <div className="bottom-actions"><a href="https://github.com/RadamirSS/Villa_como_v2/tree/main/docs" target="_blank" rel="noreferrer">Методика и незакрытые вопросы ↗</a><button onClick={() => setInfoExpanded(!infoExpanded)}>{infoExpanded ? 'Скрыть инженерные требования' : 'Что необходимо для BIM-точности?'} <span>{infoExpanded ? '−' : '+'}</span></button></div>
+        {infoExpanded && <div className="expanded-note">Следующий инженерный шаг после автоматического 3D-прототипа: привязать все текущие векторные контуры к координатам в целых миллиметрах, формализовать стенные сегменты, их толщины и проёмы, проверить замкнутые размерные цепочки по A‑03–A‑17 и согласовать межэтажные отметки. Только после этого один набор данных будет надёжно генерировать 2D и 3D.</div>}
         <footer><span>VILLA COMO / DIGITAL DESIGN</span><span>MÈTRE · Рабочая документация</span><span>© 2026</span></footer>
       </div>
     </main>
