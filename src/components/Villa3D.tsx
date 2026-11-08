@@ -5,7 +5,7 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import rawSpatial from '../data/spatial-model.json'
 import rawArchitectural from '../data/architectural-geometry.json'
 import rawPlans from '../data/architectural-plans.json'
-import { createExteriorConcept, createExteriorContext, exteriorConcept, registrationMetres } from './ExteriorConcept'
+import { createExteriorConcept, createExteriorContext, exteriorConcept, registrationMetres, createUnusedAttic } from './ExteriorConcept'
 
 /**
  * Stage 3: generated from SOURCE PRINT GEOMETRY, not semantic/millimetre BIM.
@@ -133,7 +133,7 @@ function vectorRoomMarker(value: number, select: () => void) {
   return marker
 }
 
-function wallAndSlabGroup(floorId: FloorId, height: number, current: boolean, detail: boolean) {
+export function wallAndSlabGroup(floorId: FloorId, height: number, current: boolean, detail: boolean, overview = false) {
   const data = spatial.floors[floorId]
   const group = new THREE.Group()
   const wallMaterial = new THREE.MeshStandardMaterial({
@@ -143,7 +143,7 @@ function wallAndSlabGroup(floorId: FloorId, height: number, current: boolean, de
   const slabMaterial = new THREE.MeshStandardMaterial({ color: current ? '#d0cab8' : '#6e8880', roughness: .95,
     transparent: !current, opacity: current ? .95 : .42, side: THREE.DoubleSide })
   const edgeMaterial = new THREE.MeshBasicMaterial({ color: '#354941', transparent: true, opacity: .3 })
-  for (const polygon of data.slabEnvelopePt) {
+  for (const polygon of overview ? [{outer:exteriorConcept.floors[floorId].outlinePt,holes:[]}, ...(floorId === 'level-2' ? [{outer:exteriorConcept.terrace.polygonPt,holes:[]}] : [])] : data.slabEnvelopePt) {
     const shape = toShape(polygon)
     if (!shape) continue
     const mesh = new THREE.Mesh(extrusion(shape, spatial.displayAssumptions.slabThicknessM), slabMaterial)
@@ -185,7 +185,7 @@ async function inflateSvg(encoded: string) {
  * intentionally shown ajar at the angle printed in the source drawing;
  * exact jamb/hinge build-up and overhead lintel depth remain provisional.
  */
-function sourceDoorGroup(floorId: FloorId, current: boolean, drawLintels: boolean) {
+function sourceDoorGroup(floorId: FloorId, current: boolean, drawLintels: boolean, limit = Infinity) {
   const group = new THREE.Group()
   const leaves = architecture.floors[floorId].doors
   const leafMaterial = new THREE.MeshStandardMaterial({
@@ -202,7 +202,7 @@ function sourceDoorGroup(floorId: FloorId, current: boolean, drawLintels: boolea
     const b = new THREE.Vector3(pX(end[0]), 0, pZ(end[1]))
     const vector = b.clone().sub(a)
     const span = vector.length()
-    const leafHeight = door.leafHeightMm / 1000
+    const leafHeight = Math.min(limit, door.leafHeightMm / 1000)
     if (span > .15 && span < 3) {
       const panel = new THREE.Mesh(new THREE.BoxGeometry(span, leafHeight, .045), leafMaterial)
       panel.position.copy(a.clone().add(b).multiplyScalar(.5))
@@ -289,8 +289,9 @@ function disposeSceneGroup(obj: THREE.Object3D) {
   })
 }
 
-export default function Villa3D({ floorId, selectedRoom, onSelectRoom }: {
+export default function Villa3D({ floorId, selectedRoom, onSelectRoom, floorSelectionRevision = 0 }: {
   floorId: FloorId
+  floorSelectionRevision?: number
   selectedRoom: number | null
   onSelectRoom: (value: number) => void
 }) {
@@ -301,7 +302,7 @@ export default function Villa3D({ floorId, selectedRoom, onSelectRoom }: {
   const drawingsRef = useRef<THREE.Group | null>(null)
   const contextRef = useRef<THREE.Group | null>(null)
   const boundsRef = useRef(new THREE.Box3())
-  const poseRef = useRef<'perspective' | 'front' | 'rear' | 'side' | 'top'>('perspective')
+  const poseRef = useRef<'perspective' | 'front' | 'rear' | 'side' | 'top' | 'floor'>('perspective')
   const fitKeyRef = useRef('')
   const invalidateRef = useRef(() => {})
   const fitCameraRef = useRef(() => {})
@@ -313,7 +314,8 @@ export default function Villa3D({ floorId, selectedRoom, onSelectRoom }: {
   const [glazing, setGlazing] = useState(true)
   const [terrace, setTerrace] = useState(true)
   const [furniture, setFurniture] = useState(false)
-  const [labels, setLabels] = useState(false)
+  const [labels, setLabels] = useState(true)
+  const [showGarage, setShowGarage] = useState(true)
   const [walls, setWalls] = useState(true)
   const [doors, setDoors] = useState(true)
   const [top, setTop] = useState(false)
@@ -323,7 +325,13 @@ export default function Villa3D({ floorId, selectedRoom, onSelectRoom }: {
   const [site, setSite] = useState(true)
   const [expanded, setExpanded] = useState(false)
   onSelectRef.current = onSelectRoom
-  const viewAll = view === 'all' && floorId !== 'garage'
+  const viewAll = view === 'all'
+
+  useEffect(() => {
+    if (!floorSelectionRevision) return
+    poseRef.current = 'floor'; setTop(false)
+    setView('one'); setArrangement('assembled'); setPresentation('section'); setLabels(true)
+  }, [floorSelectionRevision])
 
   useEffect(() => {
     if (!mount.current) return
@@ -387,7 +395,7 @@ export default function Villa3D({ floorId, selectedRoom, onSelectRoom }: {
       const box = boundsRef.current
       if (box.isEmpty()) return
       const centre = box.getCenter(new THREE.Vector3())
-      const poses = { perspective: [1,.68,1.35], front: [0,.35,1.6], rear: [0,.4,-1.6], side: [1.6,.4,.1], top: [.001,1,.001] }
+      const poses = { perspective: [1,.68,1.35], front: [0,.35,1.6], rear: [0,.4,-1.6], side: [1.6,.4,.1], top: [.001,1,.001], floor: [.65,1.65,1.25] }
       const direction = new THREE.Vector3(...poses[poseRef.current] as [number,number,number]).normalize()
       const cameraUp = poseRef.current === 'top' ? new THREE.Vector3(0,0,-1) : new THREE.Vector3(0,1,0)
       const right = new THREE.Vector3().crossVectors(cameraUp, direction).normalize()
@@ -449,7 +457,7 @@ export default function Villa3D({ floorId, selectedRoom, onSelectRoom }: {
     if (previous) { scene.remove(previous); disposeSceneGroup(previous) }
     if (contextRef.current) { scene.remove(contextRef.current); disposeSceneGroup(contextRef.current); contextRef.current = null }
     if (site && presentation === 'exterior' && (viewAll || floorId === 'garage')) {
-      contextRef.current = createExteriorContext(floorId === 'garage')
+      contextRef.current = createExteriorContext(!viewAll && floorId === 'garage')
       scene.add(contextRef.current)
     }
     const all = viewAll ? [...floorOrder] : [floorId]
@@ -460,27 +468,43 @@ export default function Villa3D({ floorId, selectedRoom, onSelectRoom }: {
     if (isExterior) {
       // Exterior is expressly a conceptual wrapper over the registered source footprint.
       // Roof/facade and window heights cannot be read from absent elevation drawings.
-      root.add(createExteriorConcept({ floors: all, roof, windows: glazing, terrace, garage: true,
+      root.add(createExteriorConcept({ floors: all, roof, windows: glazing, terrace, garage: showGarage,
         assembled: arrangement === 'assembled' && (viewAll || floorId === 'garage') }))
     } else {
       for (const id of all) {
         const current = id === floorId
         const base = viewAll ? vertical(id, arrangement) : 0
-        const group = wallAndSlabGroup(id, id === 'level-3' ? 2.3 : spatial.displayAssumptions.wallHeightM, current, walls)
+        const overview = presentation === 'section'
+        const group = wallAndSlabGroup(id, overview ? .55 : id === 'level-3' ? 2.3 : spatial.displayAssumptions.wallHeightM, current, walls, overview)
         const [offsetX, offsetZ] = registrationMetres(id)
         group.position.set(offsetX, base, offsetZ)
         root.add(group)
         if (walls && doors) {
-          const doorGroup = sourceDoorGroup(id, current, true)
+          const doorGroup = sourceDoorGroup(id, current, !overview, overview ? .45 : Infinity)
           doorGroup.position.set(offsetX, base, offsetZ)
           root.add(doorGroup)
+        }
+        if (overview && id === 'level-3') {
+          const unused=createUnusedAttic(); unused.position.y=base; root.add(unused)
+          let label:THREE.Object3D
+          if (fallback) {
+            const node=document.createElementNS('http://www.w3.org/2000/svg','text');node.textContent='Неиспользуемый чердак';node.setAttribute('fill','#3d5146');node.setAttribute('font-size','12');node.setAttribute('text-anchor','middle')
+            label=new SVGObject(node)
+          } else {
+            const canvas=document.createElement('canvas');canvas.width=512;canvas.height=80
+            const ctx=canvas.getContext('2d')!;ctx.fillStyle='#29433b';ctx.fillRect(0,0,512,80)
+            ctx.fillStyle='#f2ecd9';ctx.font='600 28px system-ui';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('Неиспользуемый чердак',256,40)
+            const map=new THREE.CanvasTexture(canvas);map.colorSpace=THREE.SRGBColorSpace
+            const sprite=new THREE.Sprite(new THREE.SpriteMaterial({map,depthTest:false,transparent:true}));sprite.scale.set(5,.78,1);label=sprite
+          }
+          label.position.set(11,base+.8,1);label.userData.spaceKind='unused-attic';root.add(label)
         }
         if (current && labels) {
           for (const room of plans[id].rooms) {
             if (!room.marker) continue
             const item = fallback ? vectorRoomMarker(room.number, () => onSelectRef.current(room.number)) : roomSprite(room.number)
             const vp = spatial.floors[id].sourceViewport
-            item.position.set(pX(vp.xPt + room.marker[0]), .22, pZ(vp.yPt + room.marker[1]))
+            item.position.set(pX(vp.xPt + room.marker[0]), overview ? .72 : .22, pZ(vp.yPt + room.marker[1]))
             group.add(item)
           }
         }
@@ -506,11 +530,12 @@ export default function Villa3D({ floorId, selectedRoom, onSelectRoom }: {
       }
     })
     boundsRef.current.setFromObject(root)
+    if (isExterior && viewAll && site) boundsRef.current.expandByPoint(new THREE.Vector3(32,0,31))
     const fitKey = `${floorId}-${viewAll}-${arrangement}-${presentation}`
     if (fitKeyRef.current !== fitKey) { fitKeyRef.current = fitKey; fitCameraRef.current() }
     invalidateRef.current()
     return () => { live = false }
-  }, [floorId, viewAll, arrangement, furniture, walls, doors, labels, presentation, roof, glazing, terrace, site, fallback])
+  }, [floorId, viewAll, arrangement, furniture, walls, doors, labels, presentation, roof, glazing, terrace, site, fallback, showGarage])
 
   useEffect(() => {
     drawingsRef.current?.traverse(item => {
@@ -556,17 +581,18 @@ export default function Villa3D({ floorId, selectedRoom, onSelectRoom }: {
     </div>
     <div className="model-layers">
       <div className="model-switches" role="group" aria-label="Показ 3D уровней">
-        <button className={!viewAll ? 'selected' : ''} onClick={() => setView('one')}>Один этаж</button>
-        <button className={viewAll ? 'selected' : ''} onClick={() => { setView('all'); setArrangement('assembled') }} disabled={floorId === 'garage'} title={floorId === 'garage' ? 'Гараж без проверенной привязки к дому' : undefined}>Все этажи</button>
+        <button className={!viewAll ? 'selected' : ''} onClick={() => { setView('one');setPresentation('section');setCameraPose('floor') }}>Обзор этажа</button>
+        <button className={viewAll ? 'selected' : ''} onClick={() => { setView('all');setPresentation('exterior');setArrangement('assembled');setCameraPose('perspective') }}>Весь участок</button>
         {viewAll && <button className="mode-light" onClick={() => { setPresentation('section'); setArrangement(v => v === 'assembled' ? 'exploded' : 'assembled') }}>{arrangement === 'exploded' ? 'Собрать уровни' : 'Раздвинуть уровни'}</button>}
       </div>
       <div className="model-presentation" role="group" aria-label="Режим архитектурной визуализации">
-        <button className={presentation === 'exterior' ? 'selected' : ''} aria-pressed={presentation === 'exterior'} onClick={() => { setPresentation('exterior'); setView('all'); setArrangement('assembled'); resetCamera(false) }}>Готовый дом</button>
-        <button className={presentation === 'section' ? 'selected' : ''} aria-pressed={presentation === 'section'} onClick={() => setPresentation('section')}>Без оболочки</button>
+        <button className={presentation === 'exterior' ? 'selected' : ''} aria-pressed={presentation === 'exterior'} onClick={() => { setPresentation('exterior'); setView('all'); setArrangement('assembled'); resetCamera(false) }}>Дом и участок</button>
+        <button className={presentation === 'section' ? 'selected' : ''} aria-pressed={presentation === 'section'} onClick={() => {setPresentation('section');setView('one');setCameraPose('floor')}}>Низкие стены</button>
         <button className={presentation === 'source' ? 'selected' : ''} aria-pressed={presentation === 'source'} onClick={() => setPresentation('source')}>Исходные стены</button>
       </div>
       <div className="model-checks">
         {presentation === 'exterior' ? <>
+          <button aria-pressed={showGarage} onClick={() => setShowGarage(x => !x)} className={showGarage ? 'active' : ''}>Гараж</button>
           <button aria-pressed={roof} onClick={() => setRoof(x => !x)} className={roof ? 'active' : ''}>Крыша</button>
           <button aria-pressed={glazing} onClick={() => setGlazing(x => !x)} className={glazing ? 'active' : ''}>Остекление</button>
           <button aria-pressed={site} onClick={() => setSite(x => !x)} className={site ? 'active' : ''}>Участок</button>
@@ -585,14 +611,14 @@ export default function Villa3D({ floorId, selectedRoom, onSelectRoom }: {
       <button onClick={() => setCameraPose('front')}>Фасад</button>
       <button onClick={() => setCameraPose('rear')}>Со склона</button>
       <button onClick={() => setCameraPose('side')}>Сбоку</button>
-      <button onClick={() => { setCameraPose('top'); setPresentation('section'); setView('one'); setArrangement('assembled'); setLabels(true) }}>Внутри этажа ↗</button>
+      <button onClick={() => { setCameraPose('floor'); setPresentation('section'); setView('one'); setArrangement('assembled'); setLabels(true) }}>Внутри этажа ↗</button>
     </div>
     <div className="model-viewport" ref={mount} aria-label="Интерактивная 3D модель этажей Villa Como: перетаскивайте для вращения, колесо мыши для масштаба">
       {error && <div className="model-error" role="alert">{error}<button onClick={() => setError(null)}>Закрыть</button></div>}
       <div className="model-overlay">
         <span className="model-eyebrow">{presentation === 'exterior' ? 'VILLA COMO / SMART HOME' : 'MÈTRE / SOURCE-BASED 3D'}</span>
-        <b>{floorId === 'garage' ? 'ГАРАЖ · ОТДЕЛЬНО' : viewAll ? 'ЭТАЖИ 1–3' : floorId === 'level-1' ? 'ПЕРВЫЙ ЭТАЖ' : floorId === 'level-2' ? 'ВТОРОЙ ЭТАЖ' : 'ТРЕТИЙ ЭТАЖ'}</b>
-        <small>{presentation === 'exterior' ? floorId === 'garage' ? 'Отдельный объём гаража' : 'Посадка в склон · панорамное остекление' : `${spatial.floors[floorId].wallPolygonCount} стен · ${architecture.floors[floorId].doors.length} дверей`}</small>
+        <b>{viewAll ? 'ВИЛЛА · ГАРАЖ · ДВОР' : floorId === 'garage' ? 'ГАРАЖ' : floorId === 'level-1' ? 'ПЕРВЫЙ ЭТАЖ' : floorId === 'level-2' ? 'ВТОРОЙ ЭТАЖ' : 'ТРЕТИЙ ЭТАЖ'}</b>
+        <small>{presentation === 'exterior' ? viewAll ? 'Общая кровля · жилой и неиспользуемый чердак' : 'План выбранного этажа' : presentation === 'section' ? `${plans[floorId].rooms.length} помещений · стены 55 см` : `${spatial.floors[floorId].wallPolygonCount} стен · ${architecture.floors[floorId].doors.length} дверей`}</small>
         {selectedRoom !== null && presentation !== 'exterior' && <span className="model-selection">{selectedRoom} · {plans[floorId].rooms.find(room => room.number === selectedRoom)?.name}</span>}
       </div>
       <div className="model-gesture-hint">{presentation === 'exterior' ? 'Вращайте · Приближайте · Откройте этаж изнутри' : 'Вращайте · Выбирайте номера помещений'}</div>
@@ -611,7 +637,7 @@ export default function Villa3D({ floorId, selectedRoom, onSelectRoom }: {
       <small>Расхождение измерений в PDF с масштабом предпросмотра; не погрешность готового строительного CAD. Размерные цепочки полностью не замкнуты.</small>
     </details>
     <div className="model-warning">{presentation === 'exterior' ? <>
-      <b>Модель для презентации умного дома.</b> Планы и подписанные габариты окон перенесены из PDF; подоконные отметки, кровля, отделка и профиль склона требуют сверки с фасадами и топосъёмкой. Задняя часть нижнего этажа заглублена по уточнению владельца. Гараж показан отдельно. Далее: этап 4 — интерьер и материалы; этап 5 — свет и сценарии.
+      <b>Модель для презентации умного дома.</b> Планы и подписанные габариты окон перенесены из PDF; подоконные отметки, кровля, отделка и профиль склона требуют сверки с фасадами и топосъёмкой. Задняя часть нижнего этажа заглублена по уточнению владельца. Гараж справа, повёрнут к двору; въезд расположен со стороны балкона. Расстояния на участке — демонстрационные. Далее: этап 4 — интерьер и материалы; этап 5 — свет и сценарии.
     </> : <>
       Контуры стен и положения {architecture.floors[floorId].doors.length} дверных полотен перенесены из PDF, размеры дверей — из ведомости {spatial.floors[floorId].sourceSheet}. <b>{architecture.floors[floorId].openingCountResolved} проёмов сопоставлены с просветами на плане, остальные оставлены неразрешёнными.</b> Конструктивная крыша и фасады пока не подтверждены.
     </>}</div>

@@ -39,8 +39,8 @@ test('terrace uses real schedule but its model outline is not claimed metrically
  assert.equal(e.terrace.confirmedPosition,false)
  assert.equal(e.terrace.polygonPt.length,4)
 })
-test('garage stays unplaced next to house without verified site plan',()=>{
- assert.equal(e.garagePlacement.mode,'isolated-only')
- assert.equal(e.garagePlacement.xyMeters,null)
+test('garage uses owner-confirmed site orientation without claiming a surveyed position',()=>{
+ assert.equal(e.garagePlacement.mode,'owner-informed-site-layout')
+ assert.deepEqual(e.garagePlacement.xyMeters,[24.5,10.2])
  assert.equal(e.garagePlacement.onSitePositionApproved,false)
 })

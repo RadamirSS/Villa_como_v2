@@ -170,7 +170,8 @@ for fid,footprint in [('level-2',unary_union([Polygon(COMMON['level-1']),upper,t
     f['slabBaseM']=2.65 if fid=='level-2' else 5.63
     f['slabThicknessM']=.28 if fid=='level-2' else .27
 # Full closed coverage: roof = upper-floor footprint minus attic, not three ad-hoc patches.
-low_roofs=[{'id':f'flat-{i}','polygonPt':polydata(p),'heightM':5.901} for i,p in enumerate(polygons(upper.difference(attic)))]
+low_roofs=[] # Shared full-building roof replaces the former exposed flat wings.
+EAVE=6.45
 
 # Construct a continuous L-shaped hipped roof from the upper envelope of two
 # intersecting hip volumes. Clip occluded faces analytically, removing duplicate
@@ -181,12 +182,16 @@ def hip_rect(rect,rise):
         # Swap X/Z for the perpendicular wing.
         return [([(z,x) for x,z in pts],(b,a,c)) for pts,(a,b,c) in hip_rect((z0,x0,z1,x1),rise)]
     slope=rise/inset
-    return [([(x0,z0),(x1,z0),(x1-inset,mid),(x0+inset,mid)],(0,slope,8.2-slope*z0)),
-     ([(x0,z1),(x0+inset,mid),(x1-inset,mid),(x1,z1)],(0,-slope,8.2+slope*z1)),
-     ([(x0,z0),(x0+inset,mid),(x0,z1)],(slope,0,8.2-slope*x0)),
-     ([(x1,z0),(x1,z1),(x1-inset,mid)],(-slope,0,8.2+slope*x1))]
+    return [([(x0,z0),(x1,z0),(x1-inset,mid),(x0+inset,mid)],(0,slope,EAVE-slope*z0)),
+     ([(x0,z1),(x0+inset,mid),(x1-inset,mid),(x1,z1)],(0,-slope,EAVE+slope*z1)),
+     ([(x0,z0),(x0+inset,mid),(x0,z1)],(slope,0,EAVE-slope*x0)),
+     ([(x1,z0),(x1,z1),(x1-inset,mid)],(-slope,0,EAVE+slope*x1))]
 
-raw_faces=hip_rect((247.46,175.94,759.70,426.58),1.48)+hip_rect((247.46,175.94,529.54,569.74),1.48)
+raw_faces=(hip_rect((124.70,119.30,939.46,430.18),2.15)
+ +hip_rect((124.70,119.30,529.54,579.70),2.15)
+ +hip_rect((906.74,119.30,1121.62,584.02),2.15)
+ +hip_rect((72.14,386.18,153.62,557.14),.62)
+ +hip_rect((750.0,380.0,939.46,523.06),1.1))
 # Clip a polygon by a linear height difference > 0, for the hiding half-plane.
 def above_clip(poly,coeff):
     a,b,c=coeff; pts=list(poly.exterior.coords)[:-1]; out=[]
@@ -210,20 +215,21 @@ roof_footprint=unary_union([Polygon(p['outlinePt']) for p in roof_faces])
 
 def roof_y(p):
     values=[a*p[0]+b*p[1]+c for coords,(a,b,c) in raw_faces if Polygon(coords).buffer(.001).covers(Point(p))]
-    return max(values) if values else 8.2
+    return max(values) if values else EAVE
 
 # Display hillside, qualitative owner clarification; not topographical survey.
 # High rear plateau ends at the second-floor threshold, falls toward the front.
 def grade(p):
+    if p[0] > 600+15.0*PPM: return -.22
     t=max(0.,min(1.,(p[1]-142.6)/(423.24-142.6)))
     return 2.90-3.12*(t*t*(3-2*t))
-site=box(-220,-340,1420,990)
+site=box(-220,-340,2056,1660)
 house=Polygon(COMMON['level-1'])
 # Generate outside-only triangulation. Shared height function ensures continuity.
 terrain_triangles=[]
-for x in range(-220,1420,82):
- for y in range(-340,990,70):
-    cell=box(x,y,min(x+82,1420),min(y+70,990)).difference(house)
+for x in range(-220,2056,82):
+ for y in range(-340,1660,70):
+    cell=box(x,y,min(x+82,2056),min(y+70,1660)).difference(house)
     for p in polygons(cell):
      for tri in triangulate(p):
       if not p.covers(tri):continue
@@ -241,19 +247,25 @@ D={
  'missingSources':['roof plan','exterior elevations','building sections','site/master plan','verified sill elevations','garage geospatial relation'],
  'floors':floors,
  'roof':{'status':'conceptual-massing-only-not-source-verified','style':'continuous-intersecting-hip-roof',
-   'faces':roof_faces,'boundaryPt':ring(roof_footprint),'eaveM':8.2,'lowRoofs':low_roofs,
+   'faces':roof_faces,'boundaryPt':ring(roof_footprint),'eaveM':EAVE,'lowRoofs':low_roofs,
+   'coverage':'entire-villa-including-unused-attic','occupiedAtticPt':polydata(attic),
+   'unusedAtticPt':[polydata(p) for p in polygons(upper.difference(attic))],
+   'ownerClarification':'third floor is habitable space within the common roof; right attic exists but is unused',
    'skylights':[{'id':f'rooflight-{i+1}','centrePt':[x,z],'widthM':w,'heightM':h,'sourceSheet':'A-06','status':'plan-symbol-source-roof-pitch-inferred'}
       for i,(x,z,w,h) in enumerate([(307.2,362.4,.90,1.25),(431.4,223.2,.70,.90),(643.2,223.2,.70,.90),(647.4,326.4,.70,.90)])]},
  'terrace':{'sourceSheet':'A-20','roomNumber':13,'scheduleAreaM2':22.51,'status':'source-informed-display-outline',
    'polygonPt':[[459.36,420.72],[763.8,420.72],[763.8,513.6],[459.36,513.6]],
    'elevationM':2.93,'balustradeHeightM':1.04,'confirmedPosition':False},
  'garageAppendix':{'outlinePt':[[753.1,387.2],[915.9,390.6],[913.4,519.6],[756.4,512.1]],'heightM':2.65},
- 'garagePlacement':{'mode':'isolated-only','rotationToHouseDegrees':90,'xyMeters':None,'onSitePositionApproved':False},
+ 'garagePlacement':{'mode':'owner-informed-site-layout','rotationToHouseDegrees':-90,
+   'xyMeters':[24.5,10.2],'baseM':0,'pivotPt':[424.26,341.76],
+   'source':'owner clarification and Villa_como_v1 layout; distances remain illustrative',
+   'onSitePositionApproved':False,'relativeSide':'right','gateFacing':'balcony-front-positive-z'},
  'site':{'status':'owner-confirmed-slope-with-inferred-profile','rearGradeM':2.90,'frontGradeM':-.22,
    'rearContactMaxYPt':142.6,'buriedFloor':'level-1','rearFacadeHasOpenings':False,
    'trianglesPtM':terrain_triangles,'boundaryPt':ring(site),'pavingPt':[polydata(p) for p in polygons(paving)],
    'notSurveyed':True,'ownerClarification':'rear ground reaches level 2; level 1 rear facade is blind and embedded in hillside'},
- 'stages':{'current':'3.6 exterior correction','remaining':[{'id':4,'name':'Interiors and materials'},{'id':5,'name':'Lighting and smart-home scenarios'}]},
+ 'stages':{'current':'3.7 shared roof, low-wall floors and full site','remaining':[{'id':4,'name':'Interiors and materials'},{'id':5,'name':'Lighting and smart-home scenarios'}]},
 }
 OUT=ROOT/'src/data/exterior-concept.json'
 OUT.write_text(json.dumps(D,ensure_ascii=False,indent=2)+'\n')

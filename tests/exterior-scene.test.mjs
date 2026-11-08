@@ -1,12 +1,12 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { build } from 'esbuild'
-import { Raycaster, Vector3 } from 'three'
+import { Raycaster, Vector3, Box3 } from 'three'
 import { readFileSync } from 'node:fs'
 
 const e = JSON.parse(readFileSync(new URL('../src/data/exterior-concept.json', import.meta.url)))
 const output = await build({ entryPoints: [new URL('../src/components/ExteriorConcept.ts', import.meta.url).pathname], bundle: true, platform: 'node', format: 'esm', write: false })
-const { createExteriorConcept, createExteriorContext } = await import('data:text/javascript;base64,' + Buffer.from(output.outputFiles[0].text).toString('base64'))
+const { createExteriorConcept, createExteriorContext, createPlacedGarage, createUnusedAttic } = await import('data:text/javascript;base64,' + Buffer.from(output.outputFiles[0].text).toString('base64'))
 const options = { floors: ['level-1','level-2','level-3'], roof: true, windows: true, terrace: true, garage: false, assembled: true }
 const sourcePoint = (x, z, y = 20) => new Vector3((x - 600) / 36.4, y, (z - 350) / 36.4)
 const meshes = root => { const result = []; root.traverse(o => { if (o.isMesh) result.push(o) }); return result }
@@ -123,5 +123,51 @@ test('roof glazing stays planar instead of folding across a roof hip', () => {
   const normal=b.clone().sub(a).cross(c.clone().sub(a)).normalize()
   assert(normal.y>0)
   for(let i=0;i<p.count;i++)assert(Math.abs(new Vector3().fromBufferAttribute(p,i).sub(a).dot(normal))<1e-5)
+ }
+})
+
+
+test('the common pitched roof covers the whole second floor including the unused right attic', () => {
+ const root=createExteriorConcept({...options,batch:false});root.updateMatrixWorld(true)
+ const roof=meshes(root).filter(m=>m.userData.roofFace)
+ const outline=e.floors['level-2'].outlinePt
+ let tested=0
+ for(let x=145;x<1100;x+=47)for(let z=140;z<570;z+=39){
+  if(!contains([x,z],outline))continue
+  const hits=new Raycaster(sourcePoint(x,z),new Vector3(0,-1,0)).intersectObjects(roof,false)
+  assert.equal(new Set(hits.map(h=>Math.round(h.point.y*1000))).size,1,`missing common roof at ${x},${z}`)
+  tested++
+ }
+ assert(tested>100)
+ assert.equal(e.roof.lowRoofs.length,0)
+ assert(!meshes(root).some(m=>m.userData.floorId==='level-3'))
+})
+
+test('garage is on the right and the yard entrance faces the balcony side', () => {
+ const g=createPlacedGarage();g.updateMatrixWorld(true)
+ const bounds=new Box3().setFromObject(g)
+ assert(bounds.min.x>14.2)
+ assert.equal(g.rotation.y,-Math.PI/2)
+ assert.equal(g.position.y,0)
+ assert.equal(e.garagePlacement.gateFacing,'balcony-front-positive-z')
+ const site=createExteriorContext()
+ const parts=meshes(site).flatMap(m=>m.userData.parts??[m.userData])
+ assert(parts.some(p=>p.siteObject==='courtyard-gate'&&p.facing==='balcony-front-positive-z'))
+})
+
+test('unused attic is a physical floor area and is not added to the room register', () => {
+ const g=createUnusedAttic();assert.equal(g.userData.notHabitableRoom,true)
+ assert(meshes(g).length>0)
+ const box=new Box3().setFromObject(g);assert(box.max.x>13)
+})
+
+test('floor overview walls stay low while the source mode retains full heights', async () => {
+ const out=await build({entryPoints:[new URL('../src/components/Villa3D.tsx',import.meta.url).pathname],bundle:true,platform:'node',format:'esm',write:false})
+ const mod=await import('data:text/javascript;base64,'+Buffer.from(out.outputFiles[0].text).toString('base64'))
+ for(const id of ['level-1','level-2','level-3','garage']){
+  const low=mod.wallAndSlabGroup(id,.55,true,true,true)
+  const high=mod.wallAndSlabGroup(id,2.65,true,true,false)
+  assert(new Box3().setFromObject(low).max.y<.56)
+  assert(new Box3().setFromObject(high).max.y>2.6)
  }
 })

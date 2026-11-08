@@ -262,7 +262,8 @@ export default function App() {
   const [openPlumbingSheet, setOpenPlumbingSheet] = useState<string | null>(null)
   const floor = useMemo(() => project.floors.find(item => item.id === floorId)!, [floorId])
   const data = plans.floors[floorId]
-  const chooseFloor = (id: typeof floorIds[number]) => { setFloorId(id); setSelectedRoom(null); setOpenPlumbingSheet(null) }
+  const [floorSelectionRevision,setFloorSelectionRevision]=useState(0)
+  const chooseFloor = (id: typeof floorIds[number]) => { setFloorSelectionRevision(value=>value+1); setFloorId(id); setSelectedRoom(null); setOpenPlumbingSheet(null) }
   const selectRoom = (number: number) => setSelectedRoom(previous => previous === number ? null : number)
   return <div className="app-shell">
     <nav className="side-rail" aria-label="Навигация"><a href="/" aria-label="Villa Como v2" className="brand-mark">V<span>.</span>C</a><div className="rail-rule"><i /><i /><i /></div><span className="rail-caption">MÈTRE<br/>2026</span></nav>
@@ -291,7 +292,7 @@ export default function App() {
             </button>)}
           </div>
           <div className="workspace-grid">
-            {displayMode === '3d' ? <Villa3D floorId={floorId} selectedRoom={selectedRoom} onSelectRoom={selectRoom} /> : <PlanViewer floor={floor} data={data} selectedRoom={selectedRoom} onSelectRoom={selectRoom} onOpenPlumbing={setOpenPlumbingSheet} />}
+            {displayMode === '3d' ? <Villa3D floorSelectionRevision={floorSelectionRevision} floorId={floorId} selectedRoom={selectedRoom} onSelectRoom={selectRoom} /> : <PlanViewer floor={floor} data={data} selectedRoom={selectedRoom} onSelectRoom={selectRoom} onOpenPlumbing={setOpenPlumbingSheet} />}
             <InfoPanel floor={floor} data={data} selectedRoom={selectedRoom} onSelectRoom={selectRoom} onOpenPlumbing={setOpenPlumbingSheet} />
           </div>
         </section>

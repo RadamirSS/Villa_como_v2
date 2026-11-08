@@ -12,8 +12,9 @@ type ExteriorData = {
   pointsPerMeter: number; originPt: { xPt: number; yPt: number }
   floors: Record<FloorId, FacadeFloor>
   roof: { eaveM: number; faces: { id: string; outlinePt: Point[]; plane: [number, number, number] }[]; boundaryPt: Point[];
-    lowRoofs: { id: string; polygonPt: Polygon; heightM: number }[];
+    unusedAtticPt: Polygon[]; coverage: string; lowRoofs: { id: string; polygonPt: Polygon; heightM: number }[];
     skylights: { id: string; centrePt: Point; widthM: number; heightM: number }[] }
+  garagePlacement: { xyMeters: Point; pivotPt: Point; baseM: number; rotationToHouseDegrees: number }
   terrace: { polygonPt: Point[]; elevationM: number; balustradeHeightM: number; scheduleAreaM2: number }
   garageAppendix: { outlinePt: Point[]; heightM: number }
   site: { trianglesPtM: [number, number, number][][]; boundaryPt: Point[]; pavingPt: Polygon[]; rearGradeM: number; frontGradeM: number }
@@ -34,7 +35,7 @@ function palette() {
     frame: new THREE.MeshStandardMaterial({ color: '#383e39', roughness: .42, metalness: .55 }),
     glass: new THREE.MeshPhysicalMaterial({ color: '#88a9a5', roughness: .16, metalness: .12, transparent: true, opacity: .62, side: THREE.DoubleSide, depthWrite: false }),
     interior: new THREE.MeshStandardMaterial({ color: '#5b625b', roughness: .94 }),
-    roof: new THREE.MeshStandardMaterial({ color: '#4e5754', roughness: .72, metalness: .2, side: THREE.DoubleSide }),
+    roof: new THREE.MeshStandardMaterial({ color: '#8b6654', roughness: .92, metalness: .04, side: THREE.DoubleSide }),
     flat: new THREE.MeshStandardMaterial({ color: '#b0b1a5', roughness: .96 }),
   }
 }
@@ -165,7 +166,7 @@ function roofGroup(p: Palette, glass: boolean) {
     g.add(edge)
   }
   const outline = exteriorConcept.roof.boundaryPt
-  outline.forEach((pt, i) => g.add(beam(point(pt), point(outline[(i + 1) % outline.length]), .12, .16, 8.04, p.frame)))
+  outline.forEach((pt, i) => g.add(beam(point(pt), point(outline[(i + 1) % outline.length]), .12, .16, exteriorConcept.roof.eaveM - .16, p.frame)))
   for (const r of exteriorConcept.roof.skylights) {
     const [x, z] = r.centrePt
     const spanX = r.widthM * ppm / 2, spanZ = r.heightM * ppm / 2
@@ -243,7 +244,14 @@ function batchOpaque(root: THREE.Group) {
 
 export function createExteriorConcept(opts: { floors: FloorId[]; roof: boolean; windows: boolean; terrace: boolean; garage: boolean; assembled: boolean; batch?: boolean }) {
   const g = new THREE.Group(), p = palette(), individual = opts.floors.length === 1
-  for (const id of opts.floors) g.add(facade(id, individual, opts.windows, p))
+  for (const id of opts.floors) {
+    if (id === 'level-3' && !individual) {
+      // The A-06 living plan is a subset of the attic, not a raised facade box.
+      const f = exteriorConcept.floors[id], deck = new THREE.Group()
+      for (const poly of f.floorPlatePt ?? []) deck.add(slab(poly,f.slabBaseM!,f.slabThicknessM!,p.edge))
+      const [x,z] = registrationMetres(id); deck.position.set(x,0,z); g.add(deck)
+    } else g.add(facade(id, individual, opts.windows, p))
+  }
   if (opts.floors.includes('garage')) {
     const pts = exteriorConcept.garageAppendix.outlinePt
     pts.forEach((pt, i) => g.add(beam(point(pt), point(pts[(i + 1) % pts.length]), .28, 2.65, 0, p.plaster)))
@@ -252,11 +260,81 @@ export function createExteriorConcept(opts: { floors: FloorId[]; roof: boolean; 
       g.add(slab(pts, 2.65, .20, p.flat))
     }
   } else {
-    if (opts.roof && opts.assembled && opts.floors.includes('level-3')) g.add(roofGroup(p, opts.windows))
+    if (opts.roof && opts.assembled && opts.floors.includes('level-3')) {
+      g.add(roofGroup(p, opts.windows))
+      // Close the knee wall below the common roof, including the unused right attic.
+      const outline = exteriorConcept.floors['level-2'].outlinePt
+      const material = p.plaster.clone(); material.side = THREE.DoubleSide
+      const positions:number[]=[]
+      outline.forEach((a,i) => {
+        const b=outline[(i+1)%outline.length], count=Math.ceil(Math.hypot(b[0]-a[0],b[1]-a[1])/ppm/.22)
+        for(let j=0;j<count;j++){
+          const aa:Point=[THREE.MathUtils.lerp(a[0],b[0],j/count),THREE.MathUtils.lerp(a[1],b[1],j/count)]
+          const bb:Point=[THREE.MathUtils.lerp(a[0],b[0],(j+1)/count),THREE.MathUtils.lerp(a[1],b[1],(j+1)/count)]
+          const lowerA=point(aa,5.9),lowerB=point(bb,5.9),upperA=point(aa,roofHeight(aa)-.025),upperB=point(bb,roofHeight(bb)-.025)
+          positions.push(...[lowerA,lowerB,upperB,lowerA,upperB,upperA].flatMap(v=>v.toArray()))
+        }
+      })
+      const geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.Float32BufferAttribute(positions,3));geo.computeVertexNormals()
+      const wall=new THREE.Mesh(geo,material);wall.castShadow=true;wall.userData={atticKneeWall:true};g.add(wall)
+    }
+    if (opts.garage && opts.assembled && opts.floors.includes('level-2')) g.add(createPlacedGarage(opts.roof, opts.windows))
     if (opts.terrace && opts.assembled && opts.floors.includes('level-2')) g.add(terraceGroup(p))
   }
   if (opts.batch !== false) batchOpaque(g)
   g.userData = { visualization: 'source-informed-client-presentation', constructionApproved: false }
+  return g
+}
+
+
+/** Owner-confirmed side/orientation, v1 demonstration spacing, not survey coordinates. */
+export function createPlacedGarage(roof = true, windows = true) {
+  const data=exteriorConcept.garagePlacement
+  const local=createExteriorConcept({floors:['garage'],roof,windows,terrace:false,garage:false,assembled:false,batch:false})
+  local.position.set(-px(data.pivotPt[0]),0,-pz(data.pivotPt[1]))
+  const placed=new THREE.Group();placed.name='site-garage';placed.add(local)
+  placed.rotation.y=THREE.MathUtils.degToRad(data.rotationToHouseDegrees)
+  placed.position.set(data.xyMeters[0],data.baseM,data.xyMeters[1])
+  placed.userData={buildingId:'garage',placement:'owner-informed-demonstration'}
+  return placed
+}
+
+export function createUnusedAttic() {
+  const g=new THREE.Group();g.name='unused-attic'
+  const m=new THREE.MeshStandardMaterial({color:'#aab2a8',roughness:1,side:THREE.DoubleSide})
+  for(const p of exteriorConcept.roof.unusedAtticPt)g.add(slab(p,.005,.025,m))
+  g.userData={spaceKind:'unused-attic',notHabitableRoom:true};return g
+}
+
+function siteAccessories() {
+  const g=new THREE.Group();g.name='courtyard-and-gate'
+  const p=palette()
+  const rect=(x0:number,z0:number,x1:number,z1:number,y:number,t:number,mat:THREE.Material)=>{
+    const mesh=new THREE.Mesh(new THREE.BoxGeometry(x1-x0,t,z1-z0),mat);mesh.position.set((x0+x1)/2,y-t/2,(z0+z1)/2);mesh.receiveShadow=true;g.add(mesh);return mesh
+  }
+  const rail=(a:THREE.Vector3,b:THREE.Vector3,y:number)=>{
+    g.add(beam(a,b,.055,.045,y+1.02,p.frame))
+    const n=Math.ceil(a.distanceTo(b)/1.7)
+    for(let i=0;i<=n;i++){const pos=a.clone().lerp(b,i/n);const post=new THREE.Mesh(new THREE.BoxGeometry(.045,1.04,.045),p.frame);post.position.set(pos.x,y+.52,pos.z);g.add(post)}
+  }
+  // Lower access road and garage apron; higher court follows the v1 scheme.
+  rect(15.3,2,32.2,30,-.12,.09,p.stone)
+  rect(6.0,7.2,13.2,17,2.93,.22,p.stone)
+  rect(0,6.1,13.2,7.3,2.93,.18,p.stone)
+  rect(0,4.48,1.2,6.2,2.93,.18,p.stone)
+  for(const x of [6.3,12.9])for(const z of [7.6,16.6])rect(x-.12,z-.12,x+.12,z+.12,2.72,2.85,p.edge)
+  rail(new THREE.Vector3(6,0,7.2),new THREE.Vector3(6,0,17),2.93)
+  rail(new THREE.Vector3(13.2,0,7.2),new THREE.Vector3(13.2,0,17),2.93)
+  const coords=[9,2.93,17,12.5,2.93,17,12.5,-.12,28,9,2.93,17,12.5,-.12,28,9,-.12,28]
+  const geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.Float32BufferAttribute(coords,3));geo.computeVertexNormals()
+  const ramp=new THREE.Mesh(geo,new THREE.MeshStandardMaterial({color:'#b9b29f',roughness:1,side:THREE.DoubleSide}));ramp.receiveShadow=true;ramp.userData={siteObject:'access-ramp'};g.add(ramp)
+  rect(9,27.8,21,30,-.12,.09,p.stone)
+  // Courtyard entrance faces +Z, the same side as the balcony, not the garage door.
+  for(const x of [8.8,14.1])rect(x-.16,29.75,x+.16,30.1,1.65,1.87,p.edge)
+  for(const x of [10.1,12.8]){
+    const gate=rect(x-1.25,29.89,x+1.25,29.97,1.4,1.55,p.frame)
+    gate.userData={siteObject:'courtyard-gate',controlBinding:null,facing:'balcony-front-positive-z'}
+  }
   return g
 }
 
@@ -291,6 +369,7 @@ export function createExteriorContext(garage = false): THREE.Group {
         g.add(new THREE.Mesh(geo, earth))
       }
     }
+    g.add(siteAccessories())
     const paving = new THREE.MeshStandardMaterial({ color: '#cfc6b2', roughness: .96 })
     for (const poly of exteriorConcept.site.pavingPt) g.add(slab(poly, -.21, .08, paving))
   }
