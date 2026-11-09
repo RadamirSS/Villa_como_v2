@@ -1,3 +1,4 @@
+import { tx } from '../i18n'
 import { useEffect, useState } from 'react'
 
 /**
@@ -36,9 +37,9 @@ export default function SourceVector({ encoded, alt, className = '' }: {
   encoded: string | undefined; alt: string; className?: string
 }) {
   const { url, error } = useSourceVector(encoded)
-  if (error) return <div className="source-vector-state">Не удалось показать исходный чертёж: {error}</div>
-  if (!url) return <div className="source-vector-state">Загрузка векторного чертежа…</div>
-  return <img className={className} src={url} alt={alt} draggable={false}/>
+  if (error) return <div className="source-vector-state">{tx("Не удалось показать исходный чертёж: ")}{tx(error)}</div>
+  if (!url) return <div className="source-vector-state">{tx("Загрузка векторного чертежа…")}</div>
+  return <img className={className} src={url} alt={tx(alt)} draggable={false}/>
 }
 
 
@@ -59,7 +60,7 @@ export function LazySourceVector({ source, sheet, alt, className }: {
     }).catch(error => { if (live) setError(String(error)) })
     return () => { live = false }
   }, [source, sheet])
-  if (error) return <div className="source-vector-state" role="alert">Не удалось загрузить чертёж: {error}</div>
-  if (!data || data.source !== source || data.sheet !== sheet) return <div className="source-vector-state" role="status">Загрузка исходного чертежа…</div>
-  return <SourceVector encoded={data.encoded} alt={alt} className={className}/>
+  if (error) return <div className="source-vector-state" role="alert">{tx("Не удалось загрузить чертёж: ")}{tx(error)}</div>
+  if (!data || data.source !== source || data.sheet !== sheet) return <div className="source-vector-state" role="status">{tx("Загрузка исходного чертежа…")}</div>
+  return <SourceVector encoded={data.encoded} alt={tx(alt)} className={className}/>
 }

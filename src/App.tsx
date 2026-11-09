@@ -1,3 +1,6 @@
+import { useTranslation } from 'react-i18next'
+import i18n, { languages } from './i18n'
+import { tx } from './i18n'
 import { useEffect, useMemo, useRef, useState, type PointerEvent } from 'react'
 import { project } from './domain/project'
 import rawPlans from './data/architectural-plans.json'
@@ -12,8 +15,8 @@ import type { ArchitecturalPlan, ArchitecturalPlanSet, PlanRoom } from './data/p
 import type { FloorRecord } from './domain/types'
 
 const plans = rawPlans as unknown as ArchitecturalPlanSet
-const format = new Intl.NumberFormat('ru-RU', { maximumFractionDigits: 2, minimumFractionDigits: 2 })
-const signed = (n: number) => (n > 0 ? '+' : '') + new Intl.NumberFormat('ru-RU').format(n)
+const format = { format: (value:number) => new Intl.NumberFormat(i18n.resolvedLanguage, {maximumFractionDigits:2,minimumFractionDigits:2}).format(value) }
+const signed = (n: number) => (n > 0 ? '+' : '') + new Intl.NumberFormat(i18n.resolvedLanguage).format(n)
 const area = (n: number) => format.format(n) + ' м²'
 const floorIds = ['level-1', 'level-2', 'level-3', 'garage'] as const
 const swingLabel = { left: 'Левое', right: 'Правое', double: 'Двустворчатое' } as const
@@ -106,70 +109,66 @@ function PlanViewer({ floor, data, selectedRoom, onSelectRoom, onOpenPlumbing }:
     <div className="plan-top-strip">
       <div className="plan-title">
         <span className="live-indicator" />
-        <span>{layers.furniture ? 'МЕБЕЛИРОВАНИЕ · ИСХОДНЫЕ ВЕКТОРЫ ' + data.furnitureSheet : 'АРХИТЕКТУРНЫЙ 2D · ' + data.finalSheet}</span>
+        <span>{tx(layers.furniture ? 'МЕБЕЛИРОВАНИЕ · ИСХОДНЫЕ ВЕКТОРЫ ' + data.furnitureSheet : 'АРХИТЕКТУРНЫЙ 2D · ' + data.finalSheet)}</span>
       </div>
       <div className="plan-controls">
-        <button aria-label="Уменьшить" title="Уменьшить" onClick={() => changeZoom(1 / 1.2)}>−</button>
-        <span>{Math.round(zoom * 100)}%</span>
-        <button aria-label="Увеличить" title="Увеличить" onClick={() => changeZoom(1.2)}>+</button>
-        <button className="fit-control" onClick={fit}>Вписать</button>
+        <button aria-label={tx("Уменьшить")} title={tx("Уменьшить")} onClick={() => changeZoom(1 / 1.2)}>−</button>
+        <span>{tx(Math.round(zoom * 100))}%</span>
+        <button aria-label={tx("Увеличить")} title={tx("Увеличить")} onClick={() => changeZoom(1.2)}>+</button>
+        <button className="fit-control" onClick={fit}>{tx("Вписать")}</button>
       </div>
     </div>
-    <div className="layer-bar" aria-label="Слои проекта">
-      <span>СЛОИ</span>
+    <div className="layer-bar" aria-label={tx("Слои проекта")}>
+      <span>{tx("СЛОИ")}</span>
       <button className={layers.furniture ? 'layer-active' : ''} onClick={() => toggle('furniture')} aria-pressed={layers.furniture}>
-        <i className="layer-marker furniture-marker" /> Мебель · {data.furnitureSheet}
+        <i className="layer-marker furniture-marker" /> {tx(" Мебель · ")}{tx(data.furnitureSheet)}
       </button>
       <button className={layers.plumbing ? 'layer-active' : ''} onClick={() => toggle('plumbing')} aria-pressed={layers.plumbing}>
-        <i className="layer-marker plumbing-marker" /> Сантехнические зоны
-      </button>
-      <button disabled={layers.furniture} title={layers.furniture ? 'Переключитесь на архитектуру' : undefined} className={layers.finish ? 'layer-active' : ''} onClick={() => toggle('finish')} aria-pressed={layers.finish}>
-        <i className="layer-marker finish-marker" /> Чистовые грани
-      </button>
+        <i className="layer-marker plumbing-marker" /> {tx(" Сантехнические зоны ")}</button>
+      <button disabled={layers.furniture} title={tx(layers.furniture ? 'Переключитесь на архитектуру' : undefined)} className={layers.finish ? 'layer-active' : ''} onClick={() => toggle('finish')} aria-pressed={layers.finish}>
+        <i className="layer-marker finish-marker" /> {tx(" Чистовые грани ")}</button>
       <button className={layers.construction ? 'layer-active' : ''} onClick={() => toggle('construction')} aria-pressed={layers.construction}>
-        <i className="layer-marker construction-marker" /> Новые перегородки
-      </button>
+        <i className="layer-marker construction-marker" /> {tx(" Новые перегородки ")}</button>
       <button className={layers.rooms ? 'layer-active' : ''} onClick={() => toggle('rooms')} aria-pressed={layers.rooms}>
-        <i className="layer-marker room-marker" /> Номера помещений
-      </button>
+        <i className="layer-marker room-marker" /> {tx(" Номера помещений ")}</button>
     </div>
     <div className="plan-stage" ref={stage} onPointerDown={onDown} onPointerMove={onMove} onPointerUp={onUp} onPointerCancel={onUp}>
       <div className="plan-stage-origin">
         <div className="plan-transform" style={{ transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})` }}>
           <div className={'vector-document ' + (!layers.finish ? 'finish-hidden' : '')} style={{ aspectRatio: data.viewport.width + '/' + data.viewport.height }}>
-            {loading && <div className="plan-loading">Загрузка исходных векторов…</div>}
-            {error && <div className="plan-error">Не удалось загрузить векторный чертёж: {error}</div>}
-            {layers.furniture ? <SourceVector key={floor.id} source="furniture" sheet={floor.id} alt={`Векторный мебельный план ${data.furnitureSheet}`} className="furniture-source-art" /> : !!svg && <div className="vector-ink" dangerouslySetInnerHTML={{ __html: svg }} />}
-            <svg className="plan-overlay" viewBox={`0 0 ${data.viewport.width} ${data.viewport.height}`} role="img" aria-label="Проектные перегородки и номера помещений">
-              {layers.plumbing && plumbingByFloor(floor.id).flatMap(group => group.rooms.map(roomNum => {
+            {tx(loading && <div className="plan-loading">{tx("Загрузка исходных векторов…")}</div>)}
+            {tx(error && <div className="plan-error">{tx("Не удалось загрузить векторный чертёж: ")}{tx(error)}</div>)}
+            {tx(layers.furniture ? <SourceVector key={floor.id} source="furniture" sheet={floor.id} alt={tx(`Векторный мебельный план ${data.furnitureSheet}`)} className="furniture-source-art" /> : !!svg && <div className="vector-ink" dangerouslySetInnerHTML={{ __html: svg }} />)}
+            <svg className="plan-overlay" viewBox={`0 0 ${data.viewport.width} ${data.viewport.height}`} role="img" aria-label={tx("Проектные перегородки и номера помещений")}>
+              {tx(layers.plumbing && plumbingByFloor(floor.id).flatMap(group => group.rooms.map(roomNum => {
                 const rm = data.rooms.find(item => item.number === roomNum)
                 if (!rm?.marker) return null
                 return <g key={group.sheet + '-' + roomNum} data-room-marker="true" transform={`translate(${rm.marker[0] + 16},${rm.marker[1] - 14})`} className="plumbing-pin" role="button" tabIndex={0}
                   onClick={event => { event.stopPropagation(); onOpenPlumbing(group.sheet) }} onPointerDown={event => event.stopPropagation()}
-                  aria-label={`Сантехника ${group.sheet} · ${rm.name}`}><circle r="7.5"/><text textAnchor="middle" dominantBaseline="central">✚</text><title>Сантехнический лист {group.sheet} для помещения № {roomNum}: {rm.name}. Точка служит навигацией, не монтажной привязкой.</title></g>
-              }))}
-              {layers.construction && data.newPartitionShapes.map((region, i) => <rect key={i} x={region.x} y={region.y} width={region.width} height={region.height}
-                fill={partitionColor[region.kind]} stroke="none" opacity="0.87" />)}
-              {layers.rooms && data.rooms.filter((room): room is PlanRoom & { marker: [number, number] } => room.marker !== null).map(room => <g
+                  aria-label={tx(`Сантехника ${group.sheet} · ${rm.name}`)}><circle r="7.5"/><text textAnchor="middle" dominantBaseline="central">✚</text><title>{tx("Сантехнический лист ")}{tx(group.sheet)} {tx(" для помещения № ")}{tx(roomNum)}: {tx(rm.name)}{tx(". Точка служит навигацией, не монтажной привязкой.")}</title></g>
+              })))}
+              {tx(layers.construction && data.newPartitionShapes.map((region, i) => <rect key={i} x={region.x} y={region.y} width={region.width} height={region.height}
+                fill={partitionColor[region.kind]} stroke="none" opacity="0.87" />))}
+              {tx(layers.rooms && data.rooms.filter((room): room is PlanRoom & { marker: [number, number] } => room.marker !== null).map(room => <g
                 key={room.number} transform={`translate(${room.marker[0]},${room.marker[1]})`} data-room-marker="true"
                 className={'room-pin ' + (room.number === selectedRoom ? 'room-pin-active' : '')}
                 onPointerDown={event => event.stopPropagation()}
                 onClick={event => { event.stopPropagation(); onSelectRoom(room.number) }}
-                role="button" tabIndex={0} aria-label={`Помещение № ${room.number}: ${room.name}`}>
+                role="button" tabIndex={0} aria-label={tx(`Помещение № ${room.number}: ${room.name}`)}>
                 <circle r={room.number === selectedRoom ? 12 : 9.5} />
-                <text textAnchor="middle" dominantBaseline="central">{room.number}</text>
-                <title>{room.name} · {area(room.areaM2)} · {data.furnitureSheet}</title>
-              </g>)}
+                <text textAnchor="middle" dominantBaseline="central">{tx(room.number)}</text>
+                <title>{tx(room.name)} · {tx(area(room.areaM2))} · {tx(data.furnitureSheet)}</title>
+              </g>))}
             </svg>
           </div>
         </div>
       </div>
       <div className="corner-axis corner-axis-tl">X / ARCH</div>
-      <div className="corner-axis corner-axis-br">SOURCE: {layers.furniture ? data.furnitureSheet : data.finalSheet} · ЭКРАННЫЙ МАСШТАБ УСЛОВНЫЙ</div>
+      <div className="corner-axis corner-axis-br">SOURCE: {tx(layers.furniture ? data.furnitureSheet : data.finalSheet)} {tx(" · ЭКРАННЫЙ МАСШТАБ УСЛОВНЫЙ")}</div>
     </div>
     <div className="plan-footbar">
-      <span>{layers.furniture ? `Мебель по ${data.furnitureSheet}: исходное расположение, не отдельные BIM-объекты` : `Чистовые контуры ${data.finalSheet} · монтаж ${data.installSheet}`}</span>
-      <button type="button" onClick={downloadSvg} disabled={!svg}>Архитектурный SVG ↗</button>
+      <span>{tx(layers.furniture ? `Мебель по ${data.furnitureSheet}: исходное расположение, не отдельные BIM-объекты` : `Чистовые контуры ${data.finalSheet} · монтаж ${data.installSheet}`)}</span>
+      <button type="button" onClick={downloadSvg} disabled={!svg}>{tx("Архитектурный SVG ↗")}</button>
     </div>
   </div>
 }
@@ -184,79 +183,80 @@ function InfoPanel({ floor, data, selectedRoom, onSelectRoom, onOpenPlumbing }: 
   const [tab, setTab] = useState<PanelTab>('rooms')
   const [query, setQuery] = useState('')
   useEffect(() => { setTab('rooms'); setQuery('') }, [floor.id])
-  const filtered = data.rooms.filter(r => (r.name + ' ' + r.number).toLocaleLowerCase().includes(query.toLocaleLowerCase()))
+  const filtered = data.rooms.filter(r => (tx(r.name) + ' ' + r.number).toLocaleLowerCase().includes(query.toLocaleLowerCase()))
   const chosen = data.rooms.find(room => room.number === selectedRoom)
   return <aside className="info-panel">
     <div className="info-head">
-      <span className="section-index">02 / ПАСПОРТ УРОВНЯ</span>
-      <h3>{floor.title}</h3>
+      <span className="section-index">{tx("02 / ПАСПОРТ УРОВНЯ")}</span>
+      <h3>{tx(floor.title)}</h3>
       <div className="info-grid">
-        <div><span>Площадь по ведомости</span><b>{area(floor.scheduleAreaM2)}</b></div>
-        <div><span>Проектных помещений</span><b>{data.rooms.length}</b></div>
+        <div><span>{tx("Площадь по ведомости")}</span><b>{tx(area(floor.scheduleAreaM2))}</b></div>
+        <div><span>{tx("Проектных помещений")}</span><b>{tx(data.rooms.length)}</b></div>
       </div>
-      {chosen && <div className="selected-info"><span>ВЫБРАНО ПОМЕЩЕНИЕ № {chosen.number}</span><b>{chosen.name}</b><small>{area(chosen.areaM2)} · {data.furnitureSheet}</small><button onClick={() => onSelectRoom(chosen.number)}>×</button></div>}
+      {tx(chosen && <div className="selected-info"><span>{tx("ВЫБРАНО ПОМЕЩЕНИЕ № ")}{tx(chosen.number)}</span><b>{tx(chosen.name)}</b><small>{tx(area(chosen.areaM2))} · {tx(data.furnitureSheet)}</small><button onClick={() => onSelectRoom(chosen.number)}>×</button></div>)}
     </div>
-    <div className="info-tabs" role="tablist" aria-label="Данные этажа">
-      <button className={tab === 'rooms' ? 'selected' : ''} role="tab" aria-selected={tab === 'rooms'} onClick={() => setTab('rooms')}>Помещения</button>
-      <button className={tab === 'plumbing' ? 'selected' : ''} role="tab" aria-selected={tab === 'plumbing'} onClick={() => setTab('plumbing')}>Сантехника</button>
-      <button className={tab === 'doors' ? 'selected' : ''} role="tab" aria-selected={tab === 'doors'} onClick={() => setTab('doors')}>Двери</button>
-      <button className={tab === 'dimensions' ? 'selected' : ''} role="tab" aria-selected={tab === 'dimensions'} onClick={() => setTab('dimensions')}>Размеры</button>
+    <div className="info-tabs" role="tablist" aria-label={tx("Данные этажа")}>
+      <button className={tab === 'rooms' ? 'selected' : ''} role="tab" aria-selected={tab === 'rooms'} onClick={() => setTab('rooms')}>{tx("Помещения")}</button>
+      <button className={tab === 'plumbing' ? 'selected' : ''} role="tab" aria-selected={tab === 'plumbing'} onClick={() => setTab('plumbing')}>{tx("Сантехника")}</button>
+      <button className={tab === 'doors' ? 'selected' : ''} role="tab" aria-selected={tab === 'doors'} onClick={() => setTab('doors')}>{tx("Двери")}</button>
+      <button className={tab === 'dimensions' ? 'selected' : ''} role="tab" aria-selected={tab === 'dimensions'} onClick={() => setTab('dimensions')}>{tx("Размеры")}</button>
     </div>
     <div className="info-scroll">
-      {tab === 'rooms' && <>
-        <input aria-label="Поиск помещений" className="room-search" placeholder="Поиск по помещению…" value={query} onChange={e => setQuery(e.target.value)} />
+      {tx(tab === 'rooms' && <>
+        <input aria-label={tx("Поиск помещений")} className="room-search" placeholder={tx("Поиск по помещению…")} value={query} onChange={e => setQuery(e.target.value)} />
         <div className="room-table">
-          {filtered.map(r => <button key={r.number} className={'room-row ' + (selectedRoom === r.number ? 'row-active' : '')} onClick={() => onSelectRoom(r.number)}>
-            <span className="room-num">{String(r.number).padStart(2, '0')}</span><span className="room-name">{r.name}</span><strong>{format.format(r.areaM2)}</strong>
-          </button>)}
-          {filtered.length === 0 && <p className="empty-search">Совпадений нет</p>}
+          {tx(filtered.map(r => <button key={r.number} className={'room-row ' + (selectedRoom === r.number ? 'row-active' : '')} onClick={() => onSelectRoom(r.number)}>
+            <span className="room-num">{tx(String(r.number).padStart(2, '0'))}</span><span className="room-name">{tx(r.name)}</span><strong>{tx(format.format(r.areaM2))}</strong>
+          </button>))}
+          {tx(filtered.length === 0 && <p className="empty-search">{tx("Совпадений нет")}</p>)}
         </div>
-        <p className="source-note">Значения из {data.furnitureSheet}. Круги на плане привязаны к напечатанным номерам, а не рассчитаны как центроиды BIM-полигонов.</p>
-      </>}
-      {tab === 'plumbing' && <>
-        <p className="source-note">Точные марки приборов, количества и исходные планы выводов по A-22–A-29. Для просмотра нажмите на рабочий лист. Координаты выводов не выдуманы.</p>
-        {plumbingByFloor(floor.id).filter(group => selectedRoom === null || group.rooms.includes(selectedRoom)).map(group => <div className="plumbing-group" key={group.sheet}>
-          <div className="plumbing-group-head"><div><span>{group.sheet} · {group.fixtures.length} марок</span><b>{group.title}</b></div><button onClick={() => onOpenPlumbing(group.sheet)}>Смотреть план ↗</button></div>
-          {group.fixtures.map(item => <div key={item.mark} className="fixture-row"><span className="fixture-mark">{item.mark}</span><span>{item.name ?? 'Позиция обозначена на плане; описание не извлечено из ведомости'}{item.status !== 'specified' && <small>Требует проверки PDF</small>}</span><b>{item.quantity !== null ? '×' + item.quantity : '?'}</b></div>)}
-        </div>)}
-        {selectedRoom !== null && !plumbingByFloor(floor.id).some(group => group.rooms.includes(selectedRoom)) && <p className="source-note">Для выбранного помещения отдельный сантехнический лист в A-22–A-29 не указан. Снимите выделение, чтобы увидеть все схемы этажа.</p>}
-      </>}
-      {tab === 'doors' && <>
-        <p className="source-note">Спецификация чистовых проёмов {data.finalSheet}. Размеры в мм, обозначения и направления открывания сохранены по рабочему листу.</p>
-        <div className="door-head"><span>МАРКА / ОТКРЫВАНИЕ</span><span>ПРОЁМ Ш×В</span><span>ПОЛОТНО Ш×В</span></div>
-        {data.doorSpecification.map(door => <div className="door-row" key={door.mark}>
-          <span><b>{door.mark}</b><small>{swingLabel[door.swing]}{door.count > 1 ? ' · ×' + door.count : ''}</small></span>
-          <span>{door.openingWidthMm} × {door.openingHeightMm}</span>
-          <span>{door.leafWidthMm} × {door.leafHeightMm}</span>
-        </div>)}
-        <p className="source-note">Привязка каждой марки к ID стены остаётся следующей задачей. Для гаража три фасадных проёма указаны отдельно в контрольных размерах {data.measuredSheet}.</p>
-      </>}
-      {tab === 'dimensions' && <>
-        <p className="source-note">Выписанные размерные значения из рабочих листов. Они не вычисляются из экранного масштаба и не подменяются измерениями на изображении.</p>
-        {data.controlDimensions.map((dimension, index) => <div className="dimension-row" key={index}>
-          <div><span>{dimension.label}</span><small>{dimension.sheet}</small></div>
-          <strong>{dimension.mm !== undefined ? signed(dimension.mm) + ' мм' : dimension.m2 !== undefined ? area(dimension.m2) : '—'}</strong>
-        </div>)}
-        <div className="dimension-warning">Для метрически точной CAD/BIM-модели необходимо связать каждый узел стены с размерной цепочкой, а каждый дверной проём — с конкретным сегментом стены. Пока этот контроль не завершён.</div>
-      </>}
+        <p className="source-note">{tx("Значения из ")}{tx(data.furnitureSheet)}{tx(". Круги на плане привязаны к напечатанным номерам, а не рассчитаны как центроиды BIM-полигонов.")}</p>
+      </>)}
+      {tx(tab === 'plumbing' && <>
+        <p className="source-note">{tx("Точные марки приборов, количества и исходные планы выводов по A-22–A-29. Для просмотра нажмите на рабочий лист. Координаты выводов не выдуманы.")}</p>
+        {tx(plumbingByFloor(floor.id).filter(group => selectedRoom === null || group.rooms.includes(selectedRoom)).map(group => <div className="plumbing-group" key={group.sheet}>
+          <div className="plumbing-group-head"><div><span>{tx(group.sheet)} · {tx(group.fixtures.length)} {tx(" марок")}</span><b>{tx(group.title)}</b></div><button onClick={() => onOpenPlumbing(group.sheet)}>{tx("Смотреть план ↗")}</button></div>
+          {tx(group.fixtures.map(item => <div key={item.mark} className="fixture-row"><span className="fixture-mark">{tx(item.mark)}</span><span>{tx(item.name ?? 'Позиция обозначена на плане; описание не извлечено из ведомости')}{tx(item.status !== 'specified' && <small>{tx("Требует проверки PDF")}</small>)}</span><b>{tx(item.quantity !== null ? '×' + item.quantity : '?')}</b></div>))}
+        </div>))}
+        {tx(selectedRoom !== null && !plumbingByFloor(floor.id).some(group => group.rooms.includes(selectedRoom)) && <p className="source-note">{tx("Для выбранного помещения отдельный сантехнический лист в A-22–A-29 не указан. Снимите выделение, чтобы увидеть все схемы этажа.")}</p>)}
+      </>)}
+      {tx(tab === 'doors' && <>
+        <p className="source-note">{tx("Спецификация чистовых проёмов ")}{tx(data.finalSheet)}{tx(". Размеры в мм, обозначения и направления открывания сохранены по рабочему листу.")}</p>
+        <div className="door-head"><span>{tx("МАРКА / ОТКРЫВАНИЕ")}</span><span>{tx("ПРОЁМ Ш×В")}</span><span>{tx("ПОЛОТНО Ш×В")}</span></div>
+        {tx(data.doorSpecification.map(door => <div className="door-row" key={door.mark}>
+          <span><b>{tx(door.mark)}</b><small>{tx(swingLabel[door.swing])}{tx(door.count > 1 ? ' · ×' + door.count : '')}</small></span>
+          <span>{tx(door.openingWidthMm)} × {tx(door.openingHeightMm)}</span>
+          <span>{tx(door.leafWidthMm)} × {tx(door.leafHeightMm)}</span>
+        </div>))}
+        <p className="source-note">{tx("Привязка каждой марки к ID стены остаётся следующей задачей. Для гаража три фасадных проёма указаны отдельно в контрольных размерах ")}{tx(data.measuredSheet)}.</p>
+      </>)}
+      {tx(tab === 'dimensions' && <>
+        <p className="source-note">{tx("Выписанные размерные значения из рабочих листов. Они не вычисляются из экранного масштаба и не подменяются измерениями на изображении.")}</p>
+        {tx(data.controlDimensions.map((dimension, index) => <div className="dimension-row" key={index}>
+          <div><span>{tx(dimension.label)}</span><small>{tx(dimension.sheet)}</small></div>
+          <strong>{tx(dimension.mm !== undefined ? signed(dimension.mm) + ' мм' : dimension.m2 !== undefined ? area(dimension.m2) : '—')}</strong>
+        </div>))}
+        <div className="dimension-warning">{tx("Для метрически точной CAD/BIM-модели необходимо связать каждый узел стены с размерной цепочкой, а каждый дверной проём — с конкретным сегментом стены. Пока этот контроль не завершён.")}</div>
+      </>)}
     </div>
-    <div className="info-bottom"><span>ПРОЕКТНЫЙ ИСТОЧНИК</span><strong>MÈTRE / {data.finalSheet}</strong></div>
+    <div className="info-bottom"><span>{tx("ПРОЕКТНЫЙ ИСТОЧНИК")}</span><strong>MÈTRE / {tx(data.finalSheet)}</strong></div>
   </aside>
 }
 
 function PlumbingDetail({ sheet, onClose }: { sheet: string; onClose: () => void }) {
   const group = plumbing[sheet]
   if (!group) return null
-  return <OverlayPanel title={`${sheet} · ${group.title}`} onClose={onClose} wide>
-    <div className="plumbing-modal-body"><div className="plumbing-detail-art"><SourceVector source="plumbing" sheet={sheet} alt={`Исходный план выводов ${sheet}`} /></div>
-      <div className="plumbing-detail-list"><h3>Спецификация по {sheet}</h3><p>Графика взята из рабочего листа. Размеры на нём проектные, от чистового пола, требуют контрольных замеров.</p>
-        {group.fixtures.map(item => <div className="fixture-row" key={item.mark}><span className="fixture-mark">{item.mark}</span><span>{item.name ?? 'Неясная строка ведомости'}</span><b>{item.quantity ?? '?'}</b></div>)}
-        <p className="source-note">Точки на общем плане только открывают эту схему. A-22–A-29 выполнены в масштабе 1:35; их координаты пока не сопоставлены с полной моделью здания.</p>
+  return <OverlayPanel title={tx(`${sheet} · ${group.title}`)} onClose={onClose} wide>
+    <div className="plumbing-modal-body"><div className="plumbing-detail-art"><SourceVector source="plumbing" sheet={sheet} alt={tx(`Исходный план выводов ${sheet}`)} /></div>
+      <div className="plumbing-detail-list"><h3>{tx("Спецификация по ")}{tx(sheet)}</h3><p>{tx("Графика взята из рабочего листа. Размеры на нём проектные, от чистового пола, требуют контрольных замеров.")}</p>
+        {tx(group.fixtures.map(item => <div className="fixture-row" key={item.mark}><span className="fixture-mark">{tx(item.mark)}</span><span>{tx(item.name ?? 'Неясная строка ведомости')}</span><b>{tx(item.quantity ?? '?')}</b></div>))}
+        <p className="source-note">{tx("Точки на общем плане только открывают эту схему. A-22–A-29 выполнены в масштабе 1:35; их координаты пока не сопоставлены с полной моделью здания.")}</p>
       </div></div>
   </OverlayPanel>
 }
 
 export default function App() {
+  useTranslation()
   const lighting=useLighting()
   const [floorId,setFloorId]=useState<typeof floorIds[number]>('level-1')
   const [selectedRoom,setSelectedRoom]=useState<number|null>(null)
@@ -268,17 +268,17 @@ export default function App() {
   const selectRoom=(number:number|null)=>setSelectedRoom(previous=>previous===number?null:number)
   const openPlumbing=(sheet:string)=>{setPanel(null);setOpenPlumbingSheet(sheet)}
   return <div className="showroom-app" data-time={lighting.time}>
-    <header className="showroom-header"><a href="/" className="showroom-brand">VILLA COMO</a><span className="showroom-location"><span aria-hidden="true">⌖</span> Lago di Como, Italia</span><span className="showroom-demo" title="Демонстрационный режим"><i/><span>Демо</span></span><button className="menu-button" aria-label="Открыть меню" onClick={()=>setPanel('menu')}><span/><span/></button></header>
-    <main className="showroom-main" aria-label="Интерактивная модель виллы">
+    <header className="showroom-header"><a href="/" className="showroom-brand">VILLA COMO</a><span className="showroom-location"><span aria-hidden="true">⌖</span> Lago di Como, Italia</span><span className="showroom-demo" title={tx("Демонстрационный режим")}><i/><span>{tx("Демо")}</span></span><button className="menu-button" data-menu-trigger aria-label={tx("Открыть меню")} onClick={()=>setPanel('menu')}><span/><span/></button></header>
+    <main className="showroom-main" aria-label={tx("Интерактивная модель виллы")}>
       <Villa3D lighting={lighting} floorSelectionRevision={floorSelectionRevision} floorId={floorId} selectedRoom={selectedRoom} onSelectRoom={selectRoom} onChooseFloor={chooseFloor} panel={panel} onPanel={setPanel}/>
     </main>
-    <footer className="showroom-footer"><b>MÈTRE</b><span className="footer-source">Архитектура пространства. Интеллект света.</span><button onClick={()=>setPanel('passport')}>Паспорт модели <span aria-hidden="true">↗</span></button><small>v 2.6</small></footer>
-    {(panel==='menu'||panel==='plans'||panel==='passport')&&<OverlayPanel title={panel==='menu'?'Ваш дом':panel==='plans'?'Чертежи':'Паспорт модели'} onClose={()=>setPanel(null)} wide={panel==='plans'}>
-      {panel==='menu'?<><p className="panel-intro">Всё для управления домом — в одном месте.</p><nav className="showroom-menu" aria-label="Меню дома">{([['scenarios','Сценарии','Свет одним нажатием'],['rooms','Свет в комнатах','Комнаты и виды освещения'],['view','Настройки вида','Слои и режимы модели'],['plans','Чертежи','Исходные планы и сантехника'],['passport','Паспорт модели','Источники и данные проекта']]as const).map(([id,title,description])=><button key={id} onClick={()=>setPanel(id)}><span><b>{title}</b><small>{description}</small></span><span aria-hidden="true">↗</span></button>)}</nav><p className="quiet-note">Демонстрация умного дома. Оборудование не подключено.</p></>:<>
-        <label className="panel-floor-select">Уровень<select value={floorId} onChange={e=>chooseFloor(e.target.value as typeof floorId)}>{floorIds.map(id=><option value={id} key={id}>{id==='garage'?'Гараж':id==='level-1'?'1 этаж':id==='level-2'?'2 этаж':'3 этаж'}</option>)}</select></label>
-        {panel==='plans'?<PlanViewer floor={floor} data={data} selectedRoom={selectedRoom} onSelectRoom={selectRoom} onOpenPlumbing={openPlumbing}/>:<><InfoPanel floor={floor} data={data} selectedRoom={selectedRoom} onSelectRoom={selectRoom} onOpenPlumbing={openPlumbing}/><details className="panel-details"><summary>Геометрический контроль</summary>{rawGeometry.floors[floorId].calibrationChecks.map((check,index)=><p key={index}>{check.sheet} · {check.label}: <b>{check.dimensionMm} мм</b> · расхождение с масштабом предпросмотра {check.residualAtDisplayScalePct.toFixed(2)}%</p>)}<p>Проверки размерных линий PDF не подтверждают точность всей модели.</p></details><details className="panel-details"><summary>Источники и границы точности</summary><p>Планы MÈTRE: {data.measuredSheet}, {data.installSheet}, {data.finalSheet}, {data.furnitureSheet}. Свет — A-34–A-37. Расстановка, материалы, кровля и участок содержат демонстрационные допущения. Модель не является утверждённым BIM-проектом или монтажной схемой проводки.</p><p>Левая часть A-35 не содержит проектных групп света: соответствующие группы помечены как демо. Физическое оборудование не подключено.</p><a href="https://github.com/RadamirSS/Villa_como_v2/pull/1" target="_blank" rel="noreferrer">Документация и изменения ↗</a></details></>}
-      </>}
-    </OverlayPanel>}
-    {openPlumbingSheet&&<PlumbingDetail sheet={openPlumbingSheet} onClose={()=>setOpenPlumbingSheet(null)}/>}
+    <footer className="showroom-footer"><b>MÈTRE</b><span className="footer-source">{tx("Архитектура пространства. Интеллект света.")}</span><button onClick={()=>setPanel('passport')}>{tx("Паспорт модели ")}<span aria-hidden="true">↗</span></button><small>v 2.6</small></footer>
+    {tx((panel==='menu'||panel==='plans'||panel==='passport')&&<OverlayPanel title={tx(panel==='menu'?'Ваш дом':panel==='plans'?'Чертежи':'Паспорт модели')} onClose={()=>setPanel(null)} wide={panel==='plans'}>
+      {tx(panel==='menu'?<><p className="panel-intro">{tx("Всё для управления домом — в одном месте.")}</p><label className="panel-floor-select">{tx("Язык")}<select aria-label={tx("Язык")} value={i18n.resolvedLanguage} onChange={event=>void i18n.changeLanguage(event.target.value)}>{languages.map(([code,name])=><option key={code} value={code} lang={code}>{name}</option>)}</select></label><nav className="showroom-menu" aria-label={tx("Меню дома")}>{tx(([['scenarios','Сценарии','Свет одним нажатием'],['rooms','Свет в комнатах','Комнаты и виды освещения'],['view','Настройки вида','Слои и режимы модели'],['plans','Чертежи','Исходные планы и сантехника'],['passport','Паспорт модели','Источники и данные проекта']]as const).map(([id,title,description])=><button key={id} onClick={()=>setPanel(id)}><span><b>{tx(title)}</b><small>{tx(description)}</small></span><span aria-hidden="true">↗</span></button>))}</nav><p className="quiet-note">{tx("Демонстрация умного дома. Оборудование не подключено.")}</p></>:<>
+        <label className="panel-floor-select">{tx("Уровень")}<select value={floorId} onChange={e=>chooseFloor(e.target.value as typeof floorId)}>{tx(floorIds.map(id=><option value={id} key={id}>{tx(id==='garage'?'Гараж':id==='level-1'?'1 этаж':id==='level-2'?'2 этаж':'3 этаж')}</option>))}</select></label>
+        {tx(panel==='plans'?<PlanViewer floor={floor} data={data} selectedRoom={selectedRoom} onSelectRoom={selectRoom} onOpenPlumbing={openPlumbing}/>:<><InfoPanel floor={floor} data={data} selectedRoom={selectedRoom} onSelectRoom={selectRoom} onOpenPlumbing={openPlumbing}/><details className="panel-details"><summary>{tx("Геометрический контроль")}</summary>{tx(rawGeometry.floors[floorId].calibrationChecks.map((check,index)=><p key={index}>{tx(check.sheet)} · {tx(check.label)}: <b>{tx(check.dimensionMm)} {tx(" мм")}</b> {tx(" · расхождение с масштабом предпросмотра ")}{tx(check.residualAtDisplayScalePct.toFixed(2))}%</p>))}<p>{tx("Проверки размерных линий PDF не подтверждают точность всей модели.")}</p></details><details className="panel-details"><summary>{tx("Источники и границы точности")}</summary><p>{tx("Планы MÈTRE: ")}{tx(data.measuredSheet)}, {tx(data.installSheet)}, {tx(data.finalSheet)}, {tx(data.furnitureSheet)}{tx(". Свет — A-34–A-37. Расстановка, материалы, кровля и участок содержат демонстрационные допущения. Модель не является утверждённым BIM-проектом или монтажной схемой проводки.")}</p><p>{tx("Левая часть A-35 не содержит проектных групп света: соответствующие группы помечены как демо. Физическое оборудование не подключено.")}</p><a href="https://github.com/RadamirSS/Villa_como_v2/pull/1" target="_blank" rel="noreferrer">{tx("Документация и изменения ↗")}</a></details></>)}
+      </>)}
+    </OverlayPanel>)}
+    {tx(openPlumbingSheet&&<PlumbingDetail sheet={openPlumbingSheet} onClose={()=>setOpenPlumbingSheet(null)}/>)}
   </div>
 }
