@@ -81,8 +81,18 @@ export function createSiteLandscape() {
   }
   for(const x of [30.8,37.2])box(x,35.3,.42,.55,1.7,-.2,stone,'gate-pier')
   for(let z=34.7;z<=35.8;z+=1.1)rect(31,z,37,z+.12,edging,'entrance-threshold',-.065)
-  for(let x=31.1;x<37;x+=.18){const m=box(x,35.3,.035,.09,1.26,-.04,bronze,'courtyard-gate');m.userData={siteObject:'courtyard-gate',facing:'balcony-front-positive-z',controlBinding:null,ownerConfirmedSide:'right-of-garage'}}
-  for(const y of [.04,1.2])box(34,35.3,6,.07,.05,y,bronze,'gate-rail')
+  // Two independently animated presentation leaves. Keep their original positions
+  // so the security layer can slide them into the surrounding fence.
+  for(const [leaf,left,right] of [['left',31.08,34],['right',34,36.94]] as const){
+    for(let x=left+.055;x<right;x+=.19){
+      const m=box(x,35.3,.037,.09,1.26,-.04,bronze,'courtyard-gate')
+      m.userData={siteObject:'courtyard-gate',facing:'balcony-front-positive-z',controlBinding:null,ownerConfirmedSide:'right-of-garage',gateLeaf:leaf,gateBaseX:m.position.x}
+    }
+    for(const y of [.04,1.2]){
+      const rail=box((left+right)/2,35.3,right-left,.07,.05,y,bronze,'gate-rail')
+      rail.userData={siteObject:'gate-rail',gateLeaf:leaf,gateBaseX:rail.position.x}
+    }
+  }
   box(30.53,35.58,.12,.04,.28,.85,bronze,'gate-intercom')
   // Efficient decorative lighting: emissive optics + pools, no per-lamp shadow maps.
   for(const [x,z]of [[-3.2,9],[-3.2,15],[-3.2,22],[3,25.5],[14.7,25.5],[26,28.7],[30.2,32.5],[37.8,32.5],[-16,23]]){

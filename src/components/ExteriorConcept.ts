@@ -229,7 +229,7 @@ function batchOpaque(root: THREE.Group) {
   root.updateMatrixWorld(true)
   const buckets = new Map<THREE.Material, { geometries: THREE.BufferGeometry[]; parts: object[] }>()
   const meshes: THREE.Mesh[] = []
-  root.traverse(obj => { if (obj instanceof THREE.Mesh && !Array.isArray(obj.material) && !obj.material.transparent) meshes.push(obj) })
+  root.traverse(obj => { if (obj instanceof THREE.Mesh && !Array.isArray(obj.material) && !obj.material.transparent && !obj.userData.gateLeaf && obj.parent?.userData.openingId !== 'garage-entry') meshes.push(obj) })
   for (const m of meshes) {
     const material = m.material as THREE.Material
     let bucket = buckets.get(material)

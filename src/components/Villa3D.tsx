@@ -1,4 +1,8 @@
 import CourtyardLight from './CourtyardLight'
+import SecurityControls from './SecurityControls'
+import {createSecurityDevices,animateSecurityVisuals,createSecurityMotion} from './Security3D'
+import {cameraStations,isCameraId,type SecurityController,type CameraId} from '../domain/security'
+import '../security.css'
 import { updateSiteTime } from './SiteLandscape'
 import i18n, { tx } from '../i18n'
 import { useEffect, useRef, useState } from 'react'
@@ -252,9 +256,10 @@ function disposeSceneGroup(obj: THREE.Object3D) {
   })
 }
 
-export default function Villa3D({ floorId, selectedRoom, onSelectRoom, onChooseFloor, panel, onPanel, lighting, floorSelectionRevision = 0 }: {
+export default function Villa3D({ floorId, selectedRoom, onSelectRoom, onChooseFloor, panel, onPanel, lighting, security, floorSelectionRevision = 0 }: {
   floorId: FloorId
   lighting: LightingController
+  security: SecurityController
   floorSelectionRevision?: number
   selectedRoom: number | null
   onSelectRoom: (value: number|null) => void
@@ -276,6 +281,13 @@ export default function Villa3D({ floorId, selectedRoom, onSelectRoom, onChooseF
   const onSelectRef = useRef(onSelectRoom)
   const lightStateRef=useRef(lighting.state)
   lightStateRef.current=lighting.state
+  const securityStateRef=useRef(security.state)
+  securityStateRef.current=security.state
+  const securityMotionRef=useRef(createSecurityMotion())
+  const securitySelectRef=useRef(security.setCamera)
+  securitySelectRef.current=security.setCamera
+  const onPanelRef=useRef(onPanel)
+  onPanelRef.current=onPanel
   const [view, setView] = useState<StageView>('all')
   const [arrangement, setArrangement] = useState<StageArrangement>('assembled')
   const [presentation, setPresentation] = useState<PresentationMode>('exterior')
@@ -389,10 +401,16 @@ export default function Villa3D({ floorId, selectedRoom, onSelectRoom, onChooseF
       camera.position.copy(centre).addScaledVector(direction, distance * 1.10)
       controls.update(); dirty = true
     }
-    let frame = 0
+    let frame = 0, last = performance.now()
     const draw = () => {
       frame = requestAnimationFrame(draw)
+      const now=performance.now(),dt=Math.min(.06,(now-last)/1000);last=now
       controls.update()
+      const s=securityStateRef.current,m=securityMotionRef.current
+      if(Math.abs(m.gate-(s.gateOpen?1:0))>.0001||Math.abs(m.garage-(s.garageOpen?1:0))>.0001||
+        (s.gateOpen&&s.garageOpen&&Math.abs(m.car-(s.vehicleInside?1:0))>.0001)){
+        if(animateSecurityVisuals(scene,s,m,dt))dirty=true
+      }
       if (dirty) { dirty = false; renderer.render(scene, camera) }
     }
     draw()
@@ -409,6 +427,8 @@ export default function Villa3D({ floorId, selectedRoom, onSelectRoom, onChooseF
       const ray = new THREE.Raycaster()
       ray.setFromCamera(mouse, camera)
       const hits = ray.intersectObjects(drawingsRef.current.children, true)
+      const device=hits.find(hit=>isCameraId(String(hit.object.userData.securityCameraId??'')))
+      if(device){securitySelectRef.current(device.object.userData.securityCameraId as CameraId);onPanelRef.current('security');return}
       const marker = hits.find(hit => Number.isInteger(hit.object.userData.roomNumber))
       if (marker) onSelectRef.current(marker.object.userData.roomNumber as number)
     }
@@ -443,6 +463,7 @@ export default function Villa3D({ floorId, selectedRoom, onSelectRoom, onChooseF
     drawingsRef.current = root
     scene.add(root)
     const isExterior = presentation === 'exterior'
+    if(isExterior && viewAll && site)root.add(createSecurityDevices())
     if (isExterior) {
       // Exterior is expressly a conceptual wrapper over the registered source footprint.
       // Roof/facade and window heights cannot be read from absent elevation drawings.
@@ -510,6 +531,7 @@ export default function Villa3D({ floorId, selectedRoom, onSelectRoom, onChooseF
       root.add(layer)
     }
     updateLightingVisuals(root,lightStateRef.current)
+    animateSecurityVisuals(scene,securityStateRef.current,securityMotionRef.current,0)
     if (isExterior) setLoadingTexture(false)
     if (fallback) root.traverse(item => {
       if(item instanceof THREE.Mesh){
@@ -559,6 +581,22 @@ export default function Villa3D({ floorId, selectedRoom, onSelectRoom, onChooseF
   },[lighting.state,floorId,viewAll,presentation,lighting.wiring])
 
   useEffect(()=>{
+    if(sceneRef.current)animateSecurityVisuals(sceneRef.current,security.state,securityMotionRef.current,0)
+    invalidateRef.current()
+  },[security.state])
+
+  useEffect(()=>{
+    if(!security.state.cameraId||!cameraRef.current||!controlsRef.current||!viewAll||presentation!=='exterior')return
+    const station=cameraStations.find(item=>item.id===security.state.cameraId)
+    if(!station)return
+    cameraRef.current.position.set(...station.position)
+    controlsRef.current.target.set(...station.target)
+    cameraRef.current.up.set(0,1,0)
+    controlsRef.current.update()
+    invalidateRef.current()
+  },[security.state.cameraId,viewAll,presentation])
+
+  useEffect(()=>{
     const scene=sceneRef.current;if(!scene)return
     if(contextRef.current)updateSiteTime(contextRef.current,lighting.time,lighting.courtyard)
     scene.background=new THREE.Color(lighting.time==='day'?'#aba995':lighting.time==='dusk'?'#9b9785':'#18272d')
@@ -581,6 +619,7 @@ export default function Villa3D({ floorId, selectedRoom, onSelectRoom, onChooseF
   }, [selectedRoom, floorId, labels, viewAll])
 
   const setCameraPose = (pose: typeof poseRef.current) => {
+    if(security.state.cameraId)security.setCamera(null)
     poseRef.current = pose;setActivePose(pose); setTop(pose === 'top'); fitCameraRef.current()
   }
   const resetCamera = (plan: boolean) => setCameraPose(plan ? 'top' : 'perspective')
@@ -597,8 +636,10 @@ export default function Villa3D({ floorId, selectedRoom, onSelectRoom, onChooseF
   const room=plans[floorId].rooms.find(r=>r.number===selectedRoom)
   const litRooms=lightingPlan.rooms.filter(r=>roomIsOn(lighting.state,r.floor as FloorId,r.number)).length
   const activeScenario=lightScenarios.find(s=>s.id===lighting.scenario)
-  return <div className="showroom-scene" data-time={lighting.time}>
+  return <div className="showroom-scene" data-time={lighting.time} data-night-vision={security.state.cameraId!==null&&security.state.nightVision}>
     <div className="showroom-canvas" ref={mount} aria-label={tx("Интерактивная 3D модель Villa Como: вращайте и выбирайте комнаты")}/>
+    {security.state.cameraId&&<div className="security-camera-hud"><div><strong>● DEMO CAM {String(cameraStations.findIndex(c=>c.id===security.state.cameraId)+1).padStart(2,'0')} · {tx(cameraStations.find(c=>c.id===security.state.cameraId)?.name??'')}</strong><small>{tx('ВИРТУАЛЬНЫЙ РАКУРС · НЕ ВИДЕОПОТОК')}</small></div><button onClick={()=>{security.setCamera(null);resetCamera(false)}}>{tx('Общий вид')}</button></div>}
+    {security.state.triggered&&<div className="security-alert-hud" role="status">{tx('⚠ ДЕМО-ТРЕВОГА · Движение у въезда')}</div>}
     <div className="showroom-intro"><p><span/> THE ART OF SMART LIVING</p><h1>Villa <em>Como.</em></h1><span>{tx("Архитектура пространства. Интеллект света.")}</span></div>
     <div className="scene-utilities"><button className="icon-button" aria-label={tx("Сбросить ракурс")} title={tx("Сбросить ракурс")} onClick={()=>viewAll?resetCamera(false):setCameraPose('floor')}><ShowroomIcon name="reset"/></button><button className="icon-button" aria-label={tx('Приблизить')} title={tx('Приблизить')} onClick={()=>zoomCamera(.82)}>+</button><button className="icon-button" aria-label={tx('Отдалить')} title={tx('Отдалить')} onClick={()=>zoomCamera(1.22)}>−</button></div>
     <div className="showroom-camera glass-control" role="group" aria-label={tx("Ракурс модели")}>{tx(([['perspective','Объём'],['front','Со двора'],['rear','Сзади'],['top','Сверху']]as const).map(([pose,label])=><button key={pose} aria-pressed={activePose===pose||(pose==='perspective'&&activePose==='floor')} onClick={()=>setCameraPose(pose==='perspective'&&!viewAll?'floor':pose)}>{tx(label)}</button>))}</div>
@@ -606,12 +647,12 @@ export default function Villa3D({ floorId, selectedRoom, onSelectRoom, onChooseF
     {tx(!viewAll&&room&&<div className="selected-room-card glass-control"><button className="selected-room-name" onClick={()=>onPanel('rooms')}><span>{tx("КОМНАТА ")}{tx(room.number)}</span><b>{tx(room.name)}</b><small>{tx(roomIsOn(lighting.state,floorId,room.number)?'Свет включён':'Свет выключен')} {tx(" · виды света ↗")}</small></button><button role="switch" aria-checked={roomIsOn(lighting.state,floorId,room.number)} aria-label={tx(`Свет: ${room.name}`)} className="selected-room-power" onClick={()=>lighting.setRoom(floorId,room.number,!roomIsOn(lighting.state,floorId,room.number))}><ShowroomIcon name="light"/></button><button className="room-card-close" aria-label={tx("Снять выбор комнаты")} onClick={()=>onSelectRoom(null)}>×</button></div>)}
     <div className="showroom-time glass-control" role="group" aria-label={tx("Время суток")}>{tx((['day','dusk','night']as const).map((time,i)=><button key={time} aria-pressed={lighting.time===time} onClick={()=>lighting.setTime(time)}><ShowroomIcon name={['sun','dusk','moon'][i]as 'sun'|'dusk'|'moon'}/>{tx(['День','Сумерки','Ночь'][i])}</button>))}</div>
     <span className="visually-hidden" role="status">{tx(activeScenario?`Сценарий: ${activeScenario.name}. `:'')}{tx("Свет включён в ")}{tx(litRooms)} {tx(" комнатах.")} {tx(lighting.courtyard?'Двор: включён':'Двор: выключен')}</span>
-    <div className="showroom-dock glass-control"><div className="dock-heading"><span>{tx(levelTitle)}</span><div><button className="primary-model-action" aria-label={tx("Открыть свет в комнатах")} onClick={()=>onPanel('rooms')}><ShowroomIcon name="light"/><span>{tx('Свет')}</span><small>{litRooms+(lighting.courtyard?1:0)}</small></button><button className="primary-model-action" aria-label={tx("Открыть сценарии")} onClick={()=>onPanel('scenarios')}><ShowroomIcon name="scene"/><span>{tx('Сценарии')}</span>{activeScenario&&<i className="preset-dot"/>}</button></div></div>
+    <div className="showroom-dock glass-control"><div className="dock-heading"><span>{tx(levelTitle)}</span><div><button className="primary-model-action" aria-label={tx("Открыть свет в комнатах")} onClick={()=>onPanel('rooms')}><ShowroomIcon name="light"/><span>{tx('Свет')}</span><small>{litRooms+(lighting.courtyard?1:0)}</small></button><button className="primary-model-action" aria-label={tx("Открыть сценарии")} onClick={()=>onPanel('scenarios')}><ShowroomIcon name="scene"/><span>{tx('Сценарии')}</span>{activeScenario&&<i className="preset-dot"/>}</button><button className="primary-model-action" aria-label={tx("Открыть безопасность")} onClick={()=>onPanel('security')}><ShowroomIcon name="shield"/><span>{tx('Охрана')}</span>{security.state.armed&&<i className="preset-dot"/>}</button></div></div>
      <div className="showroom-floors" role="tablist" aria-label={tx("Выбор этажа")} onKeyDown={event=>{if(!['ArrowRight','ArrowLeft','Home','End'].includes(event.key))return;event.preventDefault();const tabs=Array.from(event.currentTarget.querySelectorAll<HTMLButtonElement>('[role=tab]'));const index=tabs.indexOf(document.activeElement as HTMLButtonElement);const next=event.key==='Home'?0:event.key==='End'?tabs.length-1:(index+(event.key==='ArrowRight'?1:-1)+tabs.length)%tabs.length;tabs[next]?.focus();tabs[next]?.click()}}><button role="tab" aria-selected={viewAll} onClick={chooseAll}><span aria-hidden="true">▦</span> <span className="overview-label">{tx('Весь участок')}</span></button>{tx((['level-2','level-1','level-3','garage']as const).map(id=><button role="tab" aria-label={tx(id==='garage'?'Гараж':id==='level-1'?'1 этаж':id==='level-2'?'2 этаж':'3 этаж')} aria-selected={!viewAll&&floorId===id} key={id} onClick={()=>onChooseFloor(id)}><span aria-hidden="true">{tx(id==='garage'?'▱':id==='level-1'?'1':id==='level-2'?'2':'3')}</span>{tx(id==='garage'?'Гараж':'этаж')}</button>))}</div>
     </div>
     {tx((!viewAll&&!room)&&<p className="showroom-hint">{tx("Выберите комнату на модели, чтобы управлять светом")}</p>)}
-    {tx((panel==='view'||panel==='scenarios'||panel==='rooms')&&<OverlayPanel title={tx(panel==='view'?'Настройки вида':panel==='scenarios'?'Сценарии':'Свет')} onClose={()=>onPanel(null)}>
-      {tx(panel==='view'?<div className="view-settings"><p className="panel-intro">{tx("Настройте отображение под свою задачу.")}</p>
+    {tx((panel==='view'||panel==='scenarios'||panel==='rooms'||panel==='security')&&<OverlayPanel title={tx(panel==='view'?'Настройки вида':panel==='scenarios'?'Сценарии':panel==='security'?'Безопасность':'Свет')} onClose={()=>onPanel(null)}>
+      {tx(panel==='security'?<SecurityControls security={security} onShowSite={()=>{chooseAll();onPanel(null)}} onChooseCamera={id=>{chooseAll();security.setCamera(id);onPanel(null)}}/>:panel==='view'?<div className="view-settings"><p className="panel-intro">{tx("Настройте отображение под свою задачу.")}</p>
        <h3>{tx("Модель")}</h3><div className="setting-modes"><button className="panel-secondary" onClick={()=>{chooseAll();onPanel(null)}}>{tx("Дом и участок")}</button><button className="panel-secondary" onClick={()=>{setDetailRoom(null);setView('one');setPresentation('section');setCameraPose('floor');onPanel(null)}}>{tx("Низкие стены")}</button><button className="panel-secondary" onClick={()=>{setDetailRoom(null);setView('one');setPresentation('source');onPanel(null)}}>{tx("Полные стены")}</button><button className="panel-secondary" onClick={()=>{setDetailRoom(null);setView('all');setPresentation('section');setArrangement(v=>v==='assembled'?'exploded':'assembled');onPanel(null)}}>{tx(arrangement==='exploded'?'Собрать этажи':'Раздвинуть этажи')}</button></div>
        <h3>{tx("Показывать")}</h3><div className="setting-toggles">{tx((presentation==='exterior'?[[showGarage,setShowGarage,'Гараж на участке'],[roof,setRoof,'Кровлю'],[glazing,setGlazing,'Остекление'],[site,setSite,'Участок'],[terrace,setTerrace,'Террасу']]:[[walls,setWalls,'Стены'],[doors,setDoors,'Двери'],[furniture,setFurniture,'Мебель и сантехнику'],[labels,setLabels,'Номера комнат']]).map(([value,setter,label])=><label key={label as string}><span>{tx(label as string)}</span><input type="checkbox" checked={value as boolean} onChange={e=>(setter as (v:boolean)=>void)(e.target.checked)}/></label>))}<label><span>{tx("Условные связи групп света")}</span><input type="checkbox" checked={lighting.wiring} onChange={e=>lighting.setWiring(e.target.checked)}/></label></div>
        {tx(floorId==='level-2'&&<button className="panel-secondary full-width" onClick={()=>{poseRef.current='kitchen';setActivePose('kitchen');setDetailRoom(12);setFurniture(true);setView('one');setPresentation('section');setLabels(false);onSelectRoom(12);onPanel(null)}}>{tx("Рассмотреть кухню крупно ↗")}</button>)}
