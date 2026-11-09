@@ -22,7 +22,7 @@ export function createSecurityDevices(){
  const cameraDark=new THREE.MeshStandardMaterial({color:'#263832',metalness:.35,roughness:.4})
  for(const station of cameraStations){
   const cam=new THREE.Group()
-  cam.name='virtual-camera-'+station.id;cam.position.set(...station.position)
+  cam.name='virtual-camera-'+station.id;cam.position.set(station.position[0],station.position[1],station.position[2])
   const dir=new THREE.Vector3(...station.target).sub(new THREE.Vector3(...station.position)).normalize()
   const mount=new THREE.Mesh(new THREE.CylinderGeometry(.055,.055,.3,8),cameraDark)
   mount.rotation.z=Math.PI/2;mount.position.y=-.13;cam.add(mount)

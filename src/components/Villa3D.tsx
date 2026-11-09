@@ -588,8 +588,8 @@ export default function Villa3D({ floorId, selectedRoom, onSelectRoom, onChooseF
     if(!security.state.cameraId||!cameraRef.current||!controlsRef.current||!viewAll||presentation!=='exterior')return
     const station=cameraStations.find(item=>item.id===security.state.cameraId)
     if(!station)return
-    cameraRef.current.position.set(...station.position)
-    controlsRef.current.target.set(...station.target)
+    cameraRef.current.position.set(station.position[0],station.position[1],station.position[2])
+    controlsRef.current.target.set(station.target[0],station.target[1],station.target[2])
     cameraRef.current.up.set(0,1,0)
     controlsRef.current.update()
     invalidateRef.current()
