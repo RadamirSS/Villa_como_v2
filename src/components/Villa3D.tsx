@@ -399,8 +399,9 @@ export default function Villa3D({ security, securityCapture, floorId, selectedRo
     securityCapture.current=(id)=>{
       const spec=virtualCameras.find(c=>c.id===id);if(!spec)return ''
       const view=new THREE.PerspectiveCamera(65,camera.aspect,.1,150);view.position.set(spec.position[0],spec.position[1],spec.position[2]);view.lookAt(new THREE.Vector3(...spec.target))
+      const hidden:THREE.Object3D[]=[];scene.traverse(o=>{if(o.userData.securityCamera===id&&o.visible){hidden.push(o);o.visible=false}})
       renderer.render(scene,view)
-      let result='';try{const element=renderer.domElement;result=element instanceof HTMLCanvasElement?element.toDataURL('image/png'):'data:image/svg+xml;charset=utf-8,'+encodeURIComponent(new XMLSerializer().serializeToString(element))}finally{renderer.render(scene,camera)}
+      let result='';try{const element=renderer.domElement;result=element instanceof HTMLCanvasElement?element.toDataURL('image/png'):'data:image/svg+xml;charset=utf-8,'+encodeURIComponent(new XMLSerializer().serializeToString(element))}finally{for(const o of hidden)o.visible=true;renderer.render(scene,camera)}
       return result
     }
     let frame = 0
