@@ -1,11 +1,19 @@
 import { useEffect, useRef, useState } from 'react'
 import * as THREE from 'three'
+import LightingControls from './LightingControls'
+import {createLightingLayer,updateLightingVisuals}from './Lighting3D'
+import type{LightingController}from '../domain/useLighting'
+import {roomIsOn,lightingPlan,lightScenarios}from '../domain/lighting'
+import OverlayPanel,{type ShowroomPanel}from './OverlayPanel'
+import ShowroomIcon from './ShowroomIcon'
+import { createInterior3D } from './Interior3D'
+import { SVGRenderer, SVGObject } from 'three/examples/jsm/renderers/SVGRenderer.js'
+import { TessellateModifier } from 'three/examples/jsm/modifiers/TessellateModifier.js'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import rawSpatial from '../data/spatial-model.json'
 import rawArchitectural from '../data/architectural-geometry.json'
 import rawPlans from '../data/architectural-plans.json'
-import furnitureVectors from '../data/furniture-vectors.json'
-import { createExteriorConcept, createExteriorContext, exteriorConcept } from './ExteriorConcept'
+import { createExteriorConcept, createExteriorContext, exteriorConcept, registrationMetres, createUnusedAttic } from './ExteriorConcept'
 
 /**
  * Stage 3: generated from SOURCE PRINT GEOMETRY, not semantic/millimetre BIM.
@@ -114,7 +122,26 @@ function roomSprite(value: number) {
   return sprite
 }
 
-function wallAndSlabGroup(floorId: FloorId, height: number, current: boolean, detail: boolean) {
+
+function vectorRoomMarker(value: number, select: () => void) {
+  const ns = 'http://www.w3.org/2000/svg'
+  const node = document.createElementNS(ns, 'g')
+  node.setAttribute('role', 'button'); node.setAttribute('tabindex', '0')
+  node.setAttribute('aria-label', `Помещение ${value}`)
+  node.style.cursor = 'pointer'
+  const circle = document.createElementNS(ns, 'circle')
+  circle.setAttribute('r', '12'); circle.setAttribute('fill', '#dbc399'); circle.setAttribute('stroke', '#294e40')
+  const text = document.createElementNS(ns, 'text')
+  text.textContent = String(value); text.setAttribute('text-anchor', 'middle'); text.setAttribute('dy', '.35em')
+  text.setAttribute('font-size', '11'); text.setAttribute('font-family', 'system-ui'); text.setAttribute('fill', '#183b2c')
+  node.append(circle, text)
+  node.addEventListener('click', select)
+  node.addEventListener('keydown', event => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); select() } })
+  const marker = new SVGObject(node); marker.userData.roomNumber = value
+  return marker
+}
+
+export function wallAndSlabGroup(floorId: FloorId, height: number, current: boolean, detail: boolean, overview = false) {
   const data = spatial.floors[floorId]
   const group = new THREE.Group()
   const wallMaterial = new THREE.MeshStandardMaterial({
@@ -124,11 +151,12 @@ function wallAndSlabGroup(floorId: FloorId, height: number, current: boolean, de
   const slabMaterial = new THREE.MeshStandardMaterial({ color: current ? '#d0cab8' : '#6e8880', roughness: .95,
     transparent: !current, opacity: current ? .95 : .42, side: THREE.DoubleSide })
   const edgeMaterial = new THREE.MeshBasicMaterial({ color: '#354941', transparent: true, opacity: .3 })
-  for (const polygon of data.slabEnvelopePt) {
+  for (const polygon of overview ? [{outer:exteriorConcept.floors[floorId].outlinePt,holes:[]}, ...(floorId === 'level-2' ? [{outer:exteriorConcept.terrace.polygonPt,holes:[]}] : [])] : data.slabEnvelopePt) {
     const shape = toShape(polygon)
     if (!shape) continue
     const mesh = new THREE.Mesh(extrusion(shape, spatial.displayAssumptions.slabThicknessM), slabMaterial)
-    mesh.position.y = -.17
+    mesh.position.y = -spatial.displayAssumptions.slabThicknessM
+    mesh.userData.floorSlab=true
     mesh.receiveShadow = true
     group.add(mesh)
   }
@@ -152,21 +180,13 @@ function wallAndSlabGroup(floorId: FloorId, height: number, current: boolean, de
   return group
 }
 
-async function inflateSvg(encoded: string) {
-  const bytes = Uint8Array.from(atob(encoded), x => x.charCodeAt(0))
-  const stream = new Blob([bytes]).stream().pipeThrough(new DecompressionStream('gzip'))
-  const svg = await new Response(stream).text()
-  if (!svg.startsWith('<svg ') || /<script|<image\b|<foreignObject/i.test(svg)) throw new Error('Недопустимый SVG')
-  return svg
-}
-
 /**
  * Only the original door leaf line in plan has source-certified XY position.
  * Door heights/sizes are drawn from the A-14..17 door schedule. The leaf is
  * intentionally shown ajar at the angle printed in the source drawing;
  * exact jamb/hinge build-up and overhead lintel depth remain provisional.
  */
-function sourceDoorGroup(floorId: FloorId, current: boolean, drawLintels: boolean) {
+function sourceDoorGroup(floorId: FloorId, current: boolean, drawLintels: boolean, limit = Infinity) {
   const group = new THREE.Group()
   const leaves = architecture.floors[floorId].doors
   const leafMaterial = new THREE.MeshStandardMaterial({
@@ -183,7 +203,7 @@ function sourceDoorGroup(floorId: FloorId, current: boolean, drawLintels: boolea
     const b = new THREE.Vector3(pX(end[0]), 0, pZ(end[1]))
     const vector = b.clone().sub(a)
     const span = vector.length()
-    const leafHeight = door.leafHeightMm / 1000
+    const leafHeight = Math.min(limit, door.leafHeightMm / 1000)
     if (span > .15 && span < 3) {
       const panel = new THREE.Mesh(new THREE.BoxGeometry(span, leafHeight, .045), leafMaterial)
       panel.position.copy(a.clone().add(b).multiplyScalar(.5))
@@ -216,49 +236,9 @@ function sourceDoorGroup(floorId: FloorId, current: boolean, drawLintels: boolea
   return group
 }
 
-async function furnitureOverlay(floor: FloorId): Promise<THREE.Mesh> {
-  const source = spatial.floors[floor].sourceViewport
-  const svg = await inflateSvg(furnitureVectors[floor])
-  const url = URL.createObjectURL(new Blob([svg], { type: 'image/svg+xml' }))
-  try {
-    const img = new Image()
-    await new Promise<void>((resolve, reject) => {
-      img.onload = () => resolve()
-      img.onerror = () => reject(new Error('Не удалось распаковать мебельный план'))
-      img.src = url
-    })
-    const ratio = Math.min(2.0, 2100 / source.widthPt)
-    const canvas = document.createElement('canvas')
-    canvas.width = Math.ceil(source.widthPt * ratio)
-    canvas.height = Math.ceil(source.heightPt * ratio)
-    const ctx = canvas.getContext('2d', { willReadFrequently: true })!
-    ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
-    const pixels = ctx.getImageData(0, 0, canvas.width, canvas.height)
-    const a = pixels.data
-    // Remove the white PDF-paper background: objects remain as source 2D ink laid on a 3D plane.
-    for (let i = 0; i < a.length; i += 4) {
-      const min = Math.min(a[i], a[i + 1], a[i + 2])
-      if (min >= 244) a[i + 3] = 0
-      else if (min >= 228) a[i + 3] = Math.min(a[i + 3], Math.round((244 - min) / 16 * 255))
-    }
-    ctx.putImageData(pixels, 0, 0)
-    const texture = new THREE.CanvasTexture(canvas)
-    texture.colorSpace = THREE.SRGBColorSpace
-    texture.anisotropy = 4
-    const geometry = new THREE.PlaneGeometry(source.widthPt / ptPerM, source.heightPt / ptPerM)
-    const material = new THREE.MeshBasicMaterial({ map: texture, transparent: true, side: THREE.DoubleSide, depthWrite: false, opacity: .77 })
-    const plane = new THREE.Mesh(geometry, material)
-    plane.rotation.x = -Math.PI / 2
-    plane.position.set(pX(source.xPt + source.widthPt / 2), .035, pZ(source.yPt + source.heightPt / 2))
-    plane.renderOrder = 3
-    plane.userData.source = `MÈTRE ${plans[floor].furnitureSheet} · source 2D projection`
-    return plane
-  } finally { URL.revokeObjectURL(url) }
-}
-
 function disposeSceneGroup(obj: THREE.Object3D) {
   obj.traverse(child => {
-    if (child instanceof THREE.Mesh || child instanceof THREE.Sprite || child instanceof THREE.LineSegments) {
+    if (child instanceof THREE.Mesh || child instanceof THREE.Sprite || child instanceof THREE.Line) {
       child.geometry?.dispose()
       const mats = Array.isArray(child.material) ? child.material : [child.material]
       for (const m of mats) {
@@ -269,102 +249,157 @@ function disposeSceneGroup(obj: THREE.Object3D) {
   })
 }
 
-export default function Villa3D({ floorId, selectedRoom, onSelectRoom }: {
+export default function Villa3D({ floorId, selectedRoom, onSelectRoom, onChooseFloor, panel, onPanel, lighting, floorSelectionRevision = 0 }: {
   floorId: FloorId
+  lighting: LightingController
+  floorSelectionRevision?: number
   selectedRoom: number | null
-  onSelectRoom: (value: number) => void
+  onSelectRoom: (value: number|null) => void
+  onChooseFloor: (floor:FloorId)=>void
+  panel:ShowroomPanel
+  onPanel:(panel:ShowroomPanel)=>void
 }) {
   const mount = useRef<HTMLDivElement>(null)
   const sceneRef = useRef<THREE.Scene | null>(null)
   const controlsRef = useRef<OrbitControls | null>(null)
   const cameraRef = useRef<THREE.PerspectiveCamera | null>(null)
   const drawingsRef = useRef<THREE.Group | null>(null)
-  const rendererRef = useRef<THREE.WebGLRenderer | null>(null)
+  const contextRef = useRef<THREE.Group | null>(null)
+  const boundsRef = useRef(new THREE.Box3())
+  const poseRef = useRef<'perspective' | 'front' | 'rear' | 'side' | 'top' | 'floor' | 'kitchen'>('perspective')
+  const fitKeyRef = useRef('')
+  const invalidateRef = useRef(() => {})
+  const fitCameraRef = useRef(() => {})
   const onSelectRef = useRef(onSelectRoom)
+  const lightStateRef=useRef(lighting.state)
+  lightStateRef.current=lighting.state
   const [view, setView] = useState<StageView>('all')
   const [arrangement, setArrangement] = useState<StageArrangement>('assembled')
   const [presentation, setPresentation] = useState<PresentationMode>('exterior')
   const [roof, setRoof] = useState(true)
   const [glazing, setGlazing] = useState(true)
   const [terrace, setTerrace] = useState(true)
-  const [furniture, setFurniture] = useState(false)
-  const [labels, setLabels] = useState(false)
+  const [furniture, setFurniture] = useState(true)
+  const [detailRoom, setDetailRoom] = useState<number | null>(null)
+  const [labels, setLabels] = useState(true)
+  const [showGarage, setShowGarage] = useState(true)
   const [walls, setWalls] = useState(true)
   const [doors, setDoors] = useState(true)
   const [top, setTop] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [loadingTexture, setLoadingTexture] = useState(false)
+  const [, setLoadingTexture] = useState(false)
+  const [fallback, setFallback] = useState(false)
+  const [site, setSite] = useState(true)
+  const snapshotRef=useRef(()=>{})
+  const [activePose,setActivePose]=useState('perspective')
   onSelectRef.current = onSelectRoom
-  const viewAll = view === 'all' && floorId !== 'garage'
+  const viewAll = view === 'all'
+
+  useEffect(() => {
+    if (!floorSelectionRevision) return
+    poseRef.current = 'floor'; setActivePose('floor');setTop(false); setDetailRoom(null)
+    setView('one'); setArrangement('assembled'); setPresentation('section'); setLabels(true)
+  }, [floorSelectionRevision])
 
   useEffect(() => {
     if (!mount.current) return
     const container = mount.current
-    let renderer: THREE.WebGLRenderer
+    let webgl: THREE.WebGLRenderer | null = null
+    let renderer: { domElement: HTMLElement | SVGElement; setSize: (w: number, h: number) => void; render: (s: THREE.Scene, c: THREE.Camera) => void }
     try {
-      renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: 'high-performance' })
-    } catch (e) {
-      setError('3D недоступен: браузер не смог запустить WebGL. ' + String(e))
-      return
+      webgl = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: 'default' })
+      webgl.setPixelRatio(Math.min(window.devicePixelRatio, 1.7))
+      webgl.shadowMap.enabled = true
+      webgl.shadowMap.type = THREE.PCFSoftShadowMap
+      webgl.outputColorSpace = THREE.SRGBColorSpace
+      webgl.toneMapping = THREE.ACESFilmicToneMapping
+      webgl.toneMappingExposure = 1.05
+      renderer = webgl
+      setFallback(false)
+    } catch {
+      // Same scene, meshes and camera; a graceful vector rendering on devices
+      // without WebGL. No prerecorded image, independent model, or fake view.
+      const svg = new SVGRenderer()
+      svg.setQuality('high'); svg.setPrecision(3)
+      renderer = svg
+      setFallback(true)
     }
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.8))
     renderer.setSize(container.clientWidth || 700, container.clientHeight || 550)
-    renderer.shadowMap.enabled = true
-    renderer.shadowMap.type = THREE.PCFSoftShadowMap
-    renderer.outputColorSpace = THREE.SRGBColorSpace
-    renderer.toneMapping = THREE.ACESFilmicToneMapping
-    renderer.toneMappingExposure = 1.25
-    rendererRef.current = renderer
+    renderer.domElement.setAttribute('data-renderer', webgl ? 'webgl' : 'svg')
     container.appendChild(renderer.domElement)
     const scene = new THREE.Scene()
-    scene.background = new THREE.Color('#b9cecb')
-    scene.fog = new THREE.Fog('#b9cecb', 75, 160)
+    scene.background = new THREE.Color('#e4e7df')
     sceneRef.current = scene
-    const camera = new THREE.PerspectiveCamera(36, 1, .04, 200)
-    camera.position.set(24, 29, 31)
+    snapshotRef.current=()=>{
+      renderer.render(scene,camera)
+      const element=renderer.domElement,link=document.createElement('a')
+      if(element instanceof HTMLCanvasElement){link.href=element.toDataURL('image/png');link.download='villa-como.png';link.click()}
+      else{const url=URL.createObjectURL(new Blob([new XMLSerializer().serializeToString(element)],{type:'image/svg+xml'}));link.href=url;link.download='villa-como.svg';link.click();window.setTimeout(()=>URL.revokeObjectURL(url),1000)}
+    }
+    const camera = new THREE.PerspectiveCamera(35, 1, .1, 300)
+    camera.position.set(28, 24, 34)
     cameraRef.current = camera
-    const controls = new OrbitControls(camera, renderer.domElement)
-    controls.enableDamping = true
-    controls.dampingFactor = .07
-    controls.minDistance = 3
-    controls.maxDistance = 96
-    controls.maxPolarAngle = Math.PI / 2.02
-    controls.target.set(0, 1.7, 0)
+    const controls = new OrbitControls(camera, renderer.domElement as HTMLElement)
+    controls.enableDamping = !!webgl
+    controls.dampingFactor = .08
+    controls.minDistance = 5
+    controls.maxDistance = 120
+    controls.maxPolarAngle = Math.PI * .485
+    controls.target.set(0, 3.4, 0)
     controls.update()
     controlsRef.current = controls
-    scene.add(new THREE.HemisphereLight('#f4f6ff', '#33443c', 2.0))
-    const key = new THREE.DirectionalLight('#ffefd4', 3)
-    key.position.set(-17, 32, 20)
+    // SVGRenderer sums ambient colour and ignores intensity; encode its ambient level in colour.
+    scene.add(new THREE.AmbientLight(webgl ? '#ffffff' : '#959b9a', webgl ? .7 : 1))
+    scene.add(new THREE.HemisphereLight('#fff7e7', '#747d69', webgl ? 1.5 : 0))
+    const key = new THREE.DirectionalLight(webgl ? '#fff4e2' : '#ffffff', webgl ? 2.6 : .6)
+    key.position.set(-16, 28, 18)
     key.castShadow = true
-    key.shadow.mapSize.set(1536, 1536)
-    key.shadow.camera.left = -34; key.shadow.camera.right = 34
-    key.shadow.camera.top = 34; key.shadow.camera.bottom = -34
-    key.shadow.normalBias = .018
+    key.shadow.mapSize.set(2048, 2048)
+    key.shadow.camera.left = -26; key.shadow.camera.right = 26
+    key.shadow.camera.top = 26; key.shadow.camera.bottom = -26
+    key.shadow.normalBias = .025
     scene.add(key)
-    const fill = new THREE.DirectionalLight('#9ac8bb', 1.3)
-    fill.position.set(20, 16, -17)
+    const fill = new THREE.DirectionalLight('#d3e2df', webgl ? .8 : .25)
+    fill.position.set(20, 14, -18)
     scene.add(fill)
-    const grid = new THREE.GridHelper(100, 100, '#3b5751', '#253c38')
-    grid.position.y = -.41
-    ;(grid.material as THREE.LineBasicMaterial).transparent = true
-    ;(grid.material as THREE.LineBasicMaterial).opacity = .42
-    scene.add(grid)
-    const ground = new THREE.Mesh(new THREE.PlaneGeometry(130, 130), new THREE.ShadowMaterial({ opacity: .22 }))
-    ground.rotation.x = -Math.PI / 2
-    ground.position.y = -.43
-    ground.receiveShadow = true
-    scene.add(ground)
-    const exteriorContext = createExteriorContext()
-    scene.add(exteriorContext)
+    let dirty = true
+    const invalidate = () => { dirty = true }
+    invalidateRef.current = invalidate
+    controls.addEventListener('change', invalidate)
+    fitCameraRef.current = () => {
+      const box = boundsRef.current
+      if (box.isEmpty()) return
+      const centre = box.getCenter(new THREE.Vector3())
+      const poses = { perspective: [1,.68,1.35], front: [0,.35,1.6], rear: [0,.4,-1.6], side: [1.6,.4,.1], top: [.001,1,.001], floor: [.65,1.65,1.25], kitchen: [.25,1.15,1.65] }
+      const direction = new THREE.Vector3(...poses[poseRef.current] as [number,number,number]).normalize()
+      const cameraUp = poseRef.current === 'top' ? new THREE.Vector3(0,0,-1) : new THREE.Vector3(0,1,0)
+      const right = new THREE.Vector3().crossVectors(cameraUp, direction).normalize()
+      const up = new THREE.Vector3().crossVectors(direction, right).normalize()
+      const tanV = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)), tanH = tanV * camera.aspect
+      let distance = 5
+      for (const x of [box.min.x,box.max.x]) for (const y of [box.min.y,box.max.y]) for (const z of [box.min.z,box.max.z]) {
+        const v = new THREE.Vector3(x,y,z).sub(centre), depth = v.dot(direction)
+        distance = Math.max(distance, Math.abs(v.dot(right)) / tanH + depth, Math.abs(v.dot(up)) / tanV + depth)
+      }
+      controls.target.copy(centre)
+      camera.up.copy(cameraUp)
+      camera.position.copy(centre).addScaledVector(direction, distance * 1.10)
+      controls.update(); dirty = true
+    }
     let frame = 0
-    const draw = () => { frame = requestAnimationFrame(draw); controls.update(); renderer.render(scene, camera) }
+    const draw = () => {
+      frame = requestAnimationFrame(draw)
+      controls.update()
+      if (dirty) { dirty = false; renderer.render(scene, camera) }
+    }
     draw()
     const resize = new ResizeObserver(() => {
       const w = Math.max(1, container.clientWidth), h = Math.max(1, container.clientHeight)
-      camera.aspect = w / h; camera.updateProjectionMatrix(); renderer.setSize(w, h)
+      camera.aspect = w / h; camera.updateProjectionMatrix(); renderer.setSize(w, h); fitCameraRef.current(); invalidate()
     })
     resize.observe(container)
-    const onClick = (event: MouseEvent) => {
+    const onClick = (input: Event) => {
+      const event = input as MouseEvent
       if (!drawingsRef.current || !cameraRef.current) return
       const rect = renderer.domElement.getBoundingClientRect()
       const mouse = new THREE.Vector2((event.clientX - rect.left) / rect.width * 2 - 1, -(event.clientY - rect.top) / rect.height * 2 + 1)
@@ -380,18 +415,25 @@ export default function Villa3D({ floorId, selectedRoom, onSelectRoom }: {
       resize.disconnect(); cancelAnimationFrame(frame)
       if (drawingsRef.current) { scene.remove(drawingsRef.current); disposeSceneGroup(drawingsRef.current) }
       drawingsRef.current = null
-      disposeSceneGroup(exteriorContext); scene.remove(exteriorContext)
-      controls.dispose(); renderer.dispose(); renderer.domElement.remove()
-      rendererRef.current = null; controlsRef.current = null; cameraRef.current = null; sceneRef.current = null
+      controls.removeEventListener('change', invalidate)
+      disposeSceneGroup(scene)
+      contextRef.current = null
+      controls.dispose(); webgl?.dispose(); renderer.domElement.remove()
+      invalidateRef.current = () => {}; fitCameraRef.current = () => {}
+      controlsRef.current = null; cameraRef.current = null; sceneRef.current = null
     }
   }, [])
 
   useEffect(() => {
     const scene = sceneRef.current
     if (!scene) return
-    let live = true
     const previous = drawingsRef.current
     if (previous) { scene.remove(previous); disposeSceneGroup(previous) }
+    if (contextRef.current) { scene.remove(contextRef.current); disposeSceneGroup(contextRef.current); contextRef.current = null }
+    if (site && presentation === 'exterior' && (viewAll || floorId === 'garage')) {
+      contextRef.current = createExteriorContext(!viewAll && floorId === 'garage')
+      scene.add(contextRef.current)
+    }
     const all = viewAll ? [...floorOrder] : [floorId]
     const root = new THREE.Group()
     drawingsRef.current = root
@@ -400,43 +442,128 @@ export default function Villa3D({ floorId, selectedRoom, onSelectRoom }: {
     if (isExterior) {
       // Exterior is expressly a conceptual wrapper over the registered source footprint.
       // Roof/facade and window heights cannot be read from absent elevation drawings.
-      root.add(createExteriorConcept({ floors: all, roof, windows: glazing, terrace, garage: true,
+      root.add(createExteriorConcept({ floors: all, roof, windows: glazing, terrace, garage: showGarage,
         assembled: arrangement === 'assembled' && (viewAll || floorId === 'garage') }))
     } else {
       for (const id of all) {
         const current = id === floorId
         const base = viewAll ? vertical(id, arrangement) : 0
-        const group = wallAndSlabGroup(id, id === 'level-3' ? 2.3 : spatial.displayAssumptions.wallHeightM, current, walls)
-        group.position.y = base
+        const overview = presentation === 'section'
+        const group = wallAndSlabGroup(id, overview ? .55 : id === 'level-3' ? 2.3 : spatial.displayAssumptions.wallHeightM, current, walls, overview)
+        const [offsetX, offsetZ] = registrationMetres(id)
+        group.position.set(offsetX, base, offsetZ)
         root.add(group)
         if (walls && doors) {
-          const doorGroup = sourceDoorGroup(id, current, true)
-          doorGroup.position.y = base
+          const doorGroup = sourceDoorGroup(id, current, !overview, overview ? .45 : Infinity)
+          doorGroup.position.set(offsetX, base, offsetZ)
           root.add(doorGroup)
+        }
+        if (overview && id === 'level-3') {
+          const unused=createUnusedAttic(); unused.position.y=base; root.add(unused)
+          let label:THREE.Object3D
+          if (fallback) {
+            const node=document.createElementNS('http://www.w3.org/2000/svg','text');node.textContent='Неиспользуемый чердак';node.setAttribute('fill','#3d5146');node.setAttribute('font-size','12');node.setAttribute('text-anchor','middle')
+            label=new SVGObject(node)
+          } else {
+            const canvas=document.createElement('canvas');canvas.width=512;canvas.height=80
+            const ctx=canvas.getContext('2d')!;ctx.fillStyle='#29433b';ctx.fillRect(0,0,512,80)
+            ctx.fillStyle='#f2ecd9';ctx.font='600 28px system-ui';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('Неиспользуемый чердак',256,40)
+            const map=new THREE.CanvasTexture(canvas);map.colorSpace=THREE.SRGBColorSpace
+            const sprite=new THREE.Sprite(new THREE.SpriteMaterial({map,depthTest:false,transparent:true}));sprite.scale.set(5,.78,1);label=sprite
+          }
+          label.position.set(11,base+.8,1);label.userData.spaceKind='unused-attic';root.add(label)
         }
         if (current && labels) {
           for (const room of plans[id].rooms) {
             if (!room.marker) continue
-            const item = roomSprite(room.number)
+            const item = fallback ? vectorRoomMarker(room.number, () => onSelectRef.current(room.number)) : roomSprite(room.number)
             const vp = spatial.floors[id].sourceViewport
-            item.position.set(pX(vp.xPt + room.marker[0]), base + .22, pZ(vp.yPt + room.marker[1]))
+            item.position.set(pX(vp.xPt + room.marker[0]), overview ? .72 : .22, pZ(vp.yPt + room.marker[1]))
             group.add(item)
           }
         }
       }
       if (furniture) {
-        setLoadingTexture(true)
-        furnitureOverlay(floorId).then(mesh => {
-          if (!live) { disposeSceneGroup(mesh); return }
-          mesh.position.y += viewAll ? vertical(floorId, arrangement) : 0
-          root.add(mesh)
-          setLoadingTexture(false)
-        }).catch(e => { if (live) { setLoadingTexture(false); setError('Не удалось загрузить мебельную проекцию: ' + String(e)) } })
-      } else setLoadingTexture(false)
+        for(const id of all){
+          const interior=createInterior3D(id,presentation === 'section',detailRoom)
+          const [x,z]=registrationMetres(id)
+          interior.position.set(x,viewAll?vertical(id,arrangement):0,z)
+          root.add(interior)
+        }
+      }
+      setLoadingTexture(false)
     }
+    const litFloors:FloorId[]=isExterior&&viewAll&&showGarage?[...all,'garage']:all
+    for(const id of [...new Set(litFloors)]){
+      const layer=createLightingLayer(id,presentation==='section',lighting.wiring,isExterior)
+      const [offsetX,offsetZ]=registrationMetres(id)
+      layer.position.set(offsetX,viewAll?vertical(id,arrangement):0,offsetZ)
+      if(isExterior&&viewAll&&id==='garage'){
+        layer.position.set(exteriorConcept.garagePlacement.xyMeters[0],exteriorConcept.garagePlacement.baseM,exteriorConcept.garagePlacement.xyMeters[1])
+        layer.rotation.y=exteriorConcept.garagePlacement.rotationToHouseDegrees*Math.PI/180
+      }
+      if(detailRoom!==null)layer.visible=false
+      root.add(layer)
+    }
+    updateLightingVisuals(root,lightStateRef.current)
     if (isExterior) setLoadingTexture(false)
-    return () => { live = false }
-  }, [floorId, viewAll, arrangement, furniture, walls, doors, labels, presentation, roof, glazing, terrace])
+    if (fallback) root.traverse(item => {
+      if(item instanceof THREE.Mesh){
+        // A selected floor is wholly below the furnishings. SVG has no depth buffer.
+        if(!viewAll&&item.userData.floorSlab)item.renderOrder=-20
+        if(item.parent?.userData.designSheets){const previous=item.geometry;item.geometry=new TessellateModifier(.5,7).modify(previous);previous.dispose()}
+      }
+      if (item instanceof THREE.Mesh && !Array.isArray(item.material) && item.material instanceof THREE.MeshPhysicalMaterial) {
+        const material = item.material.clone(); material.transparent = false; material.opacity = 1; material.side = THREE.FrontSide
+        item.material = material
+      }
+    })
+    boundsRef.current.setFromObject(root)
+    if(detailRoom!==null&&!viewAll&&!isExterior){
+      const detailBounds=new THREE.Box3()
+      root.updateMatrixWorld(true)
+      root.traverse(obj=>{if(obj.userData.placementId&&obj.userData.roomNumber===detailRoom)detailBounds.expandByObject(obj)})
+      if(!detailBounds.isEmpty()){
+        // A detail is a furniture inspection view; the complete source floor is one click away.
+        for(const child of root.children)if(!child.name.startsWith('furnished-'))child.visible=false
+        root.traverse(obj=>{if(obj.userData.placementId&&obj.userData.roomNumber!==detailRoom)obj.visible=false})
+        detailBounds.min.y=0
+        const size=detailBounds.getSize(new THREE.Vector3()),centre=detailBounds.getCenter(new THREE.Vector3())
+        const base=new THREE.Mesh(new THREE.BoxGeometry(size.x+.18,.06,size.z+.18),new THREE.MeshStandardMaterial({color:'#e6e2df',roughness:.95}))
+        base.position.set(centre.x,-.03,centre.z);base.receiveShadow=true;base.renderOrder=-20;base.userData.presentationBase=true;root.add(base)
+        boundsRef.current.copy(detailBounds)
+      }
+    }
+    if (isExterior && viewAll && site) boundsRef.current.expandByPoint(new THREE.Vector3(32,0,31))
+    const fitKey = `${floorId}-${viewAll}-${arrangement}-${presentation}-${detailRoom}`
+    if (fitKeyRef.current !== fitKey) { fitKeyRef.current = fitKey; fitCameraRef.current() }
+    invalidateRef.current()
+
+  }, [floorId, viewAll, arrangement, furniture, walls, doors, labels, presentation, roof, glazing, terrace, site, fallback, showGarage, detailRoom, lighting.wiring])
+
+  useEffect(()=>{
+    if(drawingsRef.current){
+      updateLightingVisuals(drawingsRef.current,lighting.state)
+      drawingsRef.current.traverse(obj=>{
+        if(obj instanceof SVGObject&&Number.isInteger(obj.userData.roomNumber)){
+          const on=roomIsOn(lighting.state,floorId,obj.userData.roomNumber)
+          obj.node.querySelector('circle')?.setAttribute('fill',on?'#ffcb61':'#dbc399')
+        }
+      })
+    }
+    invalidateRef.current()
+  },[lighting.state,floorId,viewAll,presentation,lighting.wiring])
+
+  useEffect(()=>{
+    const scene=sceneRef.current;if(!scene)return
+    scene.background=new THREE.Color(lighting.time==='day'?'#aba995':lighting.time==='dusk'?'#9b9785':'#18272d')
+    scene.traverse(obj=>{if(obj instanceof THREE.Light){
+      if(obj instanceof THREE.AmbientLight){obj.color.set(fallback?(lighting.time==='day'?'#959b9a':lighting.time==='dusk'?'#677574':'#36474c'):'#ffffff');obj.intensity=lighting.time==='day'?.7:lighting.time==='dusk'?.4:.2}
+      else if(obj instanceof THREE.DirectionalLight)obj.intensity=(obj.castShadow?(fallback?.6:2.6):(fallback?.25:.8))*(lighting.time==='day'?1:lighting.time==='dusk'?.5:.2)
+      else if(obj instanceof THREE.HemisphereLight)obj.intensity=fallback?0:lighting.time==='day'?1.5:lighting.time==='dusk'?.65:.25
+    }})
+    invalidateRef.current()
+  },[lighting.time,fallback])
 
   useEffect(() => {
     drawingsRef.current?.traverse(item => {
@@ -445,18 +572,13 @@ export default function Villa3D({ floorId, selectedRoom, onSelectRoom }: {
         item.scale.set(scale, scale, 1)
       }
     })
+    invalidateRef.current()
   }, [selectedRoom, floorId, labels, viewAll])
 
-  const resetCamera = (plan: boolean) => {
-    const cam = cameraRef.current, control = controlsRef.current
-    if (!cam || !control) return
-    control.target.set(0, viewAll ? 4 : 1, 0)
-    cam.position.set(plan ? 0.01 : 23, plan ? 38 : (viewAll ? 34 : 27), plan ? .01 : 32)
-    cam.up.set(0, 0, plan ? -1 : 0)
-    if (!plan) cam.up.set(0, 1, 0)
-    control.update()
-    setTop(plan)
+  const setCameraPose = (pose: typeof poseRef.current) => {
+    poseRef.current = pose;setActivePose(pose); setTop(pose === 'top'); fitCameraRef.current()
   }
+  const resetCamera = (plan: boolean) => setCameraPose(plan ? 'top' : 'perspective')
   const zoomCamera = (factor: number) => {
     const cam = cameraRef.current, target = controlsRef.current?.target
     if (!cam || !target) return
@@ -465,65 +587,32 @@ export default function Villa3D({ floorId, selectedRoom, onSelectRoom }: {
     controlsRef.current?.update()
   }
 
-  return <div className="villa3d">
-    <div className="model-top-strip">
-      <div className="model-title"><span className="live-indicator"/><b>3D · ВИЛЛА COMO / ПАКЕТ Б</b><small>{presentation === 'exterior' ? 'КОНЦЕПЦИЯ ФАСАДОВ И КРОВЛИ' : `${spatial.floors[floorId].sourceSheet} · исходная архитектура`}</small></div>
-      <div className="model-tools">
-        <button onClick={() => zoomCamera(1.22)} aria-label="Отдалить 3D">−</button>
-        <button onClick={() => zoomCamera(.82)} aria-label="Приблизить 3D">+</button>
-        <button onClick={() => resetCamera(!top)}>{top ? 'Изометрия' : 'Сверху'}</button>
-        <button onClick={() => resetCamera(false)}>Сброс</button>
-      </div>
+  const chooseAll=()=>{setDetailRoom(null);setView('all');setPresentation('exterior');setArrangement('assembled');onSelectRoom(null);setCameraPose('perspective')}
+  const levelTitle=viewAll?'Архитектура':floorId==='garage'?'Гараж':floorId==='level-1'?'1 этаж':floorId==='level-2'?'2 этаж':'3 этаж'
+  const room=plans[floorId].rooms.find(r=>r.number===selectedRoom)
+  const litRooms=lightingPlan.rooms.filter(r=>roomIsOn(lighting.state,r.floor as FloorId,r.number)).length
+  const activeScenario=lightScenarios.find(s=>s.id===lighting.scenario)
+  return <div className="showroom-scene" data-time={lighting.time}>
+    <div className="showroom-canvas" ref={mount} aria-label="Интерактивная 3D модель Villa Como: вращайте и выбирайте комнаты"/>
+    <div className="showroom-intro"><p><span/> THE ART OF SMART LIVING</p><h1>Villa <em>Como.</em></h1><span>Архитектура пространства. Интеллект света.</span></div>
+    <div className="scene-utilities"><button className="icon-button" aria-label="Сбросить ракурс" title="Сбросить ракурс" onClick={()=>viewAll?resetCamera(false):setCameraPose('floor')}><ShowroomIcon name="reset"/></button><button className="icon-button" aria-label="Сохранить вид модели" title="Сохранить вид модели" onClick={()=>snapshotRef.current()}><ShowroomIcon name="camera"/></button></div>
+    <div className="showroom-camera glass-control" role="group" aria-label="Ракурс модели">{([['perspective','Объём'],['front','Со двора'],['rear','Сзади'],['top','Сверху']]as const).map(([pose,label])=><button key={pose} aria-pressed={activePose===pose||(pose==='perspective'&&activePose==='floor')} onClick={()=>setCameraPose(pose==='perspective'&&!viewAll?'floor':pose)}>{label}</button>)}</div>
+    {error&&<div className="showroom-error" role="alert">{error}<button onClick={()=>setError(null)}>Закрыть</button></div>}
+    {!viewAll&&room&&<div className="selected-room-card glass-control"><button className="selected-room-name" onClick={()=>onPanel('rooms')}><span>КОМНАТА {room.number}</span><b>{room.name}</b><small>{roomIsOn(lighting.state,floorId,room.number)?'Свет включён':'Свет выключен'} · виды света ↗</small></button><button role="switch" aria-checked={roomIsOn(lighting.state,floorId,room.number)} aria-label={`Свет: ${room.name}`} className="selected-room-power" onClick={()=>lighting.setRoom(floorId,room.number,!roomIsOn(lighting.state,floorId,room.number))}><ShowroomIcon name="light"/></button><button className="room-card-close" aria-label="Снять выбор комнаты" onClick={()=>onSelectRoom(null)}>×</button></div>}
+    <div className="showroom-time glass-control" role="group" aria-label="Время суток">{(['day','dusk','night']as const).map((time,i)=><button key={time} aria-pressed={lighting.time===time} onClick={()=>lighting.setTime(time)}><ShowroomIcon name={['sun','dusk','moon'][i]as 'sun'|'dusk'|'moon'}/>{['День','Сумерки','Ночь'][i]}</button>)}</div>
+    <span className="visually-hidden" role="status">{activeScenario?`Сценарий: ${activeScenario.name}. `:''}Свет включён в {litRooms} комнатах.</span>
+    <div className="showroom-dock glass-control"><div className="dock-heading"><span>ПРОСМОТР <i>·</i> {levelTitle}</span><div><button aria-label="Открыть свет в комнатах" onClick={()=>onPanel('rooms')}><ShowroomIcon name="light"/><span>{litRooms?`${litRooms} вкл.`:'Свет'}</span></button><button aria-label="Открыть сценарии" onClick={()=>onPanel('scenarios')}><ShowroomIcon name="scene"/><span>{activeScenario?.name??'Сценарии'}</span></button></div></div>
+     <div className="showroom-floors" role="tablist" aria-label="Выбор этажа"><button role="tab" aria-selected={viewAll} onClick={chooseAll}><span aria-hidden="true">▦</span> Все этажи</button>{(['level-2','level-1','level-3','garage']as const).map(id=><button role="tab" aria-label={id==='garage'?'Гараж':id==='level-1'?'1 этаж':id==='level-2'?'2 этаж':'3 этаж'} aria-selected={!viewAll&&floorId===id} key={id} onClick={()=>onChooseFloor(id)}><span aria-hidden="true">{id==='garage'?'▱':id==='level-1'?'1':id==='level-2'?'2':'3'}</span>{id==='garage'?'Гараж':'этаж'}</button>)}</div>
     </div>
-    <div className="model-layers">
-      <div className="model-switches" role="group" aria-label="Показ 3D уровней">
-        <button className={!viewAll ? 'selected' : ''} onClick={() => setView('one')}>Один этаж</button>
-        <button className={viewAll ? 'selected' : ''} onClick={() => { setView('all'); setArrangement('assembled') }} disabled={floorId === 'garage'} title={floorId === 'garage' ? 'Гараж без проверенной привязки к дому' : undefined}>Все этажи</button>
-        {viewAll && <button className="mode-light" onClick={() => { setPresentation('section'); setArrangement(v => v === 'assembled' ? 'exploded' : 'assembled') }}>{arrangement === 'exploded' ? 'Собрать уровни' : 'Раздвинуть уровни'}</button>}
-      </div>
-      <div className="model-presentation" role="group" aria-label="Режим архитектурной визуализации">
-        <button className={presentation === 'exterior' ? 'selected' : ''} aria-pressed={presentation === 'exterior'} onClick={() => { setPresentation('exterior'); setView('all'); setArrangement('assembled'); resetCamera(false) }}>Готовый дом</button>
-        <button className={presentation === 'section' ? 'selected' : ''} aria-pressed={presentation === 'section'} onClick={() => setPresentation('section')}>Без оболочки</button>
-        <button className={presentation === 'source' ? 'selected' : ''} aria-pressed={presentation === 'source'} onClick={() => setPresentation('source')}>Исходные стены</button>
-      </div>
-      <div className="model-checks">
-        {presentation === 'exterior' ? <>
-          <button aria-pressed={roof} onClick={() => setRoof(x => !x)} className={roof ? 'active' : ''}>Крыша</button>
-          <button aria-pressed={glazing} onClick={() => setGlazing(x => !x)} className={glazing ? 'active' : ''}>Остекление</button>
-          <button aria-pressed={terrace} onClick={() => setTerrace(x => !x)} className={terrace ? 'active' : ''}>Терраса</button>
-        </> : <>
-          <button aria-pressed={walls} onClick={() => setWalls(x => !x)} className={walls ? 'active' : ''}>Стены</button>
-          <button aria-pressed={doors} onClick={() => setDoors(x => !x)} className={doors ? 'active' : ''}>Двери · 3D</button>
-          <button aria-pressed={furniture} onClick={() => setFurniture(x => !x)} className={furniture ? 'active' : ''}>Мебель · 2D</button>
-          <button aria-pressed={labels} onClick={() => setLabels(x => !x)} className={labels ? 'active' : ''}>Помещения</button>
-        </>}
-      </div>
-    </div>
-    <div className="model-viewport" ref={mount} aria-label="Интерактивная 3D модель этажей Villa Como: перетаскивайте для вращения, колесо мыши для масштаба">
-      {error && <div className="model-error" role="alert">{error}<button onClick={() => setError(null)}>Закрыть</button></div>}
-      <div className="model-overlay">
-        <span className="model-eyebrow">{presentation === 'exterior' ? 'EXTERIOR CONCEPT / NOT PROJECT ELEVATIONS' : 'MÈTRE / SOURCE-BASED 3D'}</span>
-        <b>{floorId === 'garage' ? 'ГАРАЖ · ОТДЕЛЬНО' : viewAll ? 'ЭТАЖИ 1–3' : floorId === 'level-1' ? 'ПЕРВЫЙ ЭТАЖ' : floorId === 'level-2' ? 'ВТОРОЙ ЭТАЖ' : 'ТРЕТИЙ ЭТАЖ'}</b>
-        <small>{presentation === 'exterior' ? `${exteriorConcept.floors[floorId].facadeSegments.length} линий фасада · ${exteriorConcept.floors[floorId].windowsApproxCount} условных окон` : `${spatial.floors[floorId].wallPolygonCount} стен · ${architecture.floors[floorId].doors.length} дверей`}</small>
-      </div>
-      <div className="model-gesture-hint">↻ Вращайте · ≋ Увеличивайте · Выбирайте помещения</div>
-      {loadingTexture && <div className="model-loading">Проекция мебели загружается…</div>}
-    </div>
-    <div className="model-footnote"><span>{presentation === 'exterior' ? `Внешний контур: ${exteriorConcept.floors[floorId].sourceSheet} · облицовка, крыша и окна — концепция` : `Стеновые контуры: ${spatial.floors[floorId].sourceSheet} · мебель: ${plans[floorId].furnitureSheet}`}</span><strong>{presentation === 'exterior' ? 'ДЕМОНСТРАЦИЯ · НЕ УТВЕРЖДЁННЫЙ ФАСАД' : 'ПРЕДВАРИТЕЛЬНАЯ 3D · НЕ BIM'}</strong></div>
-    <details className="architecture-calibration" open>
-      <summary>Геометрический контроль · {architecture.floors[floorId].calibrationChecks.length} независимые размерные привязки</summary>
-      <div className="calibration-row-head"><span>Исходный лист</span><span>Размер</span><span>Расхождение с моделью</span></div>
-      {architecture.floors[floorId].calibrationChecks.map((check, index) => <div key={index} className="calibration-row">
-        <span>{check.sheet} · {check.label}</span>
-        <b>{check.dimensionMm.toLocaleString('ru-RU')} мм</b>
-        <strong>{check.residualAtDisplayScalePct > 0 ? '+' : ''}{check.residualAtDisplayScalePct.toFixed(2)}%</strong>
-      </div>)}
-      <small>Расхождение измерений в PDF с масштабом предпросмотра; не погрешность готового строительного CAD. Размерные цепочки полностью не замкнуты.</small>
-    </details>
-    <div className="model-warning">{presentation === 'exterior' ? <>
-      <b>Фасады, остекление, крыша и материалы — демонстрационная реконструкция.</b> Их геометрия следует очертаниям A-14–A-17, но в исходном 94-страничном PDF нет полного плана кровли, фасадов, разрезов и генплана. Отметки и композиция окон не утверждены. Гараж показан отдельно, его положение относительно виллы не задано. Режим «Без оболочки» возвращает исходные объёмные стены.
-    </> : <>
-      Контуры стен и положения {architecture.floors[floorId].doors.length} дверных полотен перенесены из PDF, размеры дверей — из ведомости {spatial.floors[floorId].sourceSheet}. <b>{architecture.floors[floorId].openingCountResolved} проёмов сопоставлены с просветами на плане, остальные оставлены неразрешёнными.</b> Конструктивная крыша и фасады пока не подтверждены.
-    </>}</div>
+    {(!viewAll&&!room)&&<p className="showroom-hint">Выберите комнату на модели, чтобы управлять светом</p>}
+    {(panel==='view'||panel==='scenarios'||panel==='rooms')&&<OverlayPanel title={panel==='view'?'Настройки вида':panel==='scenarios'?'Сценарии':'Свет в комнатах'} onClose={()=>onPanel(null)}>
+      {panel==='view'?<div className="view-settings"><p className="panel-intro">Настройте отображение под свою задачу.</p>
+       <h3>Модель</h3><div className="setting-modes"><button className="panel-secondary" onClick={()=>{chooseAll();onPanel(null)}}>Дом и участок</button><button className="panel-secondary" onClick={()=>{setDetailRoom(null);setView('one');setPresentation('section');setCameraPose('floor');onPanel(null)}}>Низкие стены</button><button className="panel-secondary" onClick={()=>{setDetailRoom(null);setView('one');setPresentation('source');onPanel(null)}}>Полные стены</button><button className="panel-secondary" onClick={()=>{setDetailRoom(null);setView('all');setPresentation('section');setArrangement(v=>v==='assembled'?'exploded':'assembled');onPanel(null)}}>{arrangement==='exploded'?'Собрать этажи':'Раздвинуть этажи'}</button></div>
+       <h3>Показывать</h3><div className="setting-toggles">{(presentation==='exterior'?[[showGarage,setShowGarage,'Гараж на участке'],[roof,setRoof,'Кровлю'],[glazing,setGlazing,'Остекление'],[site,setSite,'Участок'],[terrace,setTerrace,'Террасу']]:[[walls,setWalls,'Стены'],[doors,setDoors,'Двери'],[furniture,setFurniture,'Мебель и сантехнику'],[labels,setLabels,'Номера комнат']]).map(([value,setter,label])=><label key={label as string}><span>{label as string}</span><input type="checkbox" checked={value as boolean} onChange={e=>(setter as (v:boolean)=>void)(e.target.checked)}/></label>)}<label><span>Условные связи групп света</span><input type="checkbox" checked={lighting.wiring} onChange={e=>lighting.setWiring(e.target.checked)}/></label></div>
+       {floorId==='level-2'&&<button className="panel-secondary full-width" onClick={()=>{poseRef.current='kitchen';setActivePose('kitchen');setDetailRoom(12);setFurniture(true);setView('one');setPresentation('section');setLabels(false);onSelectRoom(12);onPanel(null)}}>Рассмотреть кухню крупно ↗</button>}
+       <details className="panel-details"><summary>Масштаб и дополнительные ракурсы</summary><div className="setting-modes"><button className="panel-secondary" onClick={()=>zoomCamera(1.22)}>Отдалить</button><button className="panel-secondary" onClick={()=>zoomCamera(.82)}>Приблизить</button><button className="panel-secondary" onClick={()=>setCameraPose('side')}>Сбоку</button><button className="panel-secondary" onClick={()=>resetCamera(!top)}>{top?'Изометрия':'Сверху'}</button></div></details>
+       <details className="panel-details"><summary>О просмотре и источниках</summary><p>{fallback?'В этом браузере WebGL недоступен. Используется векторный 3D-просмотр с упрощёнными материалами и тенями.':'Используется WebGL-просмотр модели.'}</p><p>Стены: {spatial.floors[floorId].sourceSheet}; мебель: {plans[floorId].furnitureSheet}. Условные линии связывают группы света и не являются кабельными трассами. Точность и исходные данные — в паспорте модели.</p></details>
+      </div>:<>{panel==='rooms'&&<label className="panel-floor-select">Уровень<select value={floorId} onChange={e=>onChooseFloor(e.target.value as FloorId)}>{(['level-1','level-2','level-3','garage']as const).map(id=><option key={id} value={id}>{id==='garage'?'Гараж':id==='level-1'?'1 этаж':id==='level-2'?'2 этаж':'3 этаж'}</option>)}</select></label>}<LightingControls floor={floorId} room={selectedRoom} onRoom={n=>{onSelectRoom(n);if(viewAll){setView('one');setPresentation('section');setCameraPose('floor')}}} lighting={lighting} mode={panel} onApplied={()=>onPanel(null)}/></>}
+    </OverlayPanel>}
   </div>
 }

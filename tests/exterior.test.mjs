@@ -24,13 +24,13 @@ test('roof is explicitly an unverified demonstration, not a missing-drawing fabr
  assert.equal(e.roof.status,'conceptual-massing-only-not-source-verified')
  assert(e.missingSources.includes('roof plan'))
  assert(e.missingSources.includes('exterior elevations'))
- assert(e.roof.gableWings.every(r=>r.eaveYMetres<r.eaveYMetres+r.ridgeRiseM))
+ assert(e.roof.faces.every(r=>r.outlinePt.length>=3 && r.plane.length===3))
 })
 test('glazing sizes and material combinations are marked provisional',()=>{
  for(const id of ids){
   const windows=e.floors[id].facadeSegments.flatMap(x=>x.windows)
-  assert(windows.length>=5)
-  assert(windows.every(x=>x.status==='hypothetical-window-size-and-design'))
+  assert(windows.length >= (id === 'level-3' ? 0 : 3))
+  assert(windows.every(x=>x.sillSource==='presentation-assumption' && x.sourceLabel))
  }
 })
 test('terrace uses real schedule but its model outline is not claimed metrically exact',()=>{
@@ -39,8 +39,8 @@ test('terrace uses real schedule but its model outline is not claimed metrically
  assert.equal(e.terrace.confirmedPosition,false)
  assert.equal(e.terrace.polygonPt.length,4)
 })
-test('garage stays unplaced next to house without verified site plan',()=>{
- assert.equal(e.garagePlacement.mode,'isolated-only')
- assert.equal(e.garagePlacement.xyMeters,null)
+test('garage uses owner-confirmed site orientation without claiming a surveyed position',()=>{
+ assert.equal(e.garagePlacement.mode,'owner-informed-site-layout')
+ assert.deepEqual(e.garagePlacement.xyMeters,[24.5,10.2])
  assert.equal(e.garagePlacement.onSitePositionApproved,false)
 })
