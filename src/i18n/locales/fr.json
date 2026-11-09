@@ -475,5 +475,10 @@
   "Подтвердить тревогу": "Acquitter l’alerte",
   "Журнал событий": "Journal d’événements",
   "Событий пока нет": "Aucun événement",
-  "Вернуться к модели": "Retour au modèle"
+  "Вернуться к модели": "Retour au modèle",
+  "Управление на модели": "Commandes sur le modèle",
+  "Автозакрытие гаража через": "Fermeture automatique du garage dans",
+  "Гараж закрывается по таймеру": "Fermeture temporisée du garage",
+  "сек.": "s",
+  "После проезда въезд закрывается автоматически. Гараж закроется через 2 минуты или по вашей команде.": "L’entrée se ferme automatiquement après le passage. Le garage se ferme après 2 minutes ou sur votre commande."
 }

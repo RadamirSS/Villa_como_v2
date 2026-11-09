@@ -15,7 +15,15 @@ export function createSecurityObjects(){
  const lamp=new THREE.MeshBasicMaterial({color:'#fff1c4'}),tail=new THREE.MeshBasicMaterial({color:'#b94a34'})
  for(const x of [-.68,.68]){box(car,.35,.12,.03,x,.72,-2.2,lamp);box(car,.35,.12,.03,x,.72,2.1,tail)}
  const road=box(root,6,.09,6,34,-.19,38.8,new THREE.MeshStandardMaterial({color:'#686c65',roughness:1}));road.userData={securityAccessApron:true}
- for(const camera of virtualCameras){const g=new THREE.Group();g.position.set(camera.position[0],camera.position[1],camera.position[2]);g.userData={securityCamera:camera.id};const direction=new THREE.Vector3(...camera.target).sub(g.position).normalize();g.quaternion.setFromUnitVectors(new THREE.Vector3(0,0,-1),direction);box(g,.25,.22,.5,0,0,0,white);box(g,.16,.13,.03,0,0,-.27,glass);root.add(g);const zone=new THREE.Mesh(new THREE.RingGeometry(1.5,1.6,24),new THREE.MeshBasicMaterial({color:'#7ecab1',transparent:true,opacity:.35,depthWrite:false,side:THREE.DoubleSide}));zone.rotation.x=-Math.PI/2;zone.position.set(camera.target[0],.04,camera.target[2]);zone.userData={securityZone:camera.id};zone.visible=false;root.add(zone)}
+ for(const camera of virtualCameras){
+  const installation=new THREE.Group();installation.userData={securityCamera:camera.id,mountBase:camera.base};root.add(installation)
+  const [x,y,z]=camera.position,height=y-camera.base
+  box(installation,.46,.12,.46,x,camera.base+.06,z,metal)
+  const post=new THREE.Mesh(new THREE.CylinderGeometry(.055,.08,height,8),metal);post.position.set(x,camera.base+height/2,z);post.castShadow=true;post.receiveShadow=true;installation.add(post)
+  const g=new THREE.Group();g.position.set(x,y,z);const direction=new THREE.Vector3(...camera.target).sub(g.position).normalize();g.quaternion.setFromUnitVectors(new THREE.Vector3(0,0,-1),direction)
+  box(g,.25,.22,.5,0,0,0,white);box(g,.16,.13,.03,0,0,-.27,glass);box(g,.08,.20,.08,0,-.16,.06,metal);installation.add(g)
+  const zone=new THREE.Mesh(new THREE.RingGeometry(1.5,1.6,24),new THREE.MeshBasicMaterial({color:'#7ecab1',transparent:true,opacity:.35,depthWrite:false,side:THREE.DoubleSide}));zone.rotation.x=-Math.PI/2;zone.position.set(camera.target[0],camera.base+.24,camera.target[2]);zone.userData={securityZone:camera.id};zone.visible=false;root.add(zone)
+ }
  const indicator=box(root,.17,.08,.08,30.53,1.45,35.6,new THREE.MeshBasicMaterial({color:'#78a88d'}));indicator.userData={securityIndicator:true}
  return root
 }

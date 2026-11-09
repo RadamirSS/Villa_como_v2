@@ -1,3 +1,5 @@
+import QuickAccess from './QuickAccess'
+import {carPose} from './Security3D'
 import {createSecurityObjects,updateSecurityObjects} from './Security3D'
 import type {SecurityController} from '../domain/useSecurity'
 import type {CameraCapture} from './SecurityControls'
@@ -256,8 +258,10 @@ function disposeSceneGroup(obj: THREE.Object3D) {
   })
 }
 
-export default function Villa3D({ security, securityCapture, floorId, selectedRoom, onSelectRoom, onChooseFloor, panel, onPanel, lighting, floorSelectionRevision = 0 }: {
+export default function Villa3D({ interaction,onInteract,security, securityCapture, floorId, selectedRoom, onSelectRoom, onChooseFloor, panel, onPanel, lighting, floorSelectionRevision = 0 }: {
   floorId: FloorId
+  interaction:string|null
+  onInteract:(id:string)=>void
   security:SecurityController
   securityCapture:CameraCapture
   lighting: LightingController
@@ -268,6 +272,8 @@ export default function Villa3D({ security, securityCapture, floorId, selectedRo
   panel:ShowroomPanel
   onPanel:(panel:ShowroomPanel)=>void
 }) {
+  const interactionRef=useRef(onInteract);interactionRef.current=onInteract
+  const hotspotRefs=useRef(new Map<string,HTMLButtonElement>())
   const securityRef=useRef(security.state);securityRef.current=security.state
   const mount = useRef<HTMLDivElement>(null)
   const sceneRef = useRef<THREE.Scene | null>(null)
@@ -396,13 +402,18 @@ export default function Villa3D({ security, securityCapture, floorId, selectedRo
       camera.position.copy(centre).addScaledVector(direction, distance * 1.10)
       controls.update(); dirty = true
     }
+    let preview:THREE.WebGLRenderer|SVGRenderer|null=null
     securityCapture.current=(id)=>{
       const spec=virtualCameras.find(c=>c.id===id);if(!spec)return ''
-      const view=new THREE.PerspectiveCamera(65,camera.aspect,.1,150);view.position.set(spec.position[0],spec.position[1],spec.position[2]);view.lookAt(new THREE.Vector3(...spec.target))
+      if(!preview){
+        if(webgl){const r=new THREE.WebGLRenderer({antialias:true,preserveDrawingBuffer:true});r.setPixelRatio(1);r.outputColorSpace=THREE.SRGBColorSpace;r.toneMapping=THREE.ACESFilmicToneMapping;r.toneMappingExposure=1.1;r.shadowMap.enabled=true;r.shadowMap.type=THREE.PCFSoftShadowMap;preview=r}
+        else{const r=new SVGRenderer();r.setQuality('high');r.setPrecision(3);preview=r}
+        preview.setSize(960,540)
+      }
+      const direction=new THREE.Vector3(...spec.target).sub(new THREE.Vector3(...spec.position)).normalize()
+      const view=new THREE.PerspectiveCamera(58,16/9,.08,180);view.position.set(spec.position[0],spec.position[1],spec.position[2]);view.position.addScaledVector(direction,.45);view.lookAt(new THREE.Vector3(...spec.target))
       const hidden:THREE.Object3D[]=[];scene.traverse(o=>{if(o.userData.securityCamera===id&&o.visible){hidden.push(o);o.visible=false}})
-      renderer.render(scene,view)
-      let result='';try{const element=renderer.domElement;result=element instanceof HTMLCanvasElement?element.toDataURL('image/png'):'data:image/svg+xml;charset=utf-8,'+encodeURIComponent(new XMLSerializer().serializeToString(element))}finally{for(const o of hidden)o.visible=true;renderer.render(scene,camera)}
-      return result
+      try{preview.render(scene,view);const el=preview.domElement;return el instanceof HTMLCanvasElement?el.toDataURL('image/png'):'data:image/svg+xml;charset=utf-8,'+encodeURIComponent(new XMLSerializer().serializeToString(el))}finally{for(const o of hidden)o.visible=true}
     }
     let frame = 0
     const draw = () => {
@@ -410,6 +421,16 @@ export default function Villa3D({ security, securityCapture, floorId, selectedRo
       controls.update()
       if(drawingsRef.current)updateSecurityObjects(drawingsRef.current,securityRef.current)
       if(contextRef.current)updateSecurityObjects(contextRef.current,securityRef.current)
+      const hotspotActive=drawingsRef.current?.userData.securityView===true
+      for(const [id,button] of hotspotRefs.current){
+        let position:THREE.Vector3
+        if(id==='car'){const p=carPose(securityRef.current.car);position=new THREE.Vector3(p.x,1.7,p.z)}
+        else if(id==='gate')position=new THREE.Vector3(34,1.6,35.3)
+        else if(id==='garage')position=new THREE.Vector3(19.29,1.9,10.2)
+        else{const spec=virtualCameras.find(c=>'camera:'+c.id===id)!;position=new THREE.Vector3(...spec.position).add(new THREE.Vector3(0,.45,0))}
+        position.project(camera);button.hidden=!hotspotActive||position.z>1||position.z< -1||Math.abs(position.x)>1||Math.abs(position.y)>1
+        button.style.left=((position.x+1)/2*container.clientWidth)+'px';button.style.top=((-position.y+1)/2*container.clientHeight)+'px'
+      }
       const access=securityRef.current
       if(access.gate!==(access.gateTarget?1:0)||access.garage!==(access.garageTarget?1:0)||access.carTarget!==null)dirty=true
       if (dirty) { dirty = false; renderer.render(scene, camera) }
@@ -420,20 +441,28 @@ export default function Villa3D({ security, securityCapture, floorId, selectedRo
       camera.aspect = w / h; camera.updateProjectionMatrix(); renderer.setSize(w, h); fitCameraRef.current(); invalidate()
     })
     resize.observe(container)
+    let pointerStart=[0,0]
+    const onPointerDown=(e:PointerEvent)=>{pointerStart=[e.clientX,e.clientY]}
+    renderer.domElement.addEventListener('pointerdown',onPointerDown as EventListener)
     const onClick = (input: Event) => {
       const event = input as MouseEvent
       if (!drawingsRef.current || !cameraRef.current) return
+      if(Math.hypot(event.clientX-pointerStart[0],event.clientY-pointerStart[1])>7)return
       const rect = renderer.domElement.getBoundingClientRect()
       const mouse = new THREE.Vector2((event.clientX - rect.left) / rect.width * 2 - 1, -(event.clientY - rect.top) / rect.height * 2 + 1)
       const ray = new THREE.Raycaster()
       ray.setFromCamera(mouse, camera)
-      const hits = ray.intersectObjects(drawingsRef.current.children, true)
+      const hits = ray.intersectObjects([...drawingsRef.current.children,...(contextRef.current?.children??[])],true)
+      let target:THREE.Object3D|null=hits[0]?.object??null
+      while(target){if(target.userData.securityCamera){interactionRef.current('camera:'+target.userData.securityCamera);return}if(target.userData.securityMotion==='car'){interactionRef.current('car');return}if(target.userData.accessMotion){interactionRef.current(target.userData.accessMotion);return}target=target.parent}
       const marker = hits.find(hit => Number.isInteger(hit.object.userData.roomNumber))
       if (marker) onSelectRef.current(marker.object.userData.roomNumber as number)
     }
     renderer.domElement.addEventListener('click', onClick)
     return () => {
       renderer.domElement.removeEventListener('click', onClick)
+      renderer.domElement.removeEventListener('pointerdown',onPointerDown as EventListener)
+      if(preview instanceof THREE.WebGLRenderer)preview.dispose()
       resize.disconnect(); cancelAnimationFrame(frame)
       if (drawingsRef.current) { scene.remove(drawingsRef.current); disposeSceneGroup(drawingsRef.current) }
       drawingsRef.current = null
@@ -462,7 +491,8 @@ export default function Villa3D({ security, securityCapture, floorId, selectedRo
     const root = new THREE.Group()
     drawingsRef.current = root
     scene.add(root)
-    if(viewAll&&presentation==='exterior')root.add(createSecurityObjects())
+    root.userData.securityView=viewAll&&presentation==='exterior'
+    if(root.userData.securityView)root.add(createSecurityObjects())
     const isExterior = presentation === 'exterior'
     if (isExterior) {
       // Exterior is expressly a conceptual wrapper over the registered source footprint.
@@ -623,6 +653,10 @@ export default function Villa3D({ security, securityCapture, floorId, selectedRo
   const activeScenario=lightScenarios.find(s=>s.id===lighting.scenario)
   return <div className="showroom-scene" data-time={lighting.time}>
     <div className="showroom-canvas" ref={mount} aria-label={tx("Интерактивная 3D модель Villa Como: вращайте и выбирайте комнаты")}/>
+    <div className="model-hotspots" aria-label={tx('Управление на модели')}>
+      {[{id:'gate',label:'Въездные ворота',icon:'▤'},{id:'garage',label:'Ворота гаража',icon:'▥'},{id:'car',label:'Автомобиль',icon:'◆'},...virtualCameras.map(c=>({id:'camera:'+c.id,label:c.name,icon:'◉'}))].map(item=><button key={item.id} hidden ref={node=>{if(node)hotspotRefs.current.set(item.id,node);else hotspotRefs.current.delete(item.id)}} aria-label={tx(item.label)} title={tx(item.label)} onClick={()=>onInteract(item.id)}>{item.icon}</button>)}
+    </div>
+    {interaction&&viewAll&&presentation==='exterior'&&<QuickAccess id={interaction} security={security} onClose={()=>onInteract('')}/>}
     <div className="showroom-intro"><p><span/> THE ART OF SMART LIVING</p><h1>Villa <em>Como.</em></h1><span>{tx("Архитектура пространства. Интеллект света.")}</span></div>
     <div className="scene-utilities"><button className="icon-button" aria-label={tx("Сбросить ракурс")} title={tx("Сбросить ракурс")} onClick={()=>viewAll?resetCamera(false):setCameraPose('floor')}><ShowroomIcon name="reset"/></button><button className="icon-button" aria-label={tx('Приблизить')} title={tx('Приблизить')} onClick={()=>zoomCamera(.82)}>+</button><button className="icon-button" aria-label={tx('Отдалить')} title={tx('Отдалить')} onClick={()=>zoomCamera(1.22)}>−</button></div>
     <div className="showroom-camera glass-control" role="group" aria-label={tx("Ракурс модели")}>{tx(([['perspective','Объём'],['front','Со двора'],['rear','Сзади'],['top','Сверху']]as const).map(([pose,label])=><button key={pose} aria-pressed={activePose===pose||(pose==='perspective'&&activePose==='floor')} onClick={()=>setCameraPose(pose==='perspective'&&!viewAll?'floor':pose)}>{tx(label)}</button>))}</div>

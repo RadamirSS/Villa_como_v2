@@ -39,3 +39,30 @@ test('car route is continuous and scene geometry finite with four virtual camera
  root.traverse(o=>{if(o.userData.securityMotion==='car')car++;if(o.userData.securityCamera)cameras++;if(o.isMesh)for(const n of o.geometry.attributes.position.array)assert(Number.isFinite(n))})
  assert.equal(car,1);assert.equal(cameras,6)
 })
+test('arrival closes entrance only after clearance and schedules exactly two minutes',()=>{
+ let s=m.securityReducer(m.initialSecurity(),{type:'car',target:1}),now=100000
+ for(let i=0;i<200&&s.carTarget!==null;i++){
+  now+=100;s=m.securityReducer(s,{type:'tick',dt:.1,now})
+  if(s.car>0&&s.car<.24)assert.equal(s.gateTarget,true)
+  if(s.car>=.24)assert.equal(s.gateTarget,false)
+ }
+ assert.equal(s.car,1);assert.equal(s.garageTarget,true);assert.equal(s.garageCloseAt,now+120000)
+ const deadline=s.garageCloseAt
+ s=m.securityReducer(s,{type:'tick',dt:.1,now:deadline-1});assert.equal(s.garageTarget,true)
+ s=m.securityReducer(s,{type:'tick',dt:.1,now:deadline});assert.equal(s.garageTarget,false);assert.equal(s.garageCloseAt,null)
+})
+test('exit closes entrance after the rear of the car clears it; manual garage close cancels timer',()=>{
+ let s={...m.initialSecurity(),car:1,garage:1,garageTarget:true}
+ s=m.securityReducer(s,{type:'car',target:0});let now=200000
+ for(let i=0;i<220&&s.carTarget!==null;i++){
+  now+=100;s=m.securityReducer(s,{type:'tick',dt:.1,now})
+  if(s.car>0)assert.equal(s.gateTarget,true)
+ }
+ assert.equal(s.car,0);assert.equal(s.gateTarget,false);assert.equal(s.garageCloseAt,now+120000)
+ s=m.securityReducer(s,{type:'garage',open:false});assert.equal(s.garageCloseAt,null);assert.equal(s.garageTarget,false)
+})
+test('six camera installations have ground-connected mount geometry',()=>{
+ const root=m.createSecurityObjects();const cameras=[]
+ root.traverse(o=>{if(o.userData.securityCamera)cameras.push(o)})
+ for(const installation of cameras){assert.equal(typeof installation.userData.mountBase,'number');assert(installation.children.some(o=>o.isMesh&&o.geometry.type==='CylinderGeometry'));assert(installation.children.some(o=>o.isGroup))}
+})

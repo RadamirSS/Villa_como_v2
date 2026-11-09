@@ -260,6 +260,8 @@ function PlumbingDetail({ sheet, onClose }: { sheet: string; onClose: () => void
 export default function App() {
   useTranslation()
   const lighting=useLighting()
+  const [interaction,setInteraction]=useState<string|null>(null),[cameraFocus,setCameraFocus]=useState<string|null>(null)
+  const interact=(id:string)=>{if(id.startsWith('camera:')){setCameraFocus(id.slice(7));setInteraction(null);setPanel('security')}else setInteraction(id||null)}
   const security=useSecurity(),securityCapture=useRef<(id:string)=>string>(()=>'')
   useEffect(()=>{if(security.state.garageTarget)lighting.toggleControl(['garage:ceiling'],true)},[security.state.garageTarget,lighting.toggleControl])
   const [floorId,setFloorId]=useState<typeof floorIds[number]>('level-1')
@@ -268,13 +270,13 @@ export default function App() {
   const [openPlumbingSheet,setOpenPlumbingSheet]=useState<string|null>(null)
   const [floorSelectionRevision,setFloorSelectionRevision]=useState(0)
   const floor=useMemo(()=>project.floors.find(item=>item.id===floorId)!,[floorId]),data=plans.floors[floorId]
-  const chooseFloor=(id:typeof floorIds[number])=>{setFloorSelectionRevision(v=>v+1);setFloorId(id);setSelectedRoom(null)}
+  const chooseFloor=(id:typeof floorIds[number])=>{setInteraction(null);setFloorSelectionRevision(v=>v+1);setFloorId(id);setSelectedRoom(null)}
   const selectRoom=(number:number|null)=>setSelectedRoom(previous=>previous===number?null:number)
   const openPlumbing=(sheet:string)=>{setPanel(null);setOpenPlumbingSheet(sheet)}
   return <div className="showroom-app" data-time={lighting.time}>
-    <header className="showroom-header"><a href="/" className="showroom-brand">VILLA COMO</a><span className="showroom-location"><span aria-hidden="true">⌖</span> Lago di Como, Italia</span><button className="showroom-demo systems-entry" onClick={()=>setPanel('security')} aria-label={tx('Системы дома')} title={tx("Демонстрационный режим")}><i style={{background:security.state.alarm?'#ef7955':security.state.mode==='disarmed'?'#78a88d':'#d9b570'}}/><span>{tx("Системы")}</span></button><button className="menu-button" data-menu-trigger aria-label={tx("Открыть меню")} onClick={()=>setPanel('menu')}><span/><span/></button></header>
+    <header className="showroom-header"><a href="/" className="showroom-brand">VILLA COMO</a><span className="showroom-location"><span aria-hidden="true">⌖</span> Lago di Como, Italia</span><button className="showroom-demo systems-entry" onClick={()=>{setCameraFocus(null);setPanel('security')}} aria-label={tx('Системы дома')} title={tx("Демонстрационный режим")}><i style={{background:security.state.alarm?'#ef7955':security.state.mode==='disarmed'?'#78a88d':'#d9b570'}}/><span>{tx("Системы")}</span></button><button className="menu-button" data-menu-trigger aria-label={tx("Открыть меню")} onClick={()=>setPanel('menu')}><span/><span/></button></header>
     <main className="showroom-main" aria-label={tx("Интерактивная модель виллы")}>
-      <Villa3D security={security} securityCapture={securityCapture} lighting={lighting} floorSelectionRevision={floorSelectionRevision} floorId={floorId} selectedRoom={selectedRoom} onSelectRoom={selectRoom} onChooseFloor={chooseFloor} panel={panel} onPanel={setPanel}/>
+      <Villa3D interaction={interaction} onInteract={interact} security={security} securityCapture={securityCapture} lighting={lighting} floorSelectionRevision={floorSelectionRevision} floorId={floorId} selectedRoom={selectedRoom} onSelectRoom={selectRoom} onChooseFloor={chooseFloor} panel={panel} onPanel={setPanel}/>
     </main>
     <footer className="showroom-footer"><b>MÈTRE</b><span className="footer-source">{tx("Архитектура пространства. Интеллект света.")}</span><button onClick={()=>setPanel('passport')}>{tx("Паспорт модели ")}<span aria-hidden="true">↗</span></button><small>v 2.6</small></footer>
     {tx((panel==='menu'||panel==='plans'||panel==='passport')&&<OverlayPanel title={tx(panel==='menu'?'Ваш дом':panel==='plans'?'Чертежи':'Паспорт модели')} onClose={()=>setPanel(null)} wide={panel==='plans'}>
@@ -283,7 +285,7 @@ export default function App() {
         {tx(panel==='plans'?<PlanViewer floor={floor} data={data} selectedRoom={selectedRoom} onSelectRoom={selectRoom} onOpenPlumbing={openPlumbing}/>:<><InfoPanel floor={floor} data={data} selectedRoom={selectedRoom} onSelectRoom={selectRoom} onOpenPlumbing={openPlumbing}/><details className="panel-details"><summary>{tx("Геометрический контроль")}</summary>{tx(rawGeometry.floors[floorId].calibrationChecks.map((check,index)=><p key={index}>{tx(check.sheet)} · {tx(check.label)}: <b>{tx(check.dimensionMm)} {tx(" мм")}</b> {tx(" · расхождение с масштабом предпросмотра ")}{tx(check.residualAtDisplayScalePct.toFixed(2))}%</p>))}<p>{tx("Проверки размерных линий PDF не подтверждают точность всей модели.")}</p></details><details className="panel-details"><summary>{tx("Источники и границы точности")}</summary><p>{tx("Планы MÈTRE: ")}{tx(data.measuredSheet)}, {tx(data.installSheet)}, {tx(data.finalSheet)}, {tx(data.furnitureSheet)}{tx(". Свет — A-34–A-37. Расстановка, материалы, кровля и участок содержат демонстрационные допущения. Модель не является утверждённым BIM-проектом или монтажной схемой проводки.")}</p><p>{tx("Левая часть A-35 не содержит проектных групп света: соответствующие группы помечены как демо. Физическое оборудование не подключено.")}</p><a href="https://github.com/RadamirSS/Villa_como_v2/pull/1" target="_blank" rel="noreferrer">{tx("Документация и изменения ↗")}</a></details></>)}
       </>)}
     </OverlayPanel>)}
-    {panel==='security'&&<OverlayPanel title={tx('Системы дома')} onClose={()=>setPanel(null)}><SecurityPanel security={security} capture={securityCapture} onShow={()=>setPanel(null)}/></OverlayPanel>}
+    {panel==='security'&&<OverlayPanel title={tx('Системы дома')} onClose={()=>setPanel(null)}><SecurityPanel focusCamera={cameraFocus} security={security} capture={securityCapture} onShow={()=>setPanel(null)}/></OverlayPanel>}
     {tx(openPlumbingSheet&&<PlumbingDetail sheet={openPlumbingSheet} onClose={()=>setOpenPlumbingSheet(null)}/>)}
   </div>
 }
