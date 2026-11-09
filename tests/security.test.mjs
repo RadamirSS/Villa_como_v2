@@ -1,7 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import {build} from 'esbuild'
-import * as THREE from 'three'
 
 const built=await build({entryPoints:['src/components/Security3D.ts'],bundle:true,platform:'node',format:'esm',write:false})
 const lib=await import('data:text/javascript;base64,'+Buffer.from(built.outputFiles[0].text).toString('base64'))
@@ -23,9 +22,10 @@ test('six virtual cameras and a sedan are actual 3D objects, never live feeds',(
 
 test('both gates animate independently and a vehicle cannot move through closed gates',()=>{
  const root=lib.createSecurityDevices()
- const slider=new THREE.Mesh(new THREE.BoxGeometry(1,1,1),new THREE.MeshBasicMaterial())
+ const existingCar=root.children.find(o=>o.userData.securityRole==='vehicle')
+ const slider=existingCar.children[0].clone()
  slider.position.x=31;slider.userData={gateLeaf:'left',gateBaseX:31};root.add(slider)
- const shutter=new THREE.Group();shutter.userData={openingId:'garage-entry'};root.add(shutter)
+ const shutter=new root.constructor();shutter.userData={openingId:'garage-entry'};root.add(shutter)
  const motion=lib.createSecurityMotion()
  lib.animateSecurityVisuals(root,{...state,vehicleInside:true},motion,4)
  assert.equal(motion.car,0)
