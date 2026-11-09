@@ -480,5 +480,6 @@
   "Автозакрытие гаража через": "Fermeture automatique du garage dans",
   "Гараж закрывается по таймеру": "Fermeture temporisée du garage",
   "сек.": "s",
-  "После проезда въезд закрывается автоматически. Гараж закроется через 2 минуты или по вашей команде.": "L’entrée se ferme automatiquement après le passage. Le garage se ferme après 2 minutes ou sur votre commande."
+  "После проезда въезд закрывается автоматически. Гараж закроется через 2 минуты или по вашей команде.": "L’entrée se ferme automatiquement après le passage. Le garage se ferme après 2 minutes ou sur votre commande.",
+  "Терраса": "Terrasse"
 }
