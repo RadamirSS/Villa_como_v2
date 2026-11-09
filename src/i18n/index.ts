@@ -11,7 +11,7 @@ export type Language = typeof languages[number][0]
 const supported = (value: string | null): value is Language => languages.some(([code]) => code === value)
 let initial: Language = 'ru'
 try { const saved = localStorage.getItem('villa-como-language'); if (supported(saved)) initial = saved } catch { /* Storage can be disabled. */ }
-void i18n.use(initReactI18next).init({ resources: {ru:{translation:{...ru,...securityLocales.ru}},en:{translation:{...en,...securityLocales.en}},fr:{translation:{...fr,...securityLocales.fr}},it:{translation:{...it,...securityLocales.it}},de:{translation:{...de,...securityLocales.de}}}, lng:initial, fallbackLng:'ru', supportedLngs:languages.map(([code])=>code), keySeparator:false, nsSeparator:false, interpolation:{escapeValue:false}, returnEmptyString:false, initAsync:false })
+void i18n.use(initReactI18next).init({ resources: {ru:{translation:{...securityLocales.ru,...ru}},en:{translation:{...securityLocales.en,...en}},fr:{translation:{...securityLocales.fr,...fr}},it:{translation:{...securityLocales.it,...it}},de:{translation:{...securityLocales.de,...de}}}, lng:initial, fallbackLng:'ru', supportedLngs:languages.map(([code])=>code), keySeparator:false, nsSeparator:false, interpolation:{escapeValue:false}, returnEmptyString:false, initAsync:false })
 i18n.on('languageChanged', language => {
  if (typeof document === 'undefined') return
  document.documentElement.lang = language
@@ -21,7 +21,7 @@ i18n.on('languageChanged', language => {
 if (typeof document !== 'undefined') document.documentElement.lang = initial
 // Exact resource keys cover static copy. Phrase matching handles composed source
 // labels (room + fixture + circuit mark) without changing immutable project IDs.
-const phrases = Object.keys({...ru,...securityLocales.ru}).filter(key => /[а-яё]/i.test(key)).sort((a,b)=>b.length-a.length)
+const phrases = Object.keys({...securityLocales.ru,...ru}).filter(key => /[а-яё]/i.test(key)).sort((a,b)=>b.length-a.length)
 const phraseKeys = new Map(phrases.map(key => [key.toLocaleLowerCase('ru'), key]))
 const escape = (s:string) => s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')
 const phrasePattern = new RegExp('(?<![а-яё])(?:'+phrases.map(escape).join('|')+')(?![а-яё])','giu')

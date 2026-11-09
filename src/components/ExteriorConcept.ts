@@ -75,6 +75,7 @@ function glazing(a: THREE.Vector3, b: THREE.Vector3, sill: number, opening: Open
   const inset = outside.clone().multiplyScalar(-.035)
   const start = a.clone().add(inset), end = b.clone().add(inset)
   if (opening.kind === 'shutter') {
+    g.userData.accessMotion='garage';g.userData.liftHeight=height
     g.add(beam(start, end, .09, height, sill, p.frame))
     for (let h = .08; h < height; h += .16) g.add(beam(start, end, .095, .012, sill + h, p.roof))
     if(floorId==='garage'){
@@ -229,7 +230,7 @@ function batchOpaque(root: THREE.Group) {
   root.updateMatrixWorld(true)
   const buckets = new Map<THREE.Material, { geometries: THREE.BufferGeometry[]; parts: object[] }>()
   const meshes: THREE.Mesh[] = []
-  root.traverse(obj => { if (obj instanceof THREE.Mesh && !Array.isArray(obj.material) && !obj.material.transparent && !obj.userData.gateLeaf && obj.parent?.userData.openingId !== 'garage-entry') meshes.push(obj) })
+  root.traverse(obj => { if (obj instanceof THREE.Mesh && !Array.isArray(obj.material) && !obj.material.transparent) {let parent:THREE.Object3D|null=obj;while(parent){if(parent.userData.accessMotion)return;parent=parent.parent}meshes.push(obj)} })
   for (const m of meshes) {
     const material = m.material as THREE.Material
     let bucket = buckets.get(material)

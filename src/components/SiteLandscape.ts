@@ -100,6 +100,10 @@ export function createSiteLandscape() {
     const glow=add(new THREE.CircleGeometry(1.15,20),pool,x,-.052,z,'light-pool');glow.rotation.x=-Math.PI/2;glow.castShadow=false
   }
   for(const x of [30.8,37.2])box(x,35.6,.18,.025,.5,.65,warm,'gate-light')
+  for(const [leaf,direction] of [['left',-1],['right',1]] as const){
+    const gate=new THREE.Group();gate.userData={accessMotion:'gate',direction,travel:3.05};root.add(gate)
+    for(const child of [...root.children])if(child.userData.gateLeaf===leaf)gate.attach(child)
+  }
   root.traverse(o=>{if(o.userData.siteObject==='ground-level-courtyard'||o.userData.siteObject==='parking-marking')o.userData.elevationM=0})
   return root
 }

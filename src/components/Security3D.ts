@@ -1,95 +1,32 @@
 import * as THREE from 'three'
-import {cameraStations,type SecurityState} from '../domain/security'
-
-/** Entirely synthetic showroom equipment. The scene contains no live camera or actuator connection. */
-export interface SecurityMotion {gate:number;garage:number;car:number}
-export const createSecurityMotion=():SecurityMotion=>({gate:0,garage:0,car:0})
-const route=new THREE.CatmullRomCurve3([
- new THREE.Vector3(34,0,38.9),new THREE.Vector3(34,0,30.2),
- new THREE.Vector3(30.5,0,26.0),new THREE.Vector3(20.8,0,24.7),
- new THREE.Vector3(15.8,0,22.5),new THREE.Vector3(15.6,0,16),
- new THREE.Vector3(18.8,0,11.7),new THREE.Vector3(23.5,0,11.7)
-],false,'centripetal',.35)
-const bodyMat=new THREE.MeshStandardMaterial({color:'#b9beb8',metalness:.58,roughness:.31})
-const glassMat=new THREE.MeshStandardMaterial({color:'#283e41',metalness:.28,roughness:.22})
-const tireMat=new THREE.MeshStandardMaterial({color:'#222a2b',roughness:.93})
-const trimMat=new THREE.MeshStandardMaterial({color:'#28322e',metalness:.43,roughness:.38})
-
-export function createSecurityDevices(){
- const root=new THREE.Group();root.name='synthetic-smart-security'
- root.userData={showroomDemo:true,hardwareConnected:false}
- const cameraShell=new THREE.MeshStandardMaterial({color:'#e4e1d7',roughness:.44,metalness:.2})
- const cameraDark=new THREE.MeshStandardMaterial({color:'#263832',metalness:.35,roughness:.4})
- for(const station of cameraStations){
-  const cam=new THREE.Group()
-  cam.name='virtual-camera-'+station.id;cam.position.set(station.position[0],station.position[1],station.position[2])
-  const dir=new THREE.Vector3(...station.target).sub(new THREE.Vector3(...station.position)).normalize()
-  const mount=new THREE.Mesh(new THREE.CylinderGeometry(.055,.055,.3,8),cameraDark)
-  mount.rotation.z=Math.PI/2;mount.position.y=-.13;cam.add(mount)
-  const shell=new THREE.Mesh(new THREE.BoxGeometry(.38,.22,.31),cameraShell)
-  shell.userData={securityCameraId:station.id,simulated:true}
-  cam.add(shell)
-  const lens=new THREE.Mesh(new THREE.CylinderGeometry(.085,.085,.035,12),cameraDark)
-  lens.rotation.x=Math.PI/2;lens.position.z=.17;lens.userData={securityCameraId:station.id,simulated:true};cam.add(lens)
-  const led=new THREE.Mesh(new THREE.SphereGeometry(.045,8,6),new THREE.MeshBasicMaterial({color:'#75a68a'}))
-  led.position.set(.15,.1,.1);led.userData={securityRole:'camera-led',securityCameraId:station.id};cam.add(led)
-  cam.lookAt(cam.position.clone().add(dir))
-  root.add(cam)
-  const ring=new THREE.Mesh(new THREE.RingGeometry(1.9,2.02,40),new THREE.MeshBasicMaterial({color:'#7ecab1',side:THREE.DoubleSide,transparent:true,opacity:.44,depthWrite:false}))
-  ring.rotation.x=-Math.PI/2;ring.position.set(station.target[0],.035,station.target[2])
-  ring.userData={securityRole:'motion-zone',securityCameraId:station.id}
-  ring.visible=false;root.add(ring)
- }
- const car=new THREE.Group();car.name='demo-electric-sedan';car.userData={securityRole:'vehicle',simulated:true}
- const add=(geometry:THREE.BufferGeometry,material:THREE.Material,x:number,y:number,z:number)=>{
-   const mesh=new THREE.Mesh(geometry,material);mesh.position.set(x,y,z);mesh.castShadow=true;car.add(mesh);return mesh
- }
- add(new THREE.BoxGeometry(1.92,.38,4.1),bodyMat,0,.65,0)
- add(new THREE.BoxGeometry(1.77,.28,3.9),bodyMat,0,.91,0)
- add(new THREE.BoxGeometry(1.62,.48,2.15),glassMat,0,1.25,-.10)
- add(new THREE.BoxGeometry(1.55,.09,1.86),bodyMat,0,1.53,-.13)
- for(const x of [-1,1])for(const z of [-1.30,1.30]){
-  const wheel=add(new THREE.CylinderGeometry(.39,.39,.20,16),tireMat,x,.40,z)
-  wheel.rotation.z=Math.PI/2
-  const cap=add(new THREE.CylinderGeometry(.20,.20,.205,12),trimMat,x+(x>0?.012:-.012),.40,z)
-  cap.rotation.z=Math.PI/2
- }
- const white=new THREE.MeshBasicMaterial({color:'#f9e8be'})
- const red=new THREE.MeshBasicMaterial({color:'#a83730'})
- for(const x of [-.69,.69]){add(new THREE.BoxGeometry(.4,.14,.05),white,x,.76,2.09);add(new THREE.BoxGeometry(.42,.12,.055),red,x,.75,-2.09)}
- car.position.copy(route.getPoint(0));root.add(car)
+import type {SecurityState} from '../domain/security'
+import {virtualCameras} from '../domain/security'
+export function createSecurityObjects(){
+ const root=new THREE.Group();root.name='security-demo-objects'
+ const body=new THREE.MeshStandardMaterial({color:'#546d73',roughness:.32,metalness:.6}),glass=new THREE.MeshStandardMaterial({color:'#1b343b',roughness:.2,metalness:.65}),rubber=new THREE.MeshStandardMaterial({color:'#252a29',roughness:.9}),metal=new THREE.MeshStandardMaterial({color:'#b4b9b0',metalness:.7,roughness:.35}),white=new THREE.MeshStandardMaterial({color:'#e3ded1',roughness:.6})
+ const car=new THREE.Group();car.userData={securityMotion:'car'};root.add(car)
+ const box=(g:THREE.Group,w:number,h:number,d:number,x:number,y:number,z:number,m:THREE.Material)=>{const mesh=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),m);mesh.position.set(x,y,z);mesh.castShadow=true;mesh.receiveShadow=true;g.add(mesh);return mesh}
+ // Bevelled silhouette rather than an imported heavy asset. Forward direction is -Z.
+ const shape=new THREE.Shape();shape.moveTo(-.94,-2.1);shape.lineTo(.94,-2.1);shape.lineTo(.99,1.8);shape.quadraticCurveTo(0,2.3,-.99,1.8);shape.closePath()
+ const geo=new THREE.ExtrudeGeometry(shape,{depth:.55,bevelEnabled:true,bevelThickness:.12,bevelSize:.1,bevelSegments:3,steps:1});geo.rotateX(-Math.PI/2)
+ const shell=new THREE.Mesh(geo,body);shell.position.y=.4;shell.castShadow=true;car.add(shell)
+ box(car,1.65,.7,2.15,0,1.13,.05,glass);box(car,1.7,.1,1.8,0,1.52,.1,body)
+ for(const x of [-1,1])for(const z of [-1.35,1.35]){const wheel=new THREE.Mesh(new THREE.CylinderGeometry(.34,.34,.20,12),rubber);wheel.rotation.z=Math.PI/2;wheel.position.set(x,.32,z);car.add(wheel);const hub=new THREE.Mesh(new THREE.CylinderGeometry(.21,.21,.215,8),metal);hub.rotation.z=Math.PI/2;hub.position.copy(wheel.position);car.add(hub)}
+ const lamp=new THREE.MeshBasicMaterial({color:'#fff1c4'}),tail=new THREE.MeshBasicMaterial({color:'#b94a34'})
+ for(const x of [-.68,.68]){box(car,.35,.12,.03,x,.72,-2.2,lamp);box(car,.35,.12,.03,x,.72,2.1,tail)}
+ const road=box(root,6,.09,6,34,-.19,38.8,new THREE.MeshStandardMaterial({color:'#686c65',roughness:1}));road.userData={securityAccessApron:true}
+ for(const camera of virtualCameras){const g=new THREE.Group();g.position.set(camera.position[0],camera.position[1],camera.position[2]);g.userData={securityCamera:camera.id};const direction=new THREE.Vector3(...camera.target).sub(g.position).normalize();g.quaternion.setFromUnitVectors(new THREE.Vector3(0,0,-1),direction);box(g,.25,.22,.5,0,0,0,white);box(g,.16,.13,.03,0,0,-.27,glass);root.add(g);const zone=new THREE.Mesh(new THREE.RingGeometry(1.5,1.6,24),new THREE.MeshBasicMaterial({color:'#7ecab1',transparent:true,opacity:.35,depthWrite:false,side:THREE.DoubleSide}));zone.rotation.x=-Math.PI/2;zone.position.set(camera.target[0],.04,camera.target[2]);zone.userData={securityZone:camera.id};zone.visible=false;root.add(zone)}
+ const indicator=box(root,.17,.08,.08,30.53,1.45,35.6,new THREE.MeshBasicMaterial({color:'#78a88d'}));indicator.userData={securityIndicator:true}
  return root
 }
-const approach=(value:number,target:number,delta:number)=>Math.abs(value-target)<=delta?target:value+Math.sign(target-value)*delta
-
-/** Applies every visual state to the current scene without rebuilding the house or camera. */
-export function animateSecurityVisuals(scene:THREE.Object3D,state:SecurityState,motion:SecurityMotion,dtSeconds:number){
- const g=approach(motion.gate,state.gateOpen?1:0,dtSeconds/2.0)
- const h=approach(motion.garage,state.garageOpen?1:0,dtSeconds/2.6)
- const canMove=state.gateOpen&&state.garageOpen&&g>.88&&h>.88
- const c=approach(motion.car,state.vehicleInside?1:0,canMove?dtSeconds/9.5:0)
- const moved=g!==motion.gate||h!==motion.garage||c!==motion.car
- motion.gate=g;motion.garage=h;motion.car=c
- scene.traverse(obj=>{
-  if(obj.userData.gateLeaf&&obj instanceof THREE.Mesh){
-   obj.position.x=obj.userData.gateBaseX+(obj.userData.gateLeaf==='left'?-3.05:3.05)*g
-  }
-  if(obj.userData.openingId==='garage-entry'){
-   // The source-informed opening stays open; only its synthetic shutter retracts.
-   obj.scale.y=Math.max(.015,1-h);obj.position.y=2.34*h
-  }
-  if(obj.userData.securityRole==='vehicle'&&obj instanceof THREE.Group){
-   obj.position.copy(route.getPoint(c))
-   const tangent=route.getTangent(Math.min(.9999,c)).normalize()
-   obj.rotation.y=Math.atan2(tangent.x,tangent.z)
-  }
-  if(obj.userData.securityRole==='motion-zone'&&obj instanceof THREE.Mesh){
-   obj.visible=state.armed
-   ;(obj.material as THREE.MeshBasicMaterial).color.set(state.triggered&&obj.userData.securityCameraId==='gate'?'#f37063':'#7ecab1')
-  }
-  if(obj.userData.securityRole==='camera-led'&&obj instanceof THREE.Mesh){
-   ;(obj.material as THREE.MeshBasicMaterial).color.set(state.triggered&&obj.userData.securityCameraId==='gate'?'#ff443b':state.cameraId===obj.userData.securityCameraId?'#f6d88f':'#75a68a')
-  }
+const carRoute=new THREE.CatmullRomCurve3([[34,38.9],[34,30.2],[30.5,26],[20.8,24.7],[15.8,22.5],[15.6,16],[18.8,11.7],[23.5,11.7]].map(([x,z])=>new THREE.Vector3(x,0,z)),false,'centripetal')
+export function carPose(progress:number){const t=THREE.MathUtils.clamp(progress,0,1),p=carRoute.getPointAt(t),d=carRoute.getTangentAt(t);return{x:p.x,z:p.z,yaw:Math.atan2(-d.x,-d.z)}}
+export function updateSecurityObjects(root:THREE.Object3D,s:SecurityState){
+ root.traverse(o=>{
+  if(o.userData.accessMotion==='gate')o.position.x=(o.userData.direction??-1)*(o.userData.travel??6.15)*s.gate
+  if(o.userData.accessMotion==='garage'){o.scale.y=1-.94*s.garage;o.position.y=o.userData.liftHeight*.94*s.garage}
+  if(o.userData.securityMotion==='car'){const p=carPose(s.car);o.position.set(p.x,0,p.z);o.rotation.y=p.yaw}
+  if(o.userData.securityZone&&o instanceof THREE.Mesh){o.visible=s.mode!=='disarmed';(o.material as THREE.MeshBasicMaterial).color.set(s.alarm&&o.userData.securityZone==='gate'?'#ff4c35':'#7ecab1')}
+  if(o.userData.securityIndicator&&o instanceof THREE.Mesh)(o.material as THREE.MeshBasicMaterial).color.set(s.alarm?'#ff4c35':s.mode==='disarmed'?'#78a88d':'#e3ba6a')
  })
- return moved
 }

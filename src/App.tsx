@@ -1,3 +1,5 @@
+import {useSecurity} from './domain/useSecurity'
+import SecurityPanel from './components/SecurityControls'
 import { useTranslation } from 'react-i18next'
 import i18n, { languages } from './i18n'
 import { tx } from './i18n'
@@ -10,7 +12,6 @@ import plumbingRegister from './data/plumbing-register.json'
 import { LazySourceVector as SourceVector } from './components/SourceVector'
 import Villa3D from './components/Villa3D'
 import { useLighting } from './domain/useLighting'
-import { useSecurityDemo } from './domain/security'
 import OverlayPanel,{type ShowroomPanel}from './components/OverlayPanel'
 import type { ArchitecturalPlan, ArchitecturalPlanSet, PlanRoom } from './data/plan-types'
 import type { FloorRecord } from './domain/types'
@@ -259,7 +260,8 @@ function PlumbingDetail({ sheet, onClose }: { sheet: string; onClose: () => void
 export default function App() {
   useTranslation()
   const lighting=useLighting()
-  const security=useSecurityDemo()
+  const security=useSecurity(),securityCapture=useRef<(id:string)=>string>(()=>'')
+  useEffect(()=>{if(security.state.garageTarget)lighting.toggleControl(['garage:ceiling'],true)},[security.state.garageTarget,lighting.toggleControl])
   const [floorId,setFloorId]=useState<typeof floorIds[number]>('level-1')
   const [selectedRoom,setSelectedRoom]=useState<number|null>(null)
   const [panel,setPanel]=useState<ShowroomPanel>(null)
@@ -270,17 +272,18 @@ export default function App() {
   const selectRoom=(number:number|null)=>setSelectedRoom(previous=>previous===number?null:number)
   const openPlumbing=(sheet:string)=>{setPanel(null);setOpenPlumbingSheet(sheet)}
   return <div className="showroom-app" data-time={lighting.time}>
-    <header className="showroom-header"><a href="/" className="showroom-brand">VILLA COMO</a><span className="showroom-location"><span aria-hidden="true">⌖</span> Lago di Como, Italia</span><span className="showroom-demo" title={tx("Демонстрационный режим")}><i/><span>{tx("Демо")}</span></span><button className="menu-button" data-menu-trigger aria-label={tx("Открыть меню")} onClick={()=>setPanel('menu')}><span/><span/></button></header>
+    <header className="showroom-header"><a href="/" className="showroom-brand">VILLA COMO</a><span className="showroom-location"><span aria-hidden="true">⌖</span> Lago di Como, Italia</span><button className="showroom-demo systems-entry" onClick={()=>setPanel('security')} aria-label={tx('Системы дома')} title={tx("Демонстрационный режим")}><i style={{background:security.state.alarm?'#ef7955':security.state.mode==='disarmed'?'#78a88d':'#d9b570'}}/><span>{tx("Системы")}</span></button><button className="menu-button" data-menu-trigger aria-label={tx("Открыть меню")} onClick={()=>setPanel('menu')}><span/><span/></button></header>
     <main className="showroom-main" aria-label={tx("Интерактивная модель виллы")}>
-      <Villa3D lighting={lighting} security={security} floorSelectionRevision={floorSelectionRevision} floorId={floorId} selectedRoom={selectedRoom} onSelectRoom={selectRoom} onChooseFloor={chooseFloor} panel={panel} onPanel={setPanel}/>
+      <Villa3D security={security} securityCapture={securityCapture} lighting={lighting} floorSelectionRevision={floorSelectionRevision} floorId={floorId} selectedRoom={selectedRoom} onSelectRoom={selectRoom} onChooseFloor={chooseFloor} panel={panel} onPanel={setPanel}/>
     </main>
     <footer className="showroom-footer"><b>MÈTRE</b><span className="footer-source">{tx("Архитектура пространства. Интеллект света.")}</span><button onClick={()=>setPanel('passport')}>{tx("Паспорт модели ")}<span aria-hidden="true">↗</span></button><small>v 2.6</small></footer>
     {tx((panel==='menu'||panel==='plans'||panel==='passport')&&<OverlayPanel title={tx(panel==='menu'?'Ваш дом':panel==='plans'?'Чертежи':'Паспорт модели')} onClose={()=>setPanel(null)} wide={panel==='plans'}>
-      {tx(panel==='menu'?<><p className="panel-intro">{tx("Всё для управления домом — в одном месте.")}</p><label className="panel-floor-select">{tx("Язык")}<select aria-label={tx("Язык")} value={i18n.resolvedLanguage} onChange={event=>void i18n.changeLanguage(event.target.value)}>{languages.map(([code,name])=><option key={code} value={code} lang={code}>{name}</option>)}</select></label><nav className="showroom-menu" aria-label={tx("Меню дома")}>{tx(([['scenarios','Сценарии','Свет одним нажатием'],['security','Безопасность','Ворота, камеры и охрана'],['rooms','Свет в комнатах','Комнаты и виды освещения'],['view','Настройки вида','Слои и режимы модели'],['plans','Чертежи','Исходные планы и сантехника'],['passport','Паспорт модели','Источники и данные проекта']]as const).map(([id,title,description])=><button key={id} onClick={()=>setPanel(id)}><span><b>{tx(title)}</b><small>{tx(description)}</small></span><span aria-hidden="true">↗</span></button>))}</nav><p className="quiet-note">{tx("Демонстрация умного дома. Оборудование не подключено.")}</p></>:<>
+      {tx(panel==='menu'?<><p className="panel-intro">{tx("Всё для управления домом — в одном месте.")}</p><label className="panel-floor-select">{tx("Язык")}<select aria-label={tx("Язык")} value={i18n.resolvedLanguage} onChange={event=>void i18n.changeLanguage(event.target.value)}>{languages.map(([code,name])=><option key={code} value={code} lang={code}>{name}</option>)}</select></label><nav className="showroom-menu" aria-label={tx("Меню дома")}>{tx(([['security','Системы дома','Ворота, камеры и охрана'],['scenarios','Сценарии','Свет одним нажатием'],['rooms','Свет в комнатах','Комнаты и виды освещения'],['view','Настройки вида','Слои и режимы модели'],['plans','Чертежи','Исходные планы и сантехника'],['passport','Паспорт модели','Источники и данные проекта']]as const).map(([id,title,description])=><button key={id} onClick={()=>setPanel(id)}><span><b>{tx(title)}</b><small>{tx(description)}</small></span><span aria-hidden="true">↗</span></button>))}</nav><p className="quiet-note">{tx("Демонстрация умного дома. Оборудование не подключено.")}</p></>:<>
         <label className="panel-floor-select">{tx("Уровень")}<select value={floorId} onChange={e=>chooseFloor(e.target.value as typeof floorId)}>{tx(floorIds.map(id=><option value={id} key={id}>{tx(id==='garage'?'Гараж':id==='level-1'?'1 этаж':id==='level-2'?'2 этаж':'3 этаж')}</option>))}</select></label>
         {tx(panel==='plans'?<PlanViewer floor={floor} data={data} selectedRoom={selectedRoom} onSelectRoom={selectRoom} onOpenPlumbing={openPlumbing}/>:<><InfoPanel floor={floor} data={data} selectedRoom={selectedRoom} onSelectRoom={selectRoom} onOpenPlumbing={openPlumbing}/><details className="panel-details"><summary>{tx("Геометрический контроль")}</summary>{tx(rawGeometry.floors[floorId].calibrationChecks.map((check,index)=><p key={index}>{tx(check.sheet)} · {tx(check.label)}: <b>{tx(check.dimensionMm)} {tx(" мм")}</b> {tx(" · расхождение с масштабом предпросмотра ")}{tx(check.residualAtDisplayScalePct.toFixed(2))}%</p>))}<p>{tx("Проверки размерных линий PDF не подтверждают точность всей модели.")}</p></details><details className="panel-details"><summary>{tx("Источники и границы точности")}</summary><p>{tx("Планы MÈTRE: ")}{tx(data.measuredSheet)}, {tx(data.installSheet)}, {tx(data.finalSheet)}, {tx(data.furnitureSheet)}{tx(". Свет — A-34–A-37. Расстановка, материалы, кровля и участок содержат демонстрационные допущения. Модель не является утверждённым BIM-проектом или монтажной схемой проводки.")}</p><p>{tx("Левая часть A-35 не содержит проектных групп света: соответствующие группы помечены как демо. Физическое оборудование не подключено.")}</p><a href="https://github.com/RadamirSS/Villa_como_v2/pull/1" target="_blank" rel="noreferrer">{tx("Документация и изменения ↗")}</a></details></>)}
       </>)}
     </OverlayPanel>)}
+    {panel==='security'&&<OverlayPanel title={tx('Системы дома')} onClose={()=>setPanel(null)}><SecurityPanel security={security} capture={securityCapture} onShow={()=>setPanel(null)}/></OverlayPanel>}
     {tx(openPlumbingSheet&&<PlumbingDetail sheet={openPlumbingSheet} onClose={()=>setOpenPlumbingSheet(null)}/>)}
   </div>
 }

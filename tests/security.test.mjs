@@ -1,50 +1,41 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import {build} from 'esbuild'
-
-const built=await build({entryPoints:['src/components/Security3D.ts'],bundle:true,platform:'node',format:'esm',write:false})
-const lib=await import('data:text/javascript;base64,'+Buffer.from(built.outputFiles[0].text).toString('base64'))
-const state={gateOpen:false,garageOpen:false,vehicleInside:false,armed:false,triggered:false,cameraId:null,nightVision:false,event:'demo'}
-
-test('six virtual cameras and a sedan are actual 3D objects, never live feeds',()=>{
- const root=lib.createSecurityDevices()
- const ids=[];let car=null;let rings=0
- root.traverse(o=>{
-  if(o.userData.securityCameraId&&o.userData.simulated)ids.push(o.userData.securityCameraId)
-  if(o.userData.securityRole==='vehicle')car=o
-  if(o.userData.securityRole==='motion-zone')rings++
- })
- assert.equal(new Set(ids).size,6)
- assert.equal(rings,6)
- assert(car)
- assert.equal(root.userData.hardwareConnected,false)
+const bundle=await build({stdin:{contents:`export * from './src/domain/security';export * from './src/components/Security3D';export {createExteriorContext,createPlacedGarage} from './src/components/ExteriorConcept'`,resolveDir:process.cwd()},bundle:true,platform:'node',format:'esm',write:false})
+const m=await import('data:text/javascript;base64,'+Buffer.from(bundle.outputFiles[0].text).toString('base64'))
+const advance=(state,n=100)=>{for(let i=0;i<n;i++)state=m.securityReducer(state,{type:'tick',dt:.1});return state}
+test('car waits for both openings, holds passage interlocks, finishes and can exit',()=>{
+ let s=m.securityReducer(m.initialSecurity(),{type:'car',target:1})
+ s=m.securityReducer(s,{type:'tick',dt:.1});assert.equal(s.car,0)
+ s=advance(s,40);assert(s.car>0);assert.equal(s.gate,1);assert.equal(s.garage,1)
+ const blocked=m.securityReducer(s,{type:'gate',open:false});assert.equal(blocked.gateTarget,true)
+ s=m.securityReducer(s,{type:'car',target:null});assert.equal(s.carTarget,null)
+ assert.equal(m.securityReducer(s,{type:'garage',open:false}).garageTarget,true)
+ s=advance(m.securityReducer(s,{type:'car',target:1}),200);assert.equal(s.car,1);assert.equal(s.carTarget,null)
+ s=advance(m.securityReducer(s,{type:'car',target:0}),200);assert.equal(s.car,0)
 })
-
-test('both gates animate independently and a vehicle cannot move through closed gates',()=>{
- const root=lib.createSecurityDevices()
- const existingCar=root.children.find(o=>o.userData.securityRole==='vehicle')
- const slider=existingCar.children[0].clone()
- slider.position.x=31;slider.userData={gateLeaf:'left',gateBaseX:31};root.add(slider)
- const shutter=new root.constructor();shutter.userData={openingId:'garage-entry'};root.add(shutter)
- const motion=lib.createSecurityMotion()
- lib.animateSecurityVisuals(root,{...state,vehicleInside:true},motion,4)
- assert.equal(motion.car,0)
- lib.animateSecurityVisuals(root,{...state,gateOpen:true,garageOpen:true,vehicleInside:true},motion,3)
- assert.equal(motion.gate,1);assert.equal(motion.garage,1)
- assert(motion.car>0&&motion.car<1)
- assert(slider.position.x<31)
- assert(shutter.scale.y<.1)
- lib.animateSecurityVisuals(root,{...state,gateOpen:false,garageOpen:false},motion,3)
- assert.equal(motion.gate,0);assert.equal(motion.garage,0)
- assert.equal(slider.position.x,31)
+test('security requires closed access; armed commands are blocked and demo alarm is explicit',()=>{
+ let s=advance(m.securityReducer(m.initialSecurity(),{type:'gate',open:true}))
+ assert.equal(m.securityReducer(s,{type:'arm',mode:'away'}).mode,'disarmed')
+ s=advance(m.securityReducer(s,{type:'gate',open:false}));s=m.securityReducer(s,{type:'arm',mode:'away'});assert.equal(s.mode,'away')
+ assert.equal(m.securityReducer(s,{type:'gate',open:true}).gateTarget,false)
+ s=m.securityReducer(s,{type:'motion'});assert.equal(s.alarm,true)
+ s=m.securityReducer(s,{type:'ack'});assert.equal(s.alarm,false);assert.equal(s.mode,'away')
+ s=m.securityReducer(s,{type:'arm',mode:'disarmed'});assert.equal(m.securityReducer(s,{type:'motion'}).alarm,false)
+ for(let i=0;i<30;i++)s=m.securityReducer(s,{type:'motion'});assert(s.events.length<=12)
 })
-
-test('arming highlights zones and simulated alarm highlights the entrance zone',()=>{
- const root=lib.createSecurityDevices(),motion=lib.createSecurityMotion()
- lib.animateSecurityVisuals(root,{...state,armed:true,triggered:true,cameraId:'gate'},motion,0)
- const rings=[];root.traverse(o=>{if(o.userData.securityRole==='motion-zone')rings.push(o)})
- assert(rings.every(o=>o.visible))
- assert(rings.some(o=>o.userData.securityCameraId==='gate'&&o.material.color.getHexString()==='f37063'))
- lib.animateSecurityVisuals(root,state,motion,0)
- assert(rings.every(o=>!o.visible))
+test('actual existing entrance and garage geometry remains animated after batching',()=>{
+ const roots=[m.createExteriorContext(),m.createPlacedGarage()];let gate,garage
+ for(const root of roots)root.traverse(o=>{if(o.userData.accessMotion==='gate')gate=o;if(o.userData.accessMotion==='garage')garage=o})
+ assert(gate);assert(garage);const geometry=garage.children[0].geometry
+ for(const root of roots)m.updateSecurityObjects(root,{...m.initialSecurity(),gate:1,garage:1})
+ assert.equal(gate.position.x,3.05);assert(garage.scale.y<.1);assert.equal(garage.children[0].geometry,geometry)
+})
+test('car route is continuous and scene geometry finite with four virtual camera identities',()=>{
+ let previous=m.carPose(0)
+ for(let t=.01;t<=1;t+=.01){const next=m.carPose(t);assert(Math.hypot(next.x-previous.x,next.z-previous.z)<.6);assert(Number.isFinite(next.yaw));previous=next}
+ assert(Math.abs(m.carPose(1).x-23.5)<1e-8);assert(Math.abs(m.carPose(1).z-11.7)<1e-8)
+ const root=m.createSecurityObjects();let car=0,cameras=0
+ root.traverse(o=>{if(o.userData.securityMotion==='car')car++;if(o.userData.securityCamera)cameras++;if(o.isMesh)for(const n of o.geometry.attributes.position.array)assert(Number.isFinite(n))})
+ assert.equal(car,1);assert.equal(cameras,6)
 })

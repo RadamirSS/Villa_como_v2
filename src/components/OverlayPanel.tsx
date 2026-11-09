@@ -1,6 +1,6 @@
 import { tx } from '../i18n'
 import {useEffect,useId,useRef,type ReactNode} from 'react'
-export type ShowroomPanel='menu'|'scenarios'|'rooms'|'security'|'view'|'plans'|'passport'|null
+export type ShowroomPanel='menu'|'scenarios'|'rooms'|'view'|'plans'|'passport'|'security'|null
 export default function OverlayPanel({title,onClose,children,wide=false}:{title:string;onClose:()=>void;children:ReactNode;wide?:boolean}){
  const dialog=useRef<HTMLDialogElement>(null),titleId=useId()
  const closeRef=useRef(onClose);closeRef.current=onClose

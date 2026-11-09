@@ -1,41 +1,24 @@
+import {useEffect,useState,type MutableRefObject} from 'react'
 import {tx} from '../i18n'
-import {cameraStations,type CameraId,type SecurityController} from '../domain/security'
-
-export default function SecurityControls({security,onShowSite,onChooseCamera}:{security:SecurityController;onShowSite:()=>void;onChooseCamera:(id:CameraId)=>void}){
- const s=security.state
- return <div className="security-sheet">
-  <p className="panel-intro">{tx('Интерактивная демонстрация автоматики, видеонаблюдения и охраны. Физические устройства не подключены.')}</p>
-  <div className={'security-status'+(s.triggered?' security-alert':'')}>
-   <span className="security-status-dot"/><div><b>{tx(s.triggered?'Демо-тревога':s.armed?'Периметр под охраной':'Охрана выключена')}</b><small role="status">{tx(s.event)}</small></div>
-  </div>
-  <h3>{tx('Въезд и гараж')}</h3>
-  <div className="security-actions">
-   <button className="security-action" onClick={()=>security.setGate(!s.gateOpen)} aria-pressed={s.gateOpen}>
-    <span aria-hidden="true">▤</span><b>{tx('Въездные ворота')}</b><small>{tx(s.gateOpen?'Открыты':'Закрыты')}</small>
-   </button>
-   <button className="security-action" onClick={()=>security.setGarage(!s.garageOpen)} aria-pressed={s.garageOpen}>
-    <span aria-hidden="true">▥</span><b>{tx('Ворота гаража')}</b><small>{tx(s.garageOpen?'Открыты':'Закрыты')}</small>
-   </button>
-  </div>
-  <div className="security-scenario-actions">
-   <button className="panel-secondary" onClick={()=>{security.driveIn();onShowSite()}}>{tx('▶ Приехать домой')}</button>
-   <button className="panel-secondary" onClick={()=>{security.driveOut();onShowSite()}}>{tx('↗ Выехать со двора')}</button>
-  </div>
-  <p className="security-note">{tx('Демонстрационный автомобиль движется по маршруту после открытия обоих ворот.')}</p>
-  <h3>{tx('Виртуальные камеры')}</h3>
-  <div className="security-camera-grid">
-   {cameraStations.map((cam,i)=><button type="button" key={cam.id} className={'security-camera-option'+(s.cameraId===cam.id?' selected':'')} onClick={()=>onChooseCamera(cam.id)} aria-pressed={s.cameraId===cam.id}>
-    <span>CAM {String(i+1).padStart(2,'0')}</span><b>{tx(cam.name)}</b><small>{tx('Открыть ракурс')}</small>
-   </button>)}
-  </div>
-  <label className="security-night"><span>{tx('Ночная визуализация камеры')}</span><input type="checkbox" checked={s.nightVision} onChange={e=>security.setNightVision(e.target.checked)}/></label>
-  <p className="security-note">{tx('Камеры показывают виртуальный ракурс этой же 3D-модели, а не видеопоток с реального объекта.')}</p>
-  <h3>{tx('Охрана периметра')}</h3>
-  <div className="security-scenario-actions">
-   <button className="panel-secondary" onClick={()=>{s.armed?security.disarm():security.arm();onShowSite()}}>{tx(s.armed?'Снять с охраны':'Поставить на охрану')}</button>
-   <button className="panel-secondary" onClick={()=>{security.simulateMotion();onChooseCamera('gate')}}>{tx('Имитировать движение')}</button>
-  </div>
-  {s.triggered&&<button className="security-reset" onClick={security.clearAlarm}>{tx('Сбросить тревогу')}</button>}
-  <p className="security-note">{tx('Сигнализация и обнаружение движения — только симуляция. Реальных уведомлений или команд нет.')}</p>
- </div>
+import i18n from '../i18n'
+import type {SecurityController} from '../domain/useSecurity'
+import {virtualCameras} from '../domain/security'
+export type CameraCapture=MutableRefObject<(id:string)=>string>
+function CameraPreview({id,capture,night}:{id:string;capture:CameraCapture;night:boolean}){
+ const[src,setSrc]=useState('')
+ useEffect(()=>{setSrc('');const refresh=()=>setSrc(capture.current(id));refresh();const timer=window.setInterval(refresh,750);return()=>window.clearInterval(timer)},[id,capture])
+ return <div className={"virtual-feed"+(night?" night-vision":"")}>{src?<img src={src} alt={tx('Виртуальная камера')}/>:<p>{tx('Подготовка обзора…')}</p>}<span>DEMO · 3D</span></div>
+}
+export default function SecurityPanel({security,capture,onShow}:{security:SecurityController;capture:CameraCapture;onShow:()=>void}){
+ const[tab,setTab]=useState<'access'|'cameras'|'security'>('access'),[camera,setCamera]=useState<string>('gate'),[night,setNight]=useState(false)
+ const{s,send}={s:security.state,send:security.dispatch}
+ const drive=(target:0|1)=>{send({type:'car',target});if(s.mode==='disarmed'&&s.car!==target)onShow()}
+ const door=(key:'gate'|'garage',title:string)=>{const p=s[key],target=s[key==='gate'?'gateTarget':'garageTarget'];const moving=p!==(target?1:0);return <section className="system-card"><h3>{tx(title)}</h3><div className="system-status" role="status">{tx(moving?(target?'Открывается':'Закрывается'):p===1?'Открыто':'Закрыто')} <small>{Math.round(p*100)}%</small></div><progress value={p} max={1} aria-label={tx(title)}/><div className="system-actions"><button className="panel-secondary" disabled={target} onClick={()=>send({type:key,open:true})}>{tx('Открыть')}</button><button className="panel-secondary" disabled={!target} onClick={()=>send({type:key,open:false})}>{tx('Закрыть')}</button></div></section>}
+ return <div className="security-panel"><p className="panel-intro">{tx('Демонстрация систем. Ворота, камеры и охрана не подключены к оборудованию.')}</p>
+ <div className="system-tabs" role="group" aria-label={tx('Системы дома')}>{([['access','Доступ'],['cameras','Камеры'],['security','Охрана']]as const).map(([id,label])=><button className="panel-secondary" key={id} aria-pressed={tab===id} onClick={()=>setTab(id)}>{tx(label)}</button>)}</div>
+ {s.message&&<p className="system-notice" role="status">{tx(s.message)}</p>}
+ {tab==='access'&&<>{door('gate','Въездные ворота')}{door('garage','Ворота гаража')}<section className="system-card"><h3>{tx('Автомобиль')}</h3><p>{tx(s.carTarget!==null?'Демонстрационный маршрут выполняется':s.car===1?'Автомобиль в гараже':s.car===0?'Автомобиль снаружи':'Автомобиль остановлен')}</p><div className="system-actions"><button className="panel-secondary" onClick={()=>drive(1)} disabled={s.car===1||s.carTarget===1}>{tx('Заехать в гараж')}</button><button className="panel-secondary" onClick={()=>drive(0)} disabled={s.car===0||s.carTarget===0}>{tx('Выехать')}</button>{s.carTarget!==null&&<button className="panel-secondary" onClick={()=>send({type:'car',target:null})}>{tx('Остановить')}</button>}</div><p className="quiet-note">{tx('Автомобиль движется по условному маршруту. Во время проезда закрытие ворот заблокировано.')}</p></section></>}
+ {tab==='cameras'&&<><label className="panel-floor-select">{tx('Камеры')}<select value={camera} onChange={e=>setCamera(e.target.value)}>{virtualCameras.map(c=><option key={c.id} value={c.id}>{tx(c.name)}</option>)}</select></label><CameraPreview id={camera} capture={capture} night={night}/><label className="security-night"><span>{tx("Ночная визуализация камеры")}</span><input type="checkbox" checked={night} onChange={e=>setNight(e.target.checked)}/></label><p className="quiet-note">{tx('Это виртуальный обзор текущей 3D-сцены, а не видеопоток с реальной камеры. Изображение обновляется во время движения ворот и автомобиля.')}</p></>}
+ {tab==='security'&&<><section className={'system-card'+(s.alarm?' alarm-active':'')}><h3>{tx(s.alarm?'Демо: тревога на периметре':s.mode==='disarmed'?'Охрана снята':s.mode==='home'?'Периметр под охраной':'Дом под охраной')}</h3><div className="system-actions">{([['disarmed','Снять охрану'],['home','Охрана периметра'],['away','Полная охрана']]as const).map(([mode,label])=><button key={mode} className="panel-secondary" aria-pressed={s.mode===mode} onClick={()=>send({type:'arm',mode})}>{tx(label)}</button>)}</div><p className="quiet-note">{tx('Для постановки закройте обе группы ворот и завершите движение автомобиля.')}</p></section><div className="system-actions"><button className="panel-secondary" onClick={()=>send({type:'motion'})}>{tx('Демо: движение у въезда')}</button>{s.alarm&&<button className="panel-secondary" onClick={()=>send({type:'ack'})}>{tx('Подтвердить тревогу')}</button>}</div></>}
+ <button className="panel-secondary full-width" onClick={onShow}>{tx("Вернуться к модели")}</button><details className="panel-details"><summary>{tx('Журнал событий')}</summary><ol className="security-events">{s.events.length?s.events.map(e=><li key={e.id}><time>{new Intl.DateTimeFormat(i18n.resolvedLanguage,{hour:'2-digit',minute:'2-digit',second:'2-digit'}).format(e.at)}</time> {tx(e.text)}</li>):<li>{tx('Событий пока нет')}</li>}</ol></details></div>
 }

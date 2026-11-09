@@ -1,3 +1,5 @@
+> Historical first implementation. For current interlocks, camera preview and security modes see [SECURITY_SHOWROOM_DEMO.md](SECURITY_SHOWROOM_DEMO.md).
+
 # Villa Como v2 — Security and Access Showroom (demonstration)
 
 ## Implemented
