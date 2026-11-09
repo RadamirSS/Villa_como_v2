@@ -411,5 +411,14 @@
   "Кладовая · потолочный": "Ripostiglio · luce a soffitto",
   "Винный погреб · бра": "Cantina vini · Applique",
   "Общий свет · демо": "Luce generale · Demo",
-  "1.1 + Лестница": "1.1 + scala"
+  "1.1 + Лестница": "1.1 + scala",
+  "Свет во дворе": "Luci del cortile",
+  "Двор: выключен": "Cortile: spento",
+  "Двор: включён": "Cortile: acceso",
+  "Сценарии также управляют демонстрационным светом двора.": "Gli scenari controllano anche le luci dimostrative del cortile.",
+  "Дорожки, въезд и парковка. Добавлено для демонстрации, в исходном проекте отсутствует.": "Vialetti, ingresso e parcheggio. Aggiunta dimostrativa, non presente nel progetto originale.",
+  "Весь участок": "Intera proprietà",
+  "Показать двор": "Mostra cortile",
+  "Как пользоваться моделью": "Come usare il modello",
+  "Выберите этаж, затем комнату. Кнопка света управляет всей комнатой, название открывает виды освещения. Вращайте одним пальцем, двумя — приближайте. Кнопка «Весь участок» возвращает общий вид.": "Scegli un piano, poi un locale. Il pulsante luce controlla tutto il locale; il nome apre i tipi di luce. Trascina con un dito per ruotare, usa due dita per lo zoom. « Intera proprietà » torna alla vista generale."
 }

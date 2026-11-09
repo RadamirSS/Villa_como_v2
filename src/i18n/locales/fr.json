@@ -411,5 +411,14 @@
   "Кладовая · потолочный": "Débarras · plafonnier",
   "Винный погреб · бра": "Cave à vin · Appliques",
   "Общий свет · демо": "Éclairage général · Démo",
-  "1.1 + Лестница": "1.1 + escalier"
+  "1.1 + Лестница": "1.1 + escalier",
+  "Свет во дворе": "Éclairage extérieur",
+  "Двор: выключен": "Extérieur : éteint",
+  "Двор: включён": "Extérieur : allumé",
+  "Сценарии также управляют демонстрационным светом двора.": "Les scènes commandent aussi l’éclairage extérieur de démonstration.",
+  "Дорожки, въезд и парковка. Добавлено для демонстрации, в исходном проекте отсутствует.": "Allées, entrée et parking. Ajout de démonstration, absent du projet original.",
+  "Весь участок": "Tout le terrain",
+  "Показать двор": "Voir la cour",
+  "Как пользоваться моделью": "Utiliser le modèle",
+  "Выберите этаж, затем комнату. Кнопка света управляет всей комнатой, название открывает виды освещения. Вращайте одним пальцем, двумя — приближайте. Кнопка «Весь участок» возвращает общий вид.": "Choisissez un niveau, puis une pièce. Le bouton lumière commande toute la pièce ; son nom ouvre les types d’éclairage. Tournez avec un doigt et zoomez avec deux. « Tout le terrain » revient à la vue générale."
 }

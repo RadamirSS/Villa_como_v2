@@ -93,9 +93,9 @@ export function createSiteLandscape() {
   root.traverse(o=>{if(o.userData.siteObject==='ground-level-courtyard'||o.userData.siteObject==='parking-marking')o.userData.elevationM=0})
   return root
 }
-export function updateSiteTime(root:THREE.Object3D,time:'day'|'dusk'|'night') {
+export function updateSiteTime(root:THREE.Object3D,time:'day'|'dusk'|'night',enabled=time!=='day') {
   root.traverse(o=>{if(!(o instanceof THREE.Mesh))return;for(const m of Array.isArray(o.material)?o.material:[o.material]){
-    if(m.name==='site-light-pool'){o.visible=time!=='day';(m as THREE.MeshBasicMaterial).opacity=time==='night'?.23:.13}
-    if(m.name==='site-warm-light')(m as THREE.MeshBasicMaterial).color.set(time==='day'?'#bca67b':'#ffce86')
+    if(m.name==='site-light-pool'){o.visible=enabled;(m as THREE.MeshBasicMaterial).opacity=time==='day'?.07:time==='night'?.23:.13}
+    if(m.name==='site-warm-light')(m as THREE.MeshBasicMaterial).color.set(!enabled?'#3b423c':time==='day'?'#e4c286':'#ffce86')
   }})
 }

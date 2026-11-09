@@ -5,8 +5,8 @@ export default function LightingControls({floor,room,onRoom,lighting,mode='rooms
  const rooms=lightingPlan.rooms.filter(r=>r.floor===floor),selected=rooms.find(r=>r.number===room)
  const groups=selected?roomGroups(floor,selected.number):[],controls=lightingPlan.controls.filter(c=>c.floor===floor&&c.groups.some(id=>groups.some(g=>g.id===id)))
  if(mode==='scenarios')return <div className="scenario-panel">
-  <p className="panel-intro">{tx("Один выбор — нужный свет во всём доме.")}</p>
-  <div className="scenario-list">{tx(lightScenarios.map((scenario,i)=><button key={scenario.id} className={'scenario-card'+(lighting.scenario===scenario.id?' chosen':'')} aria-pressed={lighting.scenario===scenario.id} onClick={()=>{lighting.applyScenario(scenario.id);onApplied?.()}}><span className="scenario-symbol" aria-hidden="true">{tx(['↗','☾','◌','⋆','↙'][i])}</span><span><b>{tx(scenario.name)}</b><small>{tx(scenario.description)}</small></span><i aria-hidden="true">{tx(lighting.scenario===scenario.id?'✓':'›')}</i></button>))}</div>
+  <p className="panel-intro">{tx("Один выбор — нужный свет во всём доме.")}</p><p className="quiet-note">{tx("Сценарии также управляют демонстрационным светом двора.")}</p>
+  <div className="scenario-list">{tx(lightScenarios.map((scenario,i)=><button key={scenario.id} className={'scenario-card'+(lighting.scenario===scenario.id?' chosen':'')} aria-pressed={lighting.scenario===scenario.id} onClick={()=>{lighting.applyScenario(scenario.id);onApplied?.()}}><span className="scenario-symbol" aria-hidden="true">{tx(['↗','☾','◌','⋆','↙'][i])}</span><span><b>{tx(scenario.name)}</b><small>{tx(scenario.description)} {tx(scenario.id==='away'?'Двор: выключен':'Двор: включён')}</small></span><i aria-hidden="true">{tx(lighting.scenario===scenario.id?'✓':'›')}</i></button>))}</div>
   <button className="panel-secondary full-width" onClick={()=>{lighting.setAll(false);onApplied?.()}}>{tx("Выключить весь свет")}</button><p className="quiet-note">{tx("Демонстрационный режим · оборудование не подключено.")}</p>
  </div>
  return <div className="room-light-panel">

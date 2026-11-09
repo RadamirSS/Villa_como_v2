@@ -411,5 +411,14 @@
   "Кладовая · потолочный": "Abstellraum · Deckenleuchte",
   "Винный погреб · бра": "Weinkeller · Wandleuchten",
   "Общий свет · демо": "Allgemeinbeleuchtung · Demo",
-  "1.1 + Лестница": "1.1 + Treppe"
+  "1.1 + Лестница": "1.1 + Treppe",
+  "Свет во дворе": "Hofbeleuchtung",
+  "Двор: выключен": "Hof: aus",
+  "Двор: включён": "Hof: an",
+  "Сценарии также управляют демонстрационным светом двора.": "Die Szenen steuern auch die Demo-Hofbeleuchtung.",
+  "Дорожки, въезд и парковка. Добавлено для демонстрации, в исходном проекте отсутствует.": "Wege, Einfahrt und Parkplatz. Demoergänzung, nicht im Originalprojekt enthalten.",
+  "Весь участок": "Gesamtes Grundstück",
+  "Показать двор": "Hof anzeigen",
+  "Как пользоваться моделью": "So bedienen Sie das Modell",
+  "Выберите этаж, затем комнату. Кнопка света управляет всей комнатой, название открывает виды освещения. Вращайте одним пальцем, двумя — приближайте. Кнопка «Весь участок» возвращает общий вид.": "Wählen Sie ein Geschoss und dann einen Raum. Die Lichttaste schaltet den ganzen Raum; der Name öffnet die Lichtarten. Mit einem Finger drehen, mit zwei Fingern zoomen. ‚Gesamtes Grundstück‘ öffnet die Übersicht."
 }
