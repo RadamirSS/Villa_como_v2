@@ -3,7 +3,9 @@ import * as THREE from 'three'
 import LightingControls from './LightingControls'
 import {createLightingLayer,updateLightingVisuals}from './Lighting3D'
 import type{LightingController}from '../domain/useLighting'
-import {roomIsOn}from '../domain/lighting'
+import {roomIsOn,lightingPlan,lightScenarios}from '../domain/lighting'
+import OverlayPanel,{type ShowroomPanel}from './OverlayPanel'
+import ShowroomIcon from './ShowroomIcon'
 import { createInterior3D } from './Interior3D'
 import { SVGRenderer, SVGObject } from 'three/examples/jsm/renderers/SVGRenderer.js'
 import { TessellateModifier } from 'three/examples/jsm/modifiers/TessellateModifier.js'
@@ -247,12 +249,15 @@ function disposeSceneGroup(obj: THREE.Object3D) {
   })
 }
 
-export default function Villa3D({ floorId, selectedRoom, onSelectRoom, lighting, floorSelectionRevision = 0 }: {
+export default function Villa3D({ floorId, selectedRoom, onSelectRoom, onChooseFloor, panel, onPanel, lighting, floorSelectionRevision = 0 }: {
   floorId: FloorId
   lighting: LightingController
   floorSelectionRevision?: number
   selectedRoom: number | null
-  onSelectRoom: (value: number) => void
+  onSelectRoom: (value: number|null) => void
+  onChooseFloor: (floor:FloorId)=>void
+  panel:ShowroomPanel
+  onPanel:(panel:ShowroomPanel)=>void
 }) {
   const mount = useRef<HTMLDivElement>(null)
   const sceneRef = useRef<THREE.Scene | null>(null)
@@ -282,16 +287,17 @@ export default function Villa3D({ floorId, selectedRoom, onSelectRoom, lighting,
   const [doors, setDoors] = useState(true)
   const [top, setTop] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [loadingTexture, setLoadingTexture] = useState(false)
+  const [, setLoadingTexture] = useState(false)
   const [fallback, setFallback] = useState(false)
   const [site, setSite] = useState(true)
-  const [expanded, setExpanded] = useState(false)
+  const snapshotRef=useRef(()=>{})
+  const [activePose,setActivePose]=useState('perspective')
   onSelectRef.current = onSelectRoom
   const viewAll = view === 'all'
 
   useEffect(() => {
     if (!floorSelectionRevision) return
-    poseRef.current = 'floor'; setTop(false); setDetailRoom(null)
+    poseRef.current = 'floor'; setActivePose('floor');setTop(false); setDetailRoom(null)
     setView('one'); setArrangement('assembled'); setPresentation('section'); setLabels(true)
   }, [floorSelectionRevision])
 
@@ -324,6 +330,12 @@ export default function Villa3D({ floorId, selectedRoom, onSelectRoom, lighting,
     const scene = new THREE.Scene()
     scene.background = new THREE.Color('#e4e7df')
     sceneRef.current = scene
+    snapshotRef.current=()=>{
+      renderer.render(scene,camera)
+      const element=renderer.domElement,link=document.createElement('a')
+      if(element instanceof HTMLCanvasElement){link.href=element.toDataURL('image/png');link.download='villa-como.png';link.click()}
+      else{const url=URL.createObjectURL(new Blob([new XMLSerializer().serializeToString(element)],{type:'image/svg+xml'}));link.href=url;link.download='villa-como.svg';link.click();window.setTimeout(()=>URL.revokeObjectURL(url),1000)}
+    }
     const camera = new THREE.PerspectiveCamera(35, 1, .1, 300)
     camera.position.set(28, 24, 34)
     cameraRef.current = camera
@@ -544,7 +556,7 @@ export default function Villa3D({ floorId, selectedRoom, onSelectRoom, lighting,
 
   useEffect(()=>{
     const scene=sceneRef.current;if(!scene)return
-    scene.background=new THREE.Color(lighting.time==='day'?'#e4e7df':lighting.time==='dusk'?'#737d7c':'#18272d')
+    scene.background=new THREE.Color(lighting.time==='day'?'#aba995':lighting.time==='dusk'?'#9b9785':'#18272d')
     scene.traverse(obj=>{if(obj instanceof THREE.Light){
       if(obj instanceof THREE.AmbientLight){obj.color.set(fallback?(lighting.time==='day'?'#959b9a':lighting.time==='dusk'?'#677574':'#36474c'):'#ffffff');obj.intensity=lighting.time==='day'?.7:lighting.time==='dusk'?.4:.2}
       else if(obj instanceof THREE.DirectionalLight)obj.intensity=(obj.castShadow?(fallback?.6:2.6):(fallback?.25:.8))*(lighting.time==='day'?1:lighting.time==='dusk'?.5:.2)
@@ -563,17 +575,8 @@ export default function Villa3D({ floorId, selectedRoom, onSelectRoom, lighting,
     invalidateRef.current()
   }, [selectedRoom, floorId, labels, viewAll])
 
-  useEffect(() => {
-    if (!expanded) return
-    const previousOverflow = document.body.style.overflow
-    document.body.style.overflow = 'hidden'
-    const escape = (event: KeyboardEvent) => { if (event.key === 'Escape') setExpanded(false) }
-    window.addEventListener('keydown', escape)
-    return () => { document.body.style.overflow = previousOverflow; window.removeEventListener('keydown', escape) }
-  }, [expanded])
-
   const setCameraPose = (pose: typeof poseRef.current) => {
-    poseRef.current = pose; setTop(pose === 'top'); fitCameraRef.current()
+    poseRef.current = pose;setActivePose(pose); setTop(pose === 'top'); fitCameraRef.current()
   }
   const resetCamera = (plan: boolean) => setCameraPose(plan ? 'top' : 'perspective')
   const zoomCamera = (factor: number) => {
@@ -584,80 +587,32 @@ export default function Villa3D({ floorId, selectedRoom, onSelectRoom, lighting,
     controlsRef.current?.update()
   }
 
-  return <div className={`villa3d${expanded ? ' villa3d-expanded' : ''}`}>
-    <div className="model-top-strip">
-      <div className="model-title"><span className="live-indicator"/><b>VILLA COMO · АРХИТЕКТУРА</b><small>{detailRoom===12&&!viewAll&&presentation!=='exterior'?'Меблировка · A-118 / A-119':presentation === 'exterior' ? 'ДОМ НА СКЛОНЕ' : `${spatial.floors[floorId].sourceSheet} · исходная архитектура`}</small></div>
-      <div className="model-tools">
-        <button onClick={() => zoomCamera(1.22)} aria-label="Отдалить 3D">−</button>
-        <button onClick={() => zoomCamera(.82)} aria-label="Приблизить 3D">+</button>
-        <button onClick={() => resetCamera(!top)}>{top ? 'Изометрия' : 'Сверху'}</button>
-        <button onClick={() => resetCamera(false)}>Сброс</button>
-        <button onClick={() => setExpanded(v => !v)} aria-pressed={expanded}>{expanded ? 'Свернуть' : 'На весь экран'}</button>
-      </div>
+  const chooseAll=()=>{setDetailRoom(null);setView('all');setPresentation('exterior');setArrangement('assembled');onSelectRoom(null);setCameraPose('perspective')}
+  const levelTitle=viewAll?'Архитектура':floorId==='garage'?'Гараж':floorId==='level-1'?'1 этаж':floorId==='level-2'?'2 этаж':'3 этаж'
+  const room=plans[floorId].rooms.find(r=>r.number===selectedRoom)
+  const litRooms=lightingPlan.rooms.filter(r=>roomIsOn(lighting.state,r.floor as FloorId,r.number)).length
+  const activeScenario=lightScenarios.find(s=>s.id===lighting.scenario)
+  return <div className="showroom-scene" data-time={lighting.time}>
+    <div className="showroom-canvas" ref={mount} aria-label="Интерактивная 3D модель Villa Como: вращайте и выбирайте комнаты"/>
+    <div className="showroom-intro"><p><span/> THE ART OF SMART LIVING</p><h1>Villa <em>Como.</em></h1><span>Архитектура пространства. Интеллект света.</span></div>
+    <div className="scene-utilities"><button className="icon-button" aria-label="Сбросить ракурс" title="Сбросить ракурс" onClick={()=>viewAll?resetCamera(false):setCameraPose('floor')}><ShowroomIcon name="reset"/></button><button className="icon-button" aria-label="Сохранить вид модели" title="Сохранить вид модели" onClick={()=>snapshotRef.current()}><ShowroomIcon name="camera"/></button></div>
+    <div className="showroom-camera glass-control" role="group" aria-label="Ракурс модели">{([['perspective','Объём'],['front','Со двора'],['rear','Сзади'],['top','Сверху']]as const).map(([pose,label])=><button key={pose} aria-pressed={activePose===pose||(pose==='perspective'&&activePose==='floor')} onClick={()=>setCameraPose(pose==='perspective'&&!viewAll?'floor':pose)}>{label}</button>)}</div>
+    {error&&<div className="showroom-error" role="alert">{error}<button onClick={()=>setError(null)}>Закрыть</button></div>}
+    {!viewAll&&room&&<div className="selected-room-card glass-control"><button className="selected-room-name" onClick={()=>onPanel('rooms')}><span>КОМНАТА {room.number}</span><b>{room.name}</b><small>{roomIsOn(lighting.state,floorId,room.number)?'Свет включён':'Свет выключен'} · виды света ↗</small></button><button role="switch" aria-checked={roomIsOn(lighting.state,floorId,room.number)} aria-label={`Свет: ${room.name}`} className="selected-room-power" onClick={()=>lighting.setRoom(floorId,room.number,!roomIsOn(lighting.state,floorId,room.number))}><ShowroomIcon name="light"/></button><button className="room-card-close" aria-label="Снять выбор комнаты" onClick={()=>onSelectRoom(null)}>×</button></div>}
+    <div className="showroom-time glass-control" role="group" aria-label="Время суток">{(['day','dusk','night']as const).map((time,i)=><button key={time} aria-pressed={lighting.time===time} onClick={()=>lighting.setTime(time)}><ShowroomIcon name={['sun','dusk','moon'][i]as 'sun'|'dusk'|'moon'}/>{['День','Сумерки','Ночь'][i]}</button>)}</div>
+    <span className="visually-hidden" role="status">{activeScenario?`Сценарий: ${activeScenario.name}. `:''}Свет включён в {litRooms} комнатах.</span>
+    <div className="showroom-dock glass-control"><div className="dock-heading"><span>ПРОСМОТР <i>·</i> {levelTitle}</span><div><button aria-label="Открыть свет в комнатах" onClick={()=>onPanel('rooms')}><ShowroomIcon name="light"/><span>{litRooms?`${litRooms} вкл.`:'Свет'}</span></button><button aria-label="Открыть сценарии" onClick={()=>onPanel('scenarios')}><ShowroomIcon name="scene"/><span>{activeScenario?.name??'Сценарии'}</span></button></div></div>
+     <div className="showroom-floors" role="tablist" aria-label="Выбор этажа"><button role="tab" aria-selected={viewAll} onClick={chooseAll}><span aria-hidden="true">▦</span> Все этажи</button>{(['level-2','level-1','level-3','garage']as const).map(id=><button role="tab" aria-label={id==='garage'?'Гараж':id==='level-1'?'1 этаж':id==='level-2'?'2 этаж':'3 этаж'} aria-selected={!viewAll&&floorId===id} key={id} onClick={()=>onChooseFloor(id)}><span aria-hidden="true">{id==='garage'?'▱':id==='level-1'?'1':id==='level-2'?'2':'3'}</span>{id==='garage'?'Гараж':'этаж'}</button>)}</div>
     </div>
-    <div className="model-layers">
-      <div className="model-switches" role="group" aria-label="Показ 3D уровней">
-        <button className={!viewAll ? 'selected' : ''} onClick={() => { setDetailRoom(null);setView('one');setPresentation('section');setCameraPose('floor') }}>Обзор этажа</button>
-        <button className={viewAll ? 'selected' : ''} onClick={() => { setDetailRoom(null);setView('all');setPresentation('exterior');setArrangement('assembled');setCameraPose('perspective') }}>Весь участок</button>
-        {viewAll && <button className="mode-light" onClick={() => { setPresentation('section'); setArrangement(v => v === 'assembled' ? 'exploded' : 'assembled') }}>{arrangement === 'exploded' ? 'Собрать уровни' : 'Раздвинуть уровни'}</button>}
-      </div>
-      <div className="model-presentation" role="group" aria-label="Режим архитектурной визуализации">
-        <button className={presentation === 'exterior' ? 'selected' : ''} aria-pressed={presentation === 'exterior'} onClick={() => { setDetailRoom(null);setPresentation('exterior'); setView('all'); setArrangement('assembled'); resetCamera(false) }}>Дом и участок</button>
-        <button className={presentation === 'section' ? 'selected' : ''} aria-pressed={presentation === 'section'} onClick={() => {setDetailRoom(null);setPresentation('section');setView('one');setCameraPose('floor')}}>Низкие стены</button>
-        <button className={presentation === 'source' ? 'selected' : ''} aria-pressed={presentation === 'source'} onClick={() => setPresentation('source')}>Исходные стены</button>
-      </div>
-      <div className="model-checks">
-        {presentation === 'exterior' ? <>
-          <button aria-pressed={showGarage} onClick={() => setShowGarage(x => !x)} className={showGarage ? 'active' : ''}>Гараж</button>
-          <button aria-pressed={roof} onClick={() => setRoof(x => !x)} className={roof ? 'active' : ''}>Крыша</button>
-          <button aria-pressed={glazing} onClick={() => setGlazing(x => !x)} className={glazing ? 'active' : ''}>Остекление</button>
-          <button aria-pressed={site} onClick={() => setSite(x => !x)} className={site ? 'active' : ''}>Участок</button>
-          <button aria-pressed={terrace} onClick={() => setTerrace(x => !x)} className={terrace ? 'active' : ''}>Терраса</button>
-        </> : <>
-          <button aria-pressed={walls} onClick={() => setWalls(x => !x)} className={walls ? 'active' : ''}>Стены</button>
-          <button aria-pressed={doors} onClick={() => setDoors(x => !x)} className={doors ? 'active' : ''}>Двери · 3D</button>
-          <button aria-pressed={furniture} onClick={() => setFurniture(x => !x)} className={furniture ? 'active' : ''}>Мебель и сантехника · 3D</button>
-          <button aria-pressed={labels} onClick={() => setLabels(x => !x)} className={labels ? 'active' : ''}>Помещения</button>
-        </>}
-      </div>
-    </div>
-    <div className="model-camera-presets" role="group" aria-label="Ракурсы дома">
-      <span>РАКУРС</span>
-      {!viewAll&&presentation!=='exterior'&&floorId==='level-2'&&<button aria-pressed={detailRoom===12} onClick={()=>{poseRef.current='kitchen';setDetailRoom(12);setFurniture(true);setLabels(false);onSelectRoom(12)}}>Кухня крупно ↗</button>}
-      <button onClick={() => setCameraPose('perspective')}>Общий</button>
-      <button onClick={() => setCameraPose('front')}>Фасад</button>
-      <button onClick={() => setCameraPose('rear')}>Со склона</button>
-      <button onClick={() => setCameraPose('side')}>Сбоку</button>
-      <button onClick={() => { setDetailRoom(null);setCameraPose('floor'); setPresentation('section'); setView('one'); setArrangement('assembled'); setLabels(true) }}>Внутри этажа ↗</button>
-    </div>
-    <LightingControls floor={floorId} room={selectedRoom} onRoom={onSelectRoom} lighting={lighting}/>
-    <div className="model-viewport" ref={mount} aria-label="Интерактивная 3D модель этажей Villa Como: перетаскивайте для вращения, колесо мыши для масштаба">
-      {error && <div className="model-error" role="alert">{error}<button onClick={() => setError(null)}>Закрыть</button></div>}
-      <div className="model-overlay">
-        <span className="model-eyebrow">{presentation === 'exterior' ? 'VILLA COMO / SMART HOME' : 'MÈTRE / SOURCE-BASED 3D'}</span>
-        <b>{detailRoom===12&&!viewAll&&presentation!=='exterior'?'КУХНЯ · ВТОРОЙ ЭТАЖ':viewAll ? 'ВИЛЛА · ГАРАЖ · ДВОР' : floorId === 'garage' ? 'ГАРАЖ' : floorId === 'level-1' ? 'ПЕРВЫЙ ЭТАЖ' : floorId === 'level-2' ? 'ВТОРОЙ ЭТАЖ' : 'ТРЕТИЙ ЭТАЖ'}</b>
-        <small>{detailRoom===12&&!viewAll&&presentation!=='exterior'?'Меблировка · A-118 / A-119':presentation === 'exterior' ? viewAll ? 'Общая кровля · жилой и неиспользуемый чердак' : 'План выбранного этажа' : presentation === 'section' ? `${plans[floorId].rooms.length} помещений · стены 55 см` : `${spatial.floors[floorId].wallPolygonCount} стен · ${architecture.floors[floorId].doors.length} дверей`}</small>
-        {selectedRoom !== null && presentation !== 'exterior' && <span className="model-selection">{selectedRoom} · {plans[floorId].rooms.find(room => room.number === selectedRoom)?.name}</span>}
-      </div>
-      <div className="model-gesture-hint">{presentation === 'exterior' ? 'Вращайте · Приближайте · Откройте этаж изнутри' : 'Вращайте · Выбирайте номера помещений'}</div>
-      {loadingTexture && <div className="model-loading">Проекция мебели загружается…</div>}
-    </div>
-    {fallback && <div className="model-renderer-note" role="status">Векторный 3D-просмотр · WebGL недоступен в этом браузере. Материалы и тени упрощены.</div>}
-    <div className="model-footnote"><span>{presentation === 'exterior' ? `Внешний контур: ${exteriorConcept.floors[floorId].sourceSheet} · размеры окон A-04–A-06 · рельеф по уточнению владельца` : `Стеновые контуры: ${spatial.floors[floorId].sourceSheet} · мебель: ${plans[floorId].furnitureSheet}`}</span><strong>{presentation === 'exterior' ? 'ЭТАП 5 / 5 · СВЕТ И СЦЕНАРИИ' : 'ПРЕДВАРИТЕЛЬНАЯ 3D · НЕ BIM'}</strong></div>
-    <details className="architecture-calibration">
-      <summary>Геометрический контроль · {architecture.floors[floorId].calibrationChecks.length} независимые размерные привязки</summary>
-      <div className="calibration-row-head"><span>Исходный лист</span><span>Размер</span><span>Расхождение с моделью</span></div>
-      {architecture.floors[floorId].calibrationChecks.map((check, index) => <div key={index} className="calibration-row">
-        <span>{check.sheet} · {check.label}</span>
-        <b>{check.dimensionMm.toLocaleString('ru-RU')} мм</b>
-        <strong>{check.residualAtDisplayScalePct > 0 ? '+' : ''}{check.residualAtDisplayScalePct.toFixed(2)}%</strong>
-      </div>)}
-      <small>Расхождение измерений в PDF с масштабом предпросмотра; не погрешность готового строительного CAD. Размерные цепочки полностью не замкнуты.</small>
-    </details>
-    <div className="model-warning">{presentation === 'exterior' ? <>
-      <b>Модель для презентации умного дома.</b> Планы и подписанные габариты окон перенесены из PDF; подоконные отметки, кровля, отделка и профиль склона требуют сверки с фасадами и топосъёмкой. Задняя часть нижнего этажа заглублена по уточнению владельца. Гараж справа, повёрнут к двору; въезд расположен со стороны балкона. Двор, парковка и гараж — на уровне первого этажа. Расстояния на участке — демонстрационные. Мебель и сантехника — упрощённые 3D-модели по планам A-18–A-29. Световые группы и сценарии работают в демонстрационном режиме; команды оборудованию не отправляются.
-    </> : <>
-      Контуры стен и положения {architecture.floors[floorId].doors.length} дверных полотен перенесены из PDF, размеры дверей — из ведомости {spatial.floors[floorId].sourceSheet}. <b>{architecture.floors[floorId].openingCountResolved} проёмов сопоставлены с просветами на плане, остальные оставлены неразрешёнными.</b> Конструктивная крыша и фасады пока не подтверждены.
-    </>}</div>
+    {(!viewAll&&!room)&&<p className="showroom-hint">Выберите комнату на модели, чтобы управлять светом</p>}
+    {(panel==='view'||panel==='scenarios'||panel==='rooms')&&<OverlayPanel title={panel==='view'?'Настройки вида':panel==='scenarios'?'Сценарии':'Свет в комнатах'} onClose={()=>onPanel(null)}>
+      {panel==='view'?<div className="view-settings"><p className="panel-intro">Настройте отображение под свою задачу.</p>
+       <h3>Модель</h3><div className="setting-modes"><button className="panel-secondary" onClick={()=>{chooseAll();onPanel(null)}}>Дом и участок</button><button className="panel-secondary" onClick={()=>{setDetailRoom(null);setView('one');setPresentation('section');setCameraPose('floor');onPanel(null)}}>Низкие стены</button><button className="panel-secondary" onClick={()=>{setDetailRoom(null);setView('one');setPresentation('source');onPanel(null)}}>Полные стены</button><button className="panel-secondary" onClick={()=>{setDetailRoom(null);setView('all');setPresentation('section');setArrangement(v=>v==='assembled'?'exploded':'assembled');onPanel(null)}}>{arrangement==='exploded'?'Собрать этажи':'Раздвинуть этажи'}</button></div>
+       <h3>Показывать</h3><div className="setting-toggles">{(presentation==='exterior'?[[showGarage,setShowGarage,'Гараж на участке'],[roof,setRoof,'Кровлю'],[glazing,setGlazing,'Остекление'],[site,setSite,'Участок'],[terrace,setTerrace,'Террасу']]:[[walls,setWalls,'Стены'],[doors,setDoors,'Двери'],[furniture,setFurniture,'Мебель и сантехнику'],[labels,setLabels,'Номера комнат']]).map(([value,setter,label])=><label key={label as string}><span>{label as string}</span><input type="checkbox" checked={value as boolean} onChange={e=>(setter as (v:boolean)=>void)(e.target.checked)}/></label>)}<label><span>Условные связи групп света</span><input type="checkbox" checked={lighting.wiring} onChange={e=>lighting.setWiring(e.target.checked)}/></label></div>
+       {floorId==='level-2'&&<button className="panel-secondary full-width" onClick={()=>{poseRef.current='kitchen';setActivePose('kitchen');setDetailRoom(12);setFurniture(true);setView('one');setPresentation('section');setLabels(false);onSelectRoom(12);onPanel(null)}}>Рассмотреть кухню крупно ↗</button>}
+       <details className="panel-details"><summary>Масштаб и дополнительные ракурсы</summary><div className="setting-modes"><button className="panel-secondary" onClick={()=>zoomCamera(1.22)}>Отдалить</button><button className="panel-secondary" onClick={()=>zoomCamera(.82)}>Приблизить</button><button className="panel-secondary" onClick={()=>setCameraPose('side')}>Сбоку</button><button className="panel-secondary" onClick={()=>resetCamera(!top)}>{top?'Изометрия':'Сверху'}</button></div></details>
+       <details className="panel-details"><summary>О просмотре и источниках</summary><p>{fallback?'В этом браузере WebGL недоступен. Используется векторный 3D-просмотр с упрощёнными материалами и тенями.':'Используется WebGL-просмотр модели.'}</p><p>Стены: {spatial.floors[floorId].sourceSheet}; мебель: {plans[floorId].furnitureSheet}. Условные линии связывают группы света и не являются кабельными трассами. Точность и исходные данные — в паспорте модели.</p></details>
+      </div>:<>{panel==='rooms'&&<label className="panel-floor-select">Уровень<select value={floorId} onChange={e=>onChooseFloor(e.target.value as FloorId)}>{(['level-1','level-2','level-3','garage']as const).map(id=><option key={id} value={id}>{id==='garage'?'Гараж':id==='level-1'?'1 этаж':id==='level-2'?'2 этаж':'3 этаж'}</option>)}</select></label>}<LightingControls floor={floorId} room={selectedRoom} onRoom={n=>{onSelectRoom(n);if(viewAll){setView('one');setPresentation('section');setCameraPose('floor')}}} lighting={lighting} mode={panel} onApplied={()=>onPanel(null)}/></>}
+    </OverlayPanel>}
   </div>
 }

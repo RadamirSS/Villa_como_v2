@@ -1,11 +1,13 @@
 import { useEffect, useMemo, useRef, useState, type PointerEvent } from 'react'
-import { project, totalScheduledArea } from './domain/project'
+import { project } from './domain/project'
 import rawPlans from './data/architectural-plans.json'
+import rawGeometry from './data/architectural-geometry.json'
 import compressedTraces from './data/source-traces.json'
 import plumbingRegister from './data/plumbing-register.json'
 import { LazySourceVector as SourceVector } from './components/SourceVector'
 import Villa3D from './components/Villa3D'
 import { useLighting } from './domain/useLighting'
+import OverlayPanel,{type ShowroomPanel}from './components/OverlayPanel'
 import type { ArchitecturalPlan, ArchitecturalPlanSet, PlanRoom } from './data/plan-types'
 import type { FloorRecord } from './domain/types'
 
@@ -245,74 +247,38 @@ function InfoPanel({ floor, data, selectedRoom, onSelectRoom, onOpenPlumbing }: 
 function PlumbingDetail({ sheet, onClose }: { sheet: string; onClose: () => void }) {
   const group = plumbing[sheet]
   if (!group) return null
-  return <div className="plumbing-backdrop" role="presentation" onClick={onClose}><section className="plumbing-modal" role="dialog" aria-modal="true" aria-labelledby="plumbing-modal-title" onClick={event => event.stopPropagation()}>
-    <div className="plumbing-modal-head"><div><span className="section-index">ИСХОДНЫЙ САНТЕХНИЧЕСКИЙ ЧЕРТЁЖ · {sheet}</span><h2 id="plumbing-modal-title">{group.title}</h2></div><button aria-label="Закрыть" onClick={onClose}>×</button></div>
+  return <OverlayPanel title={`${sheet} · ${group.title}`} onClose={onClose} wide>
     <div className="plumbing-modal-body"><div className="plumbing-detail-art"><SourceVector source="plumbing" sheet={sheet} alt={`Исходный план выводов ${sheet}`} /></div>
       <div className="plumbing-detail-list"><h3>Спецификация по {sheet}</h3><p>Графика взята из рабочего листа. Размеры на нём проектные, от чистового пола, требуют контрольных замеров.</p>
         {group.fixtures.map(item => <div className="fixture-row" key={item.mark}><span className="fixture-mark">{item.mark}</span><span>{item.name ?? 'Неясная строка ведомости'}</span><b>{item.quantity ?? '?'}</b></div>)}
         <p className="source-note">Точки на общем плане только открывают эту схему. A-22–A-29 выполнены в масштабе 1:35; их координаты пока не сопоставлены с полной моделью здания.</p>
       </div></div>
-  </section></div>
+  </OverlayPanel>
 }
 
 export default function App() {
   const lighting=useLighting()
-  const [floorId, setFloorId] = useState<typeof floorIds[number]>('level-1')
-  const [displayMode, setDisplayMode] = useState<'3d' | '2d'>('3d')
-  const [selectedRoom, setSelectedRoom] = useState<number | null>(null)
-  const [infoExpanded, setInfoExpanded] = useState(false)
-  const [openPlumbingSheet, setOpenPlumbingSheet] = useState<string | null>(null)
-  const floor = useMemo(() => project.floors.find(item => item.id === floorId)!, [floorId])
-  const data = plans.floors[floorId]
+  const [floorId,setFloorId]=useState<typeof floorIds[number]>('level-1')
+  const [selectedRoom,setSelectedRoom]=useState<number|null>(null)
+  const [panel,setPanel]=useState<ShowroomPanel>(null)
+  const [openPlumbingSheet,setOpenPlumbingSheet]=useState<string|null>(null)
   const [floorSelectionRevision,setFloorSelectionRevision]=useState(0)
-  const chooseFloor = (id: typeof floorIds[number]) => { setFloorSelectionRevision(value=>value+1); setFloorId(id); setSelectedRoom(null); setOpenPlumbingSheet(null) }
-  const selectRoom = (number: number) => setSelectedRoom(previous => previous === number ? null : number)
-  return <div className="app-shell">
-    <nav className="side-rail" aria-label="Навигация"><a href="/" aria-label="Villa Como v2" className="brand-mark">V<span>.</span>C</a><div className="rail-rule"><i /><i /><i /></div><span className="rail-caption">MÈTRE<br/>2026</span></nav>
-    <main className="main-content">
-      <header className="topbar">
-        <div className="breadcrumbs"><span>VILLA COMO</span><i>/</i><b>INTERACTIVE 3D</b><i>/</i><span>ЭТАП 5 / 5 · СВЕТ И СЦЕНАРИИ</span></div>
-        <div className="header-actions"><span className="status-light" /> <span>УМНЫЙ ДОМ · ДЕМОНСТРАЦИОННАЯ ВЕРСИЯ</span> <a href="https://github.com/RadamirSS/Villa_como_v2" target="_blank" rel="noreferrer">GitHub ↗</a></div>
-      </header>
-      <div className="page-content">
-        <div className="intro">
-          <div className="eyebrow"><span className="eyebrow-line" /> ARCHITECTURE FOR SMART LIVING <span className="muted">/ VILLA COMO</span></div>
-          <h1>Villa <em>Como.</em></h1>
-          <div className="intro-bottom"><p>Интерактивная модель виллы для презентации умного дома. Три этажа, терраса и гараж; панорамные окна по размерам обмерных планов и посадка нижнего этажа в склон. Вращайте дом, откройте этаж изнутри или сравните его с исходным чертежом. Внутри этажей показаны объёмная мебель, кухни и сантехника по планам. Управляйте группами света, выбирайте сценарии и наблюдайте свечение комнат и окон.</p><span className="intro-step"><span>ЭТАП ПРОЕКТА</span><b>05<small>/05</small></b><small>Свет · комнаты · сценарии</small></span></div>
-        </div>
-        <section className="metrics" aria-label="Показатели проекта">
-          <div><span>УРОВНИ</span><strong>04</strong><small>3 этажа и гараж</small></div>
-          <div><span>ПЛОЩАДЬ ПО ВЕДОМОСТЯМ</span><strong>{area(totalScheduledArea)}</strong><small>без подмены геометрическими расчётами</small></div>
-          <div><span>ПОЗИЦИИ ПОМЕЩЕНИЙ</span><strong>44</strong><small>7 + 19 + 13 + 5</small></div>
-          <div><span>КОНЦЕПЦИЯ ФАСАДОВ</span><strong>04</strong><small>3 уровня и отдельный гараж</small></div>
-        </section>
-        <section className="architecture-section">
-          <div className="section-head"><div><span className="section-index">01 / ARCHITECTURAL WORKSPACE</span><h2>3D-модель и проектные 2D-чертежи</h2></div><div className="design-mode-tabs" role="tablist" aria-label="Формат просмотра"><button role="tab" aria-selected={displayMode === '3d'} className={displayMode === '3d' ? 'selected' : ''} onClick={() => setDisplayMode('3d')}>◈ 3D модель</button><button role="tab" aria-selected={displayMode === '2d'} className={displayMode === '2d' ? 'selected' : ''} onClick={() => setDisplayMode('2d')}>▤ 2D чертёж</button></div></div>
-          <div className="floor-navigation" role="tablist" aria-label="Выбор этажа">
-            {floorIds.map((id, i) => <button role="tab" aria-selected={floorId === id} key={id} className={'floor-choice ' + (id === floorId ? 'active' : '')} onClick={() => chooseFloor(id)}>
-              <b>{id === 'garage' ? 'G' : String(i + 1).padStart(2, '0')}</b><span>{id === 'garage' ? 'Гараж' : (i + 1) + ' этаж'}</span><small>{area(project.floors.find(f => f.id === id)!.scheduleAreaM2)}</small>
-            </button>)}
-          </div>
-          <div className="workspace-grid">
-            {displayMode === '3d' ? <Villa3D lighting={lighting} floorSelectionRevision={floorSelectionRevision} floorId={floorId} selectedRoom={selectedRoom} onSelectRoom={selectRoom} /> : <PlanViewer floor={floor} data={data} selectedRoom={selectedRoom} onSelectRoom={selectRoom} onOpenPlumbing={setOpenPlumbingSheet} />}
-            <InfoPanel floor={floor} data={data} selectedRoom={selectedRoom} onSelectRoom={selectRoom} onOpenPlumbing={setOpenPlumbingSheet} />
-          </div>
-        </section>
-        <section className="provenance-section">
-          <div><span className="section-index">02 / PROVENANCE</span><h2>Проверяемые источники</h2></div>
-          <div className="sources-grid">
-            <div><span>ОБМЕРНЫЙ ПЛАН</span><b>{data.measuredSheet}</b><p>Первоначальные размеры и отметки</p></div>
-            <div><span>ПЛАН МОНТАЖА</span><b>{data.installSheet}</b><p>Возводимые перегородки и зашивки</p></div>
-            <div><span>ЧИСТОВЫЕ ПРОЁМЫ</span><b>{data.finalSheet}</b><p>Контуры стен, двери, чистовые грани</p></div>
-            <div><span>МЕБЕЛЬНЫЙ ПЛАН</span><b>{data.furnitureSheet}</b><p>Мебель и планировочные позиции</p></div>
-          </div>
-        </section>
-        <div className="audit-note"><div><span>!</span><strong>Дом на склоне · архитектура, граница точности</strong></div><p>Для 368 стеновых полигонов созданы устойчивые ID, восемь опорных размеров из A‑03/A‑05/A‑06/A‑15/A‑16 проверены по геометрии векторных размерных линий. Все <b>33 дверные марки</b> связаны с источниковыми символами открытых полотен и ведомостями их ширины/высоты. Для <b>18 проёмов</b> программа однозначно сопоставляет дверное полотно с просветом на исходном плане; оставшиеся 15 пока не разрешены. Точное положение створки в 3D воспроизводит <b>условную открытую ориентацию на чертеже</b>. Габариты ряда окон восстановлены по подписям A‑04–A‑06; отметки подоконников, конструктив перекрытий, лестничные марши, мансардная кровля и привязка гаража к участку требуют дальнейшей сверки. Профиль склона — демонстрационная интерпретация уточнения владельца. Эти части не подменяются придуманной BIM-геометрией. <b>Пакет А требует дальнейшей инженерной доработки</b> до заявления «в точности по проекту».</p></div>
-        <div className="bottom-actions"><a href="https://github.com/RadamirSS/Villa_como_v2/tree/main/docs" target="_blank" rel="noreferrer">Методика и незакрытые вопросы ↗</a><button onClick={() => setInfoExpanded(!infoExpanded)}>{infoExpanded ? 'Скрыть инженерные требования' : 'Что необходимо для BIM-точности?'} <span>{infoExpanded ? '−' : '+'}</span></button></div>
-        {infoExpanded && <div className="expanded-note">Следующий инженерный шаг: закрыть все размерные цепочки каждого этажа, определить геометрию оставшихся 15 дверных проёмов, зарегистрировать окна, лестничные марши и отверстия в перекрытиях; получить фасады, разрезы, конструкцию крыши и топосъёмку. Тогда можно согласовать одну метрическую пространственную модель для 2D и 3D.</div>}
-        <footer><span>VILLA COMO / DIGITAL DESIGN</span><span>MÈTRE · Рабочая документация</span><span>© 2026</span></footer>
-      </div>
+  const floor=useMemo(()=>project.floors.find(item=>item.id===floorId)!,[floorId]),data=plans.floors[floorId]
+  const chooseFloor=(id:typeof floorIds[number])=>{setFloorSelectionRevision(v=>v+1);setFloorId(id);setSelectedRoom(null)}
+  const selectRoom=(number:number|null)=>setSelectedRoom(previous=>previous===number?null:number)
+  const openPlumbing=(sheet:string)=>{setPanel(null);setOpenPlumbingSheet(sheet)}
+  return <div className="showroom-app" data-time={lighting.time}>
+    <header className="showroom-header"><a href="/" className="showroom-brand">VILLA COMO</a><span className="showroom-location"><span aria-hidden="true">⌖</span> Lago di Como, Italia</span><span className="showroom-demo" title="Демонстрационный режим"><i/><span>Демо</span></span><button className="menu-button" aria-label="Открыть меню" onClick={()=>setPanel('menu')}><span/><span/></button></header>
+    <main className="showroom-main" aria-label="Интерактивная модель виллы">
+      <Villa3D lighting={lighting} floorSelectionRevision={floorSelectionRevision} floorId={floorId} selectedRoom={selectedRoom} onSelectRoom={selectRoom} onChooseFloor={chooseFloor} panel={panel} onPanel={setPanel}/>
     </main>
-    {openPlumbingSheet && <PlumbingDetail sheet={openPlumbingSheet} onClose={() => setOpenPlumbingSheet(null)} />}
+    <footer className="showroom-footer"><b>MÈTRE</b><span className="footer-source">Архитектура пространства. Интеллект света.</span><button onClick={()=>setPanel('passport')}>Паспорт модели <span aria-hidden="true">↗</span></button><small>v 2.6</small></footer>
+    {(panel==='menu'||panel==='plans'||panel==='passport')&&<OverlayPanel title={panel==='menu'?'Ваш дом':panel==='plans'?'Чертежи':'Паспорт модели'} onClose={()=>setPanel(null)} wide={panel==='plans'}>
+      {panel==='menu'?<><p className="panel-intro">Всё для управления домом — в одном месте.</p><nav className="showroom-menu" aria-label="Меню дома">{([['scenarios','Сценарии','Свет одним нажатием'],['rooms','Свет в комнатах','Комнаты и виды освещения'],['view','Настройки вида','Слои и режимы модели'],['plans','Чертежи','Исходные планы и сантехника'],['passport','Паспорт модели','Источники и данные проекта']]as const).map(([id,title,description])=><button key={id} onClick={()=>setPanel(id)}><span><b>{title}</b><small>{description}</small></span><span aria-hidden="true">↗</span></button>)}</nav><p className="quiet-note">Демонстрация умного дома. Оборудование не подключено.</p></>:<>
+        <label className="panel-floor-select">Уровень<select value={floorId} onChange={e=>chooseFloor(e.target.value as typeof floorId)}>{floorIds.map(id=><option value={id} key={id}>{id==='garage'?'Гараж':id==='level-1'?'1 этаж':id==='level-2'?'2 этаж':'3 этаж'}</option>)}</select></label>
+        {panel==='plans'?<PlanViewer floor={floor} data={data} selectedRoom={selectedRoom} onSelectRoom={selectRoom} onOpenPlumbing={openPlumbing}/>:<><InfoPanel floor={floor} data={data} selectedRoom={selectedRoom} onSelectRoom={selectRoom} onOpenPlumbing={openPlumbing}/><details className="panel-details"><summary>Геометрический контроль</summary>{rawGeometry.floors[floorId].calibrationChecks.map((check,index)=><p key={index}>{check.sheet} · {check.label}: <b>{check.dimensionMm} мм</b> · расхождение с масштабом предпросмотра {check.residualAtDisplayScalePct.toFixed(2)}%</p>)}<p>Проверки размерных линий PDF не подтверждают точность всей модели.</p></details><details className="panel-details"><summary>Источники и границы точности</summary><p>Планы MÈTRE: {data.measuredSheet}, {data.installSheet}, {data.finalSheet}, {data.furnitureSheet}. Свет — A-34–A-37. Расстановка, материалы, кровля и участок содержат демонстрационные допущения. Модель не является утверждённым BIM-проектом или монтажной схемой проводки.</p><p>Левая часть A-35 не содержит проектных групп света: соответствующие группы помечены как демо. Физическое оборудование не подключено.</p><a href="https://github.com/RadamirSS/Villa_como_v2/pull/1" target="_blank" rel="noreferrer">Документация и изменения ↗</a></details></>}
+      </>}
+    </OverlayPanel>}
+    {openPlumbingSheet&&<PlumbingDetail sheet={openPlumbingSheet} onClose={()=>setOpenPlumbingSheet(null)}/>}
   </div>
 }

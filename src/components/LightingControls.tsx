@@ -1,37 +1,19 @@
-import {useState}from'react'
 import{kindLabels,lightingPlan,lightScenarios,roomGroups,roomIsOn,type LightingFloor,type LightKind}from'../domain/lighting'
 import type{LightingController}from'../domain/useLighting'
-export default function LightingControls({floor,room,onRoom,lighting}:{floor:LightingFloor;room:number|null;onRoom:(n:number)=>void;lighting:LightingController}){
- const[open,setOpen]=useState(false)
- const rooms=lightingPlan.rooms.filter(r=>r.floor===floor),selected=rooms.find(r=>r.number===room)??rooms[0]
- const groups=roomGroups(floor,selected.number),on=roomIsOn(lighting.state,floor,selected.number),count=Object.values(lighting.state).filter(Boolean).length
- const scenario=lightScenarios.find(s=>s.id===lighting.scenario)
- const controls=lightingPlan.controls.filter(c=>c.floor===floor&&c.groups.some(id=>groups.some(g=>g.id===id)))
- return <section className="lighting-controls" aria-label="Управление освещением">
-  <div className="lighting-scenes">
-   <span className="lighting-mode-label">СВЕТ · ДЕМО</span>
-   <select aria-label="Сценарий освещения" value={lighting.scenario??''} onChange={e=>lighting.applyScenario(e.target.value)}>
-    <option value="" disabled>Выбрать сценарий…</option>{lightScenarios.map(s=><option value={s.id} key={s.id}>{s.name}</option>)}
-   </select>
-   <div className="lighting-time" role="group" aria-label="Время суток">{(['day','dusk','night']as const).map((time,i)=><button key={time} aria-pressed={lighting.time===time} onClick={()=>lighting.setTime(time)}>{['День','Сумерки','Ночь'][i]}</button>)}</div>
-   <button onClick={()=>lighting.setAll(false)}>Всё выключить</button>
-   <button aria-pressed={lighting.wiring} onClick={()=>lighting.setWiring(!lighting.wiring)}>Связи групп</button>
-   <span className="lighting-counter" role="status">{count} / {lightingPlan.groups.length} групп включено</span>
-  </div>
-  <div className="lighting-room-row">
-   <select aria-label="Комната для управления светом" value={selected.number} onChange={e=>onRoom(Number(e.target.value))}>{rooms.map(r=><option key={r.id} value={r.number}>{roomIsOn(lighting.state,floor,r.number)?'● ':'○ '}{r.number} · {r.name}</option>)}</select>
-   <button className={'room-light-toggle '+(on?'is-on':'')} role="switch" aria-checked={on} aria-label={`Свет: ${selected.name}`} onClick={()=>lighting.setRoom(floor,selected.number,!on)}>{on?'☀ Выключить комнату':'◯ Включить комнату'}</button>
-   <button aria-expanded={open} onClick={()=>setOpen(!open)}>Группы и выключатели {open?'−':'+'}</button>
-  </div>
-  {scenario&&<p className="lighting-scene-caption"><b>{scenario.name}</b> · {scenario.description}</p>}
-  {open&&<div className="lighting-detail">
-   <div className="lighting-group-list">{groups.map(g=><div className={'lighting-group '+(lighting.state[g.id]?'lit':'')} key={g.id}>
-    <div><b>{g.evidence==='drawing-unmarked-circuit'||g.evidence==='drawing-symbol-only'?'Без марки':g.mark} · {kindLabels[g.kind as LightKind]}</b><small>{g.name}</small><span>{g.sheet}{g.evidence==='demo-unresolved'?' · Демо: группа в проекте не задана':g.evidence==='drawing-unmarked-circuit'?' · Цепь без марки':g.evidence==='drawing-label-only'?' · Только марка на плане':g.evidence==='drawing-symbol-only'?' · Прибор с собственным выключателем':''}</span></div>
-    <button role="switch" aria-checked={!!lighting.state[g.id]} aria-label={`Группа ${g.mark}: ${g.name}`} onClick={()=>lighting.toggleGroup(g.id)}>{lighting.state[g.id]?'Вкл':'Выкл'}</button>
-   </div>)}</div>
-   {controls.length>0&&<div className="lighting-switch-list"><b>Связанные выключатели · по подписям проекта</b>{controls.map((control,i)=><button key={control.id} onClick={()=>lighting.toggleControl(control.groups,control.evidence==='drawing-gate-contact')} aria-label={`Выключатель ${i+1}: ${control.label}`}><span>{control.label}</span><small>{control.groups.every(id=>lighting.state[id])?'● Включено':'○ Переключить'} · {control.sourceSheet}</small></button>)}</div>}
-   <p>Состояние общее для всех выключателей группы. Команды демонстрационные; оборудование не подключено. {lighting.wiring?'Линии показывают связи группы, а не кабельные трассы.':''}</p>
-  </div>}
-  {lighting.wiring&&<div className="lighting-wiring-caption">Условные связи светильников внутри групп · не монтажная схема проводки</div>}
- </section>
+export default function LightingControls({floor,room,onRoom,lighting,mode='rooms',onApplied}:{floor:LightingFloor;room:number|null;onRoom:(n:number)=>void;lighting:LightingController;mode?:'rooms'|'scenarios';onApplied?:()=>void}){
+ const rooms=lightingPlan.rooms.filter(r=>r.floor===floor),selected=rooms.find(r=>r.number===room)
+ const groups=selected?roomGroups(floor,selected.number):[],controls=lightingPlan.controls.filter(c=>c.floor===floor&&c.groups.some(id=>groups.some(g=>g.id===id)))
+ if(mode==='scenarios')return <div className="scenario-panel">
+  <p className="panel-intro">Один выбор — нужный свет во всём доме.</p>
+  <div className="scenario-list">{lightScenarios.map((scenario,i)=><button key={scenario.id} className={'scenario-card'+(lighting.scenario===scenario.id?' chosen':'')} aria-pressed={lighting.scenario===scenario.id} onClick={()=>{lighting.applyScenario(scenario.id);onApplied?.()}}><span className="scenario-symbol" aria-hidden="true">{['↗','☾','◌','⋆','↙'][i]}</span><span><b>{scenario.name}</b><small>{scenario.description}</small></span><i aria-hidden="true">{lighting.scenario===scenario.id?'✓':'›'}</i></button>)}</div>
+  <button className="panel-secondary full-width" onClick={()=>{lighting.setAll(false);onApplied?.()}}>Выключить весь свет</button><p className="quiet-note">Демонстрационный режим · оборудование не подключено.</p>
+ </div>
+ return <div className="room-light-panel">
+  <p className="panel-intro">Включайте комнату целиком или выберите отдельный вид света.</p>
+  {!selected&&<div className="room-control-list">{rooms.map(r=>{const on=roomIsOn(lighting.state,floor,r.number);return <div key={r.id} className="room-control-row"><button className="room-name-button" aria-pressed={false} onClick={()=>onRoom(r.number)}><span className={'room-status'+(on?' lit':'')}/><span><b>{r.name}</b><small>№ {r.number} · {on?'Свет включён':'Свет выключен'}</small></span></button><button role="switch" aria-checked={on} aria-label={`Свет: ${r.name}`} className="power-switch" onClick={()=>{lighting.setRoom(floor,r.number,!on)}}><span/></button></div>})}</div>}
+  {selected&&<section className="room-group-section"><button className="room-back-button" onClick={()=>onRoom(selected.number)}>← Все комнаты</button><div className="room-detail-heading"><h3>{selected.name}</h3><button className="power-switch" role="switch" aria-checked={roomIsOn(lighting.state,floor,selected.number)} aria-label={`Свет: ${selected.name}`} onClick={()=>lighting.setRoom(floor,selected.number,!roomIsOn(lighting.state,floor,selected.number))}><span/></button></div><div className="lighting-group-list">{groups.map(g=><div className="group-control" key={g.id}><span><b>{kindLabels[g.kind as LightKind]}</b><small>{g.evidence==='demo-unresolved'?'Демонстрационная группа':g.evidence==='drawing-unmarked-circuit'||g.evidence==='drawing-symbol-only'?'Без проектной марки':`Группа ${g.mark}`}</small></span><button className="power-switch" role="switch" aria-checked={!!lighting.state[g.id]} aria-label={`Группа ${g.mark}: ${g.name}`} onClick={()=>lighting.toggleGroup(g.id)}><span/></button></div>)}</div>
+   {controls.length>0&&<details className="panel-details"><summary>Связанные выключатели</summary><div className="lighting-switch-list">{controls.map((control,i)=><button key={control.id} className="panel-secondary" onClick={()=>lighting.toggleControl(control.groups,control.evidence==='drawing-gate-contact')} aria-label={`Выключатель ${i+1}: ${control.label}`}>{control.label}<small>{control.sourceSheet} · {control.groups.every(id=>lighting.state[id])?'Включено':'Выключено / частично'}</small></button>)}</div><p className="quiet-note">Выключатели одной группы используют общее состояние.</p></details>}
+  </section>}
+  <p className="quiet-note">Демо-группы отмечают места без полного проекта света. Команды оборудованию не отправляются.</p>
+ </div>
 }
