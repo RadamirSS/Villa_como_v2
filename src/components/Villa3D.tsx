@@ -1,3 +1,4 @@
+import { updateSiteTime } from './SiteLandscape'
 import i18n, { tx } from '../i18n'
 import { useEffect, useRef, useState } from 'react'
 import * as THREE from 'three'
@@ -356,8 +357,8 @@ export default function Villa3D({ floorId, selectedRoom, onSelectRoom, onChooseF
     key.position.set(-16, 28, 18)
     key.castShadow = true
     key.shadow.mapSize.set(2048, 2048)
-    key.shadow.camera.left = -26; key.shadow.camera.right = 26
-    key.shadow.camera.top = 26; key.shadow.camera.bottom = -26
+    key.shadow.camera.left = -45; key.shadow.camera.right = 45
+    key.shadow.camera.top = 45; key.shadow.camera.bottom = -45
     key.shadow.normalBias = .025
     scene.add(key)
     const fill = new THREE.DirectionalLight('#d3e2df', webgl ? .8 : .25)
@@ -433,6 +434,7 @@ export default function Villa3D({ floorId, selectedRoom, onSelectRoom, onChooseF
     if (contextRef.current) { scene.remove(contextRef.current); disposeSceneGroup(contextRef.current); contextRef.current = null }
     if (site && presentation === 'exterior' && (viewAll || floorId === 'garage')) {
       contextRef.current = createExteriorContext(!viewAll && floorId === 'garage')
+      updateSiteTime(contextRef.current,lighting.time)
       scene.add(contextRef.current)
     }
     const all = viewAll ? [...floorOrder] : [floorId]
@@ -535,7 +537,7 @@ export default function Villa3D({ floorId, selectedRoom, onSelectRoom, onChooseF
         boundsRef.current.copy(detailBounds)
       }
     }
-    if (isExterior && viewAll && site) boundsRef.current.expandByPoint(new THREE.Vector3(32,0,31))
+    if (isExterior && viewAll && site) boundsRef.current.expandByPoint(new THREE.Vector3(39,0,36))
     const fitKey = `${floorId}-${viewAll}-${arrangement}-${presentation}-${detailRoom}`
     if (fitKeyRef.current !== fitKey) { fitKeyRef.current = fitKey; fitCameraRef.current() }
     invalidateRef.current()
@@ -557,6 +559,7 @@ export default function Villa3D({ floorId, selectedRoom, onSelectRoom, onChooseF
 
   useEffect(()=>{
     const scene=sceneRef.current;if(!scene)return
+    if(contextRef.current)updateSiteTime(contextRef.current,lighting.time)
     scene.background=new THREE.Color(lighting.time==='day'?'#aba995':lighting.time==='dusk'?'#9b9785':'#18272d')
     scene.traverse(obj=>{if(obj instanceof THREE.Light){
       if(obj instanceof THREE.AmbientLight){obj.color.set(fallback?(lighting.time==='day'?'#959b9a':lighting.time==='dusk'?'#677574':'#36474c'):'#ffffff');obj.intensity=lighting.time==='day'?.7:lighting.time==='dusk'?.4:.2}

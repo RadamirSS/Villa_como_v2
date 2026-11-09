@@ -1,5 +1,6 @@
 import * as THREE from 'three'
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js'
+import { createSiteLandscape } from './SiteLandscape'
 import raw from '../data/exterior-concept.json'
 import { roomForWindow } from '../domain/lighting'
 
@@ -313,32 +314,9 @@ export function createUnusedAttic() {
   g.userData={spaceKind:'unused-attic',notHabitableRoom:true};return g
 }
 
-function siteAccessories() {
-  const g=new THREE.Group();g.name='courtyard-and-gate'
-  const p=palette()
-  const rect=(x0:number,z0:number,x1:number,z1:number,y:number,t:number,mat:THREE.Material)=>{
-    const mesh=new THREE.Mesh(new THREE.BoxGeometry(x1-x0,t,z1-z0),mat);mesh.position.set((x0+x1)/2,y-t/2,(z0+z1)/2);mesh.receiveShadow=true;g.add(mesh);return mesh
-  }
-  // Owner correction: entrance, parking and garage share the FIRST-floor level.
-  // No elevated court, bridge, pedestrian deck or access ramp exists here.
-  const paving=rect(0,6.2,32.2,30,-.12,.09,p.stone)
-  paving.userData={siteObject:'ground-level-courtyard',elevationM:0}
-  for(const x of [17.5,20.2,22.9]){
-    const line=rect(x,19,x+.055,24,-.064,.012,p.edge)
-    line.userData={siteObject:'parking-marking',elevationM:0}
-  }
-  // Courtyard entrance faces +Z, the same side as the balcony, not the garage door.
-  for(const x of [8.8,14.1])rect(x-.16,29.75,x+.16,30.1,1.65,1.87,p.edge)
-  for(const x of [10.1,12.8]){
-    const gate=rect(x-1.25,29.89,x+1.25,29.97,1.4,1.55,p.frame)
-    gate.userData={siteObject:'courtyard-gate',controlBinding:null,facing:'balcony-front-positive-z'}
-  }
-  return g
-}
-
 export function createExteriorContext(garage = false): THREE.Group {
   const g = new THREE.Group(); g.name = 'sloped-site'
-  const grass = new THREE.MeshStandardMaterial({ color: '#8e9d80', roughness: 1, side: THREE.DoubleSide })
+  const grass = new THREE.MeshStandardMaterial({ color: '#82906f', roughness: 1, side: THREE.DoubleSide })
   const coords = garage
     ? [-30,-.23,-24, 30,-.23,-24, 30,-.23,24, -30,-.23,-24, 30,-.23,24, -30,-.23,24]
     : exteriorConcept.site.trianglesPtM.flatMap(t => t.flatMap(([x, y, z]) => [px(x), y, pz(z)]))
@@ -367,9 +345,7 @@ export function createExteriorContext(garage = false): THREE.Group {
         g.add(new THREE.Mesh(geo, earth))
       }
     }
-    g.add(siteAccessories())
-    const paving = new THREE.MeshStandardMaterial({ color: '#cfc6b2', roughness: .96 })
-    for (const poly of exteriorConcept.site.pavingPt) g.add(slab(poly, -.21, .08, paving))
+    g.add(createSiteLandscape())
   }
   batchOpaque(g)
   g.userData = { siteProfile: 'owner-confirmed-rear-at-level-2', surveyed: false }; return g
