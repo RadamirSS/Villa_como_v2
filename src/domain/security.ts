@@ -40,7 +40,7 @@ export function securityReducer(s:SecurityState,a:SecurityAction):SecurityState{
  return event({...s,alarm:false},'Тревога подтверждена')
 }
 export const virtualCameras=[
- {id:'gate',name:'Въезд',position:[30.2,3.1,35.6],target:[34,.8,29],base:-.22},
+ {id:'gate',name:'Въезд',position:[30.2,3.1,35.6],target:[12,1.7,12],base:-.22},
  {id:'garage',name:'Гараж',position:[17.4,3.2,19.8],target:[19.5,1.1,11.7],base:-.22},
  {id:'entry',name:'Главный вход',position:[-4.8,3.2,7.4],target:[-1,1.3,3.8],base:-.22},
  {id:'terrace',name:'Терраса',position:[15.3,6,7.5],target:[0,3.5,4.8],base:-.22},
